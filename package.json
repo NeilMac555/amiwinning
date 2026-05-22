@@ -1,7 +1,7 @@
 {
-  "name": "am-i-winning",
+  "name": "am-i-up",
   "version": "0.1.0",
-  "description": "Am I Winning — The terminal for serious punters.",
+  "description": "Am I Up — The terminal for serious punters.",
   "private": true,
   "scripts": {
     "dev": "next dev",

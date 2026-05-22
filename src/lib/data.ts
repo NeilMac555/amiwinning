@@ -1,4 +1,4 @@
-// Mock data for Am I Winning — typed port of the prototype data.js.
+// Mock data for Am I Up — typed port of the prototype data.js.
 // Three profiles (sharp / mixed / drawdown) build all dashboard slices off a
 // seeded PRNG so renders are deterministic.
 

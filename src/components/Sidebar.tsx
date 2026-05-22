@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
+import { BRAND } from "@/lib/brand";
 import { BookSwitcher } from "./BookSwitcher";
 
 interface ItemProps {
@@ -76,7 +77,7 @@ export function Sidebar() {
     <aside className="sidebar">
       <div className="sb-brand">
         <div className="brand-mark" aria-hidden="true"></div>
-        Am I Winning
+        {BRAND.name}
       </div>
       {user ? (
         <div className="sb-account" title={user.email ?? ""}>

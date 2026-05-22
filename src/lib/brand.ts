@@ -4,8 +4,8 @@
 // and logged-out pages in lockstep.
 
 export const BRAND = {
-  name: "Am I Winning",
+  name: "Am I Up",
   tagline: "The terminal for serious punters.",
   taglineShort: "The terminal for serious punters",
-  fullTitle: "Am I Winning — The terminal for serious punters.",
+  fullTitle: "Am I Up — The terminal for serious punters.",
 } as const;

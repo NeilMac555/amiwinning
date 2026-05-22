@@ -21,6 +21,7 @@ import { ProfitPerStake } from "@/components/ProfitPerStake";
 import { RangeTabs } from "@/components/RangeTabs";
 import { WinRateGauge } from "@/components/WinRateGauge";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
+import { BRAND } from "@/lib/brand";
 import { filterByRange, rangeLabel, type Range } from "@/lib/range";
 import type { ImportedBet } from "@/lib/import/types";
 import { applyTheme, loadSettings } from "@/lib/settings";
@@ -211,7 +212,7 @@ export default function Dashboard() {
           </div>
 
           <div className="footer-line">
-            <span>Am I Winning · v0.4.2</span>
+            <span>{BRAND.name} · v0.4.2</span>
             <span>
               {source === "imported"
                 ? "Imported data · stakes shown as units · CLV not yet captured for historical bets"

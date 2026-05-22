@@ -1,4 +1,4 @@
-# Am I Winning — The terminal for serious punters.
+# Am I Up — The terminal for serious punters.
 
 A Next.js bet tracker leading with CLV (closing line value) and Return on Capital instead of vanity ROI. Built for sharp bettors and tipsters who need an honest read on their edge.
 
