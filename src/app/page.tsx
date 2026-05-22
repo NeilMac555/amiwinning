@@ -1,65 +1,345 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { buildAll, NOW, type DashboardData } from "@/lib/data";
+import { aggregateFromBets } from "@/lib/aggregate";
+import { consumeSeed, loadBets } from "@/lib/import/store";
+import { Sidebar } from "@/components/Sidebar";
+import { TopBar } from "@/components/TopBar";
+import { Ticker } from "@/components/Ticker";
+import { KpiStripCompact } from "@/components/Kpis";
+import { SecondaryStats } from "@/components/SecondaryStats";
+import { EquityCurve } from "@/components/EquityCurve";
+import { RecentSettled } from "@/components/RecentSettled";
+import { ClvDistribution } from "@/components/ClvDistribution";
+import { Breakdown } from "@/components/Breakdown";
+import { Heatmap } from "@/components/Heatmap";
+import { OpenPositions } from "@/components/OpenPositions";
+import { PasteHero } from "@/components/PasteHero";
+import { ProfitPerStake } from "@/components/ProfitPerStake";
+import { RangeTabs } from "@/components/RangeTabs";
+import { WinRateGauge } from "@/components/WinRateGauge";
+import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
+import { filterByRange, rangeLabel, type Range } from "@/lib/range";
+import type { ImportedBet } from "@/lib/import/types";
+import { applyTheme, loadSettings } from "@/lib/settings";
+import { useAuth } from "@/lib/auth";
+
+type Source = "mock" | "imported";
+
+export default function Dashboard() {
+  // First render: mock data so SSR/client hydration match. After mount, we
+  // check localStorage and swap to imported aggregates when present.
+  const [source, setSource] = useState<Source>("mock");
+  const [allBets, setAllBets] = useState<ImportedBet[]>([]);
+  const [data, setData] = useState<DashboardData>(() => buildAll("mixed"));
+  const [now, setNow] = useState<number>(NOW);
+  const [range, setRange] = useState<Range>("12M");
+  const [settingsUnit, setSettingsUnit] = useState<DisplayUnit>("u");
+  const [localBump, setLocalBump] = useState(0);
+  const [cleanupDismissed, setCleanupDismissed] = useState(false);
+  const { user, betsVersion, activeBook, cleanup } = useAuth();
+
+  // Load bets + settings on mount, and re-read whenever the auth layer
+  // signals a fresh pull from Supabase (betsVersion bumps).
+  useEffect(() => {
+    applyTheme();
+    const s = loadSettings();
+    setSettingsUnit(s.unit);
+    if (!user) consumeSeed();
+    const all = loadBets();
+    // Scope to the active book. Bets without a bookId (legacy cache) fall
+    // through to the active book so older data still shows up.
+    const scoped = activeBook
+      ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
+      : all;
+    if (scoped.length > 0) {
+      setSource("imported");
+      setAllBets(scoped);
+      setNow(Date.now());
+    } else {
+      setSource("mock");
+      setAllBets([]);
+    }
+  }, [betsVersion, user, activeBook, localBump]);
+
+  // Re-aggregate whenever bets or range change.
+  useEffect(() => {
+    if (source !== "imported") return;
+    const filtered = filterByRange(allBets, range, Date.now());
+    const windowed = aggregateFromBets(filtered);
+    // Return on capital is a path-dependent, "across your whole career"
+    // metric. Windowing it produces nonsense (a single bad month in a 3M
+    // window can render -100%). Always compute it from all bets and override
+    // the window-scoped values so it stays stable as the user flips ranges.
+    if (allBets.length > 0) {
+      const lifetime = aggregateFromBets(allBets);
+      windowed.kpis.rocPct = lifetime.kpis.rocPct;
+      windowed.kpis.rocAnnualised = lifetime.kpis.rocAnnualised;
+      windowed.kpis.peakDrawdown = lifetime.kpis.peakDrawdown;
+      windowed.kpis.lifetimePl = lifetime.kpis.lifetimePl;
+    }
+    setData(windowed);
+  }, [allBets, range, source]);
+
+  const importedCount = allBets.length;
+  const inRangeCount = useMemo(
+    () => (source === "imported" ? data.kpis.sampleSize : 0),
+    [source, data.kpis.sampleSize],
+  );
+
+  // Span of the user's entire career — earliest to latest bet, in years.
+  // Drives the "per year" line on the stake-scaler card.
+  const lifetimeYears = useMemo(() => {
+    if (allBets.length === 0) return undefined;
+    let minMs = Infinity;
+    let maxMs = -Infinity;
+    for (const b of allBets) {
+      const t = new Date(b.kickoff).getTime();
+      if (t < minMs) minMs = t;
+      if (t > maxMs) maxMs = t;
+    }
+    if (!isFinite(minMs) || !isFinite(maxMs)) return undefined;
+    const yrs = (maxMs - minMs) / (365.25 * 86400000);
+    return yrs > 0 ? yrs : undefined;
+  }, [allBets]);
+
+  const updatedAt = useMemo(() => {
+    return new Date(now).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/London",
+    });
+  }, [now]);
+
+  // For imported data: respect the user's setting. For the demo: keep $ since
+  // the mock bankroll is dollar-denominated.
+  const unit: DisplayUnit = source === "imported" ? settingsUnit : "$";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <UnitProvider unit={unit}>
+    <div className="app">
+      <Sidebar />
+      <div className="main-col">
+        <TopBar />
+        <Ticker items={data.ticker} />
+
+        <div className="page" data-screen-label="Dashboard">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Dashboard</h1>
+              <div className="page-subtitle">
+                <span className="dot-live"></span>
+                Updated {updatedAt} ·{" "}
+                {source === "imported"
+                  ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${rangeLabel(range, now)} · CLV pending`
+                  : "Soccer (EPL, UCL) · Pinnacle & 4 others"}
+              </div>
+            </div>
+            <RangeTabs value={range} onChange={setRange} />
+          </div>
+
+          <PasteHero onCommitted={() => setLocalBump((n) => n + 1)} />
+
+          {cleanup &&
+            cleanup.status === "done" &&
+            (cleanup.sportReclassified > 0 || cleanup.datesFixed > 0) &&
+            !cleanupDismissed && (
+              <CleanupBanner
+                sport={cleanup.sportReclassified}
+                dates={cleanup.datesFixed}
+                onDismiss={() => setCleanupDismissed(true)}
+              />
+            )}
+
+          {source === "mock" && <MockBanner />}
+          {source === "imported" && <ImportedBanner count={importedCount} />}
+
+          <KpiStripCompact kpis={data.kpis} sparks={data.sparks} />
+          <SecondaryStats s={data.secondary} />
+
+          {source === "imported" && data.kpis.lifetimePl !== undefined && (
+            <div
+              className="grid"
+              style={{ gridTemplateColumns: "1fr 1fr", marginTop: 14 }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              <WinRateGauge
+                winRatePct={data.secondary.winRate}
+                wins={data.secondary.wins ?? 0}
+                settledCount={data.secondary.settledCount ?? 0}
+                avgOdds={data.secondary.avgOdds}
+              />
+              <ProfitPerStake
+                lifetimePlUnits={data.kpis.lifetimePl}
+                totalBets={data.kpis.sampleSize}
+                yearsSpan={lifetimeYears}
+              />
+            </div>
+          )}
+
+          <div className="grid curve-row">
+            <EquityCurve
+              data={data.equity}
+              weekly={data.weekly}
+              lastBetAgo={data.kpis.lastBetAgo}
+              mode={source === "imported" ? "cumulative" : "bankroll"}
+              range={range}
+              onRangeChange={source === "imported" ? setRange : undefined}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <RecentSettled bets={data.settled} now={now} />
+          </div>
+
+          <div className="dense-grid row-3">
+            <ClvDistribution dist={data.clvDist} mean={data.kpis.clvPct} />
+            <Breakdown title="By market" rows={data.marketBd} />
+            <Breakdown title="By odds range" rows={data.oddsBd} />
+          </div>
+
+          <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+            <Heatmap data={data.heatmap} />
+          </div>
+
+          <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+            <OpenPositions
+              positions={data.open}
+              density="comfortable"
+              now={now}
+            />
+          </div>
+
+          <div className="footer-line">
+            <span>Am I Winning · v0.4.2</span>
+            <span>
+              {source === "imported"
+                ? "Imported data · stakes shown as units · CLV not yet captured for historical bets"
+                : "Data delayed ≤ 30s · Closing-line sourced from Pinnacle"}
+            </span>
+            <span>UTC+01:00</span>
+          </div>
         </div>
-      </main>
+      </div>
+    </div>
+    </UnitProvider>
+  );
+}
+
+function MockBanner() {
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        padding: "10px 16px",
+        background: "var(--surface-2)",
+        border: "var(--border-w) solid var(--border)",
+        borderRadius: 8,
+        fontSize: 12,
+        color: "var(--text-muted)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+      }}
+    >
+      <span>
+        <span style={{ fontWeight: 600, color: "var(--text)" }}>Demo data.</span>{" "}
+        Import your own to see real numbers.
+      </span>
+      <Link
+        href="/import"
+        className="btn-ghost"
+        data-active="true"
+        style={{ padding: "4px 10px", fontSize: 12 }}
+      >
+        Import data →
+      </Link>
+    </div>
+  );
+}
+
+function CleanupBanner({
+  sport,
+  dates,
+  onDismiss,
+}: {
+  sport: number;
+  dates: number;
+  onDismiss: () => void;
+}) {
+  const parts: string[] = [];
+  if (sport > 0) {
+    parts.push(`re-classified ${sport.toLocaleString()} bet${sport === 1 ? "" : "s"} to the correct sport`);
+  }
+  if (dates > 0) {
+    parts.push(`fixed ${dates.toLocaleString()} future-dated kickoff${dates === 1 ? "" : "s"}`);
+  }
+  const headline = parts.join(" · ");
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        padding: "10px 16px",
+        background: "var(--blue-tint)",
+        border: "var(--border-w) solid var(--blue-tint)",
+        borderRadius: 8,
+        fontSize: 12,
+        color: "var(--text-muted)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+      }}
+    >
+      <span>
+        <span style={{ fontWeight: 600, color: "var(--blue)" }}>
+          Data cleanup ran.
+        </span>{" "}
+        We {headline}. Changes synced to Supabase.
+      </span>
+      <button
+        type="button"
+        className="btn-ghost"
+        onClick={onDismiss}
+        style={{ padding: "4px 10px", fontSize: 12 }}
+      >
+        Dismiss
+      </button>
+    </div>
+  );
+}
+
+function ImportedBanner({ count }: { count: number }) {
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        padding: "10px 16px",
+        background: "var(--green-bg)",
+        border: "var(--border-w) solid var(--green-tint)",
+        borderRadius: 8,
+        fontSize: 12,
+        color: "var(--text-muted)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+      }}
+    >
+      <span>
+        <span style={{ fontWeight: 600, color: "var(--green)" }}>
+          {count.toLocaleString()} bets imported.
+        </span>{" "}
+        Stored in your browser. CLV will start populating once you log bets through the app pre-kickoff.
+      </span>
+      <Link
+        href="/import"
+        className="btn-ghost"
+        style={{ padding: "4px 10px", fontSize: 12 }}
+      >
+        Import more →
+      </Link>
     </div>
   );
 }
