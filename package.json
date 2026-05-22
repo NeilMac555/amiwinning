@@ -1,6 +1,7 @@
 {
   "name": "am-i-winning",
   "version": "0.1.0",
+  "description": "Am I Winning — The terminal for serious punters.",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Am I Winning — The terminal for serious punters.
+
+A Next.js bet tracker leading with CLV (closing line value) and Return on Capital instead of vanity ROI. Built for sharp bettors and tipsters who need an honest read on their edge.
 
 ## Getting Started
 

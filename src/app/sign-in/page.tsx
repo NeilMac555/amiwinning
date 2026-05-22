@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { applyTheme } from "@/lib/settings";
+import { BRAND } from "@/lib/brand";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -49,24 +50,41 @@ export default function SignInPage() {
       }}
     >
       <div style={{ width: "100%", maxWidth: 380 }}>
-        <Link
-          href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 9,
-            fontWeight: 600,
-            fontSize: 14,
-            letterSpacing: "-0.01em",
-            color: "var(--text)",
-            textDecoration: "none",
-            marginBottom: 32,
-            justifyContent: "center",
-          }}
-        >
-          <span className="brand-mark" aria-hidden="true" />
-          Am I Winning
-        </Link>
+        <div style={{ marginBottom: 32, textAlign: "center" }}>
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 9,
+              fontWeight: 600,
+              fontSize: 14,
+              letterSpacing: "-0.01em",
+              color: "var(--text)",
+              textDecoration: "none",
+            }}
+          >
+            <span className="brand-mark" aria-hidden="true" />
+            {BRAND.name}
+          </Link>
+          <div
+            style={{
+              marginTop: 10,
+              fontFamily: "var(--serif)",
+              fontStyle: "normal",
+              fontSize: 18,
+              fontWeight: 500,
+              letterSpacing: "-0.015em",
+              color: "var(--text-muted)",
+              lineHeight: 1.25,
+              fontVariationSettings: '"opsz" 36, "SOFT" 50',
+              maxWidth: 280,
+              marginInline: "auto",
+            }}
+          >
+            {BRAND.tagline}
+          </div>
+        </div>
 
         <div className="card" style={{ padding: 24 }}>
           {!configured ? (

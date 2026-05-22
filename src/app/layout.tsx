@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, JetBrains_Mono, Fraunces } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
 // Space Grotesk: industrial-geometric, distinct from the Inter/Geist default
@@ -29,9 +30,22 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Am I Winning — Dashboard",
-  description:
-    "Honest answers for serious bettors. Mathematically correct closing-line value, yield, ROI, and drawdown — all in one place.",
+  title: {
+    default: BRAND.fullTitle,
+    template: `%s · ${BRAND.name}`,
+  },
+  description: BRAND.fullTitle,
+  openGraph: {
+    title: BRAND.fullTitle,
+    description: BRAND.fullTitle,
+    siteName: BRAND.name,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: BRAND.fullTitle,
+    description: BRAND.fullTitle,
+  },
 };
 
 export const viewport: Viewport = {

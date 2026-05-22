@@ -8,6 +8,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { BRAND } from "@/lib/brand";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -35,14 +36,53 @@ export default function AuthCallbackPage() {
       style={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        color: "var(--text-muted)",
-        fontSize: 13,
         background: "var(--bg)",
+        gap: 10,
+        padding: 24,
       }}
     >
-      Signing you in…
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 9,
+          fontWeight: 600,
+          fontSize: 14,
+          letterSpacing: "-0.01em",
+          color: "var(--text)",
+        }}
+      >
+        <span className="brand-mark" aria-hidden="true" />
+        {BRAND.name}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--serif)",
+          fontStyle: "normal",
+          fontSize: 18,
+          fontWeight: 500,
+          letterSpacing: "-0.015em",
+          color: "var(--text-muted)",
+          lineHeight: 1.25,
+          fontVariationSettings: '"opsz" 36, "SOFT" 50',
+          maxWidth: 280,
+          textAlign: "center",
+        }}
+      >
+        {BRAND.tagline}
+      </div>
+      <div
+        style={{
+          marginTop: 8,
+          color: "var(--text-faint)",
+          fontSize: 13,
+        }}
+      >
+        Signing you in…
+      </div>
     </div>
   );
 }
