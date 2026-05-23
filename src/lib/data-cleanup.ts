@@ -1,8 +1,9 @@
 // One-shot client-side data cleanup. Walks every bet in the local cache,
 // fixes systemic legacy bugs, then pushes the changed bets to Supabase.
 //
-// Idempotent: gated by `aiw_cleanup_v1` flag in localStorage. Safe to call
-// on every app boot.
+// Idempotent: gated by `aiw_cleanup_v2` flag in localStorage. Safe to call
+// on every app boot. Bumped from v1 to v2 when the tennis player dictionary
+// expanded — re-runs so previously "Soccer"-tagged tennis bets get fixed.
 //
 // What it fixes:
 //   1. Sport mislabels — most legacy bets were stamped "Soccer" regardless of
@@ -28,7 +29,7 @@ export interface CleanupResult {
   error?: string;
 }
 
-const CLEANUP_FLAG = "aiw_cleanup_v1";
+const CLEANUP_FLAG = "aiw_cleanup_v2";
 
 function flagSetFor(userId?: string): string {
   return userId ? `${CLEANUP_FLAG}_${userId}` : CLEANUP_FLAG;

@@ -89,7 +89,7 @@ export default function SettingsPage() {
               <div>
                 <h1 className="page-title">Settings</h1>
                 <div className="page-subtitle">
-                  Stored in your browser for now. When auth lands, these sync to your account.
+                  Preferences and books. Synced to your account across devices.
                 </div>
               </div>
               {savedNotice && (
@@ -306,7 +306,7 @@ export default function SettingsPage() {
               )}
             </Section>
 
-            <Section title="Imported data" subtitle="Bets imported from a spreadsheet are stored in your browser.">
+            <Section title="Imported data" subtitle="Bets imported from a spreadsheet, synced to your account.">
               <div
                 style={{
                   display: "flex",
@@ -337,7 +337,7 @@ export default function SettingsPage() {
               </div>
             </Section>
 
-            <Section title="Coming soon" subtitle="Reserved for the post-auth roll-out.">
+            <Section title="Coming soon" subtitle="On the roadmap.">
               <ul
                 style={{
                   margin: 0,

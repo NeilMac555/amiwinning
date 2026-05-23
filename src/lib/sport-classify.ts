@@ -69,7 +69,13 @@ const TENNIS_PLAYERS: string[] = [
   "garin", "lopez", "darderi", "mpetshi", "perricard", "cobolli", "muller",
   "bonzi", "nakashima", "purcell", "albot", "harris", "kotov", "kovacevic",
   "wu", "shang", "shevchenko", "ofner", "comesana", "tabilo", "kovalik",
-  "carballes baena",
+  "carballes baena", "mannarino", "collignon", "brooksby", "struff", "altmaier",
+  "djere", "norrie", "thompson", "etcheverry", "draper", "auger", "tsonga",
+  "anderson", "isner", "querrey", "raonic", "goffin", "schwartzman", "monfils",
+  "gasquet", "verdasco", "lajovic", "kohlschreiber", "millman", "paire",
+  "basilashvili", "krajinovic", "humbert", "fokina", "davidovich", "munar",
+  "bedene", "duckworth", "hanfmann", "djokovic", "sock", "tomic", "gulbis",
+  "mayer", "hurkacz", "korda", "an. murray", "andy murray",
   // Top WTA
   "swiatek", "sabalenka", "rybakina", "gauff", "pegula", "paolini", "jabeur",
   "zheng", "kasatkina", "navarro", "vekic", "haddad maia", "haddad", "ostapenko",
@@ -80,10 +86,13 @@ const TENNIS_PLAYERS: string[] = [
   "boulter", "fernandez", "raducanu", "townsend", "garcia", "potapova",
   "kenin", "collins", "keys", "azarenka", "begu", "siniakova", "krunic",
   "blinkova", "burrage", "bouzkova", "dolehide", "rakhimova", "watson",
-  "uchijima",
+  "uchijima", "sakkari", "kvitova", "konta", "barty", "bertens", "halep",
+  "pliskova", "stephens", "sevastova", "vondrousova", "bencic", "mertens",
+  "jankovic", "ivanovic", "sharapova", "schiavone", "errani", "vinci",
   // Doubles / legends still occasionally bet
   "federer", "nadal", "murray", "del potro", "thiem", "wawrinka", "ferrer",
-  "soderling",
+  "soderling", "nishikori", "berdych", "ferrero", "hewitt", "roddick", "agassi",
+  "sampras", "edberg", "becker", "mcenroe", "borg",
 ];
 
 // Top-flight soccer clubs and national teams — covers most events.

@@ -50,7 +50,11 @@ function buildKpiItems(kpis: KPIs, sparks: Sparks): KpiItem[] {
       sign: signClass(kpis.clvPct),
       delta: isReal ? "" : "+0.14",
       deltaSign: isReal ? "" : "num-pos",
-      deltaLabel: isReal ? (kpis.clvPct === 0 ? "not yet captured" : "") : "vs. 30d avg",
+      deltaLabel: isReal
+        ? kpis.clvPct === 0
+          ? "not yet captured"
+          : "average edge vs Pinnacle close"
+        : "vs. 30d avg",
       sparkData: sparks.clv,
       sparkColor: colorFor(kpis.clvPct),
     },

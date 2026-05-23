@@ -10,7 +10,7 @@ export function Ticker({ items }: TickerProps) {
     <div className="ticker">
       <div className="ticker-tag">
         <span className="dot-live"></span>
-        Closing line
+        Recent bets
       </div>
       <div className="ticker-track">
         {doubled.map((t, i) => {

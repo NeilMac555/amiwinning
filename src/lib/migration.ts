@@ -54,7 +54,25 @@ export async function migrateLocalToSupabase(
   const flag = flagKey(userId);
   if (window.localStorage.getItem(flag)) return { status: "skipped" };
 
-  const bets = loadBets();
+  const allBets = loadBets();
+  if (allBets.length === 0) {
+    window.localStorage.setItem(flag, new Date().toISOString());
+    return { status: "done", count: 0 };
+  }
+
+  // Drop bets with no bookId — these are orphans from before the books
+  // table existed. Supabase's bets.book_id is NOT NULL, so pushing them
+  // would fail the entire batch and prevent the rest from migrating. The
+  // user can still see them in their localStorage cache until they choose
+  // a book for them; data-cleanup will eventually rehome these too.
+  const bets = allBets.filter((b) => !!b.bookId);
+  const skipped = allBets.length - bets.length;
+  if (skipped > 0) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[aiw] migrateLocalToSupabase: skipping ${skipped} bets without bookId`,
+    );
+  }
   if (bets.length === 0) {
     window.localStorage.setItem(flag, new Date().toISOString());
     return { status: "done", count: 0 };
