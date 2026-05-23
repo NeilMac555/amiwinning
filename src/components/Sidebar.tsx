@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { BRAND } from "@/lib/brand";
+import { isAdminEmail } from "@/lib/admin";
 import { BookSwitcher } from "./BookSwitcher";
 
 interface ItemProps {
@@ -204,6 +205,19 @@ export function Sidebar() {
 
       <div className="sb-spacer"></div>
       <div className="sb-section">
+        {isAdminEmail(user?.email) && (
+          <Item
+            label="Admin"
+            href="/admin"
+            active={is("/admin")}
+            icon={ic(
+              <>
+                <circle cx="7" cy="7" r="5.5" />
+                <path d="M7 4v3l2 2" />
+              </>,
+            )}
+          />
+        )}
         <Item
           label="Settings"
           href="/settings"
