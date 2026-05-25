@@ -143,6 +143,8 @@ export default function Dashboard() {
             <RangeTabs value={range} onChange={setRange} />
           </div>
 
+          {!user && allBets.length > 0 && <SampleDataBanner />}
+
           <PasteHero onCommitted={() => setLocalBump((n) => n + 1)} />
 
           {cleanup &&
@@ -255,6 +257,69 @@ function MockBanner() {
         style={{ padding: "4px 10px", fontSize: 12 }}
       >
         Import data →
+      </Link>
+    </div>
+  );
+}
+
+function SampleDataBanner() {
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        padding: "12px 18px",
+        background:
+          "linear-gradient(90deg, rgba(15, 110, 86, 0.10) 0%, rgba(15, 110, 86, 0.03) 100%)",
+        border: "var(--border-w) solid var(--green-tint)",
+        borderRadius: 10,
+        fontSize: 13,
+        color: "var(--text)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        position: "relative",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: -1,
+          left: 18,
+          background: "var(--bg)",
+          color: "var(--green)",
+          fontFamily: "var(--mono)",
+          fontSize: 9.5,
+          fontWeight: 700,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          padding: "0 6px",
+          borderRadius: 3,
+        }}
+      >
+        Sample
+      </span>
+      <span style={{ paddingLeft: 4 }}>
+        <span style={{ fontWeight: 600, color: "var(--green)" }}>
+          You&rsquo;re viewing sample data.
+        </span>{" "}
+        <span style={{ color: "var(--text-muted)" }}>
+          Every chart, KPI and bet on this page is illustrative.
+          Sign in to start tracking your own.
+        </span>
+      </span>
+      <Link
+        href="/sign-in"
+        className="btn-ghost"
+        data-active="true"
+        style={{
+          padding: "6px 14px",
+          fontSize: 12,
+          fontWeight: 600,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Sign in →
       </Link>
     </div>
   );

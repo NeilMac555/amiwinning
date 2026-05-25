@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Empty state mock — Am I Up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..600,0..100;1,9..144,400..600,0..100&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #F1F0EB;
+        --bg-sidebar: #ECEBE5;
+        --surface: #FBFAF7;
+        --surface-2: #F4F3EE;
+        --text: #0A0A0A;
+        --text-muted: #6B6B66;
+        --text-faint: #A8A8A2;
+        --border: rgba(10, 10, 10, 0.09);
+        --border-strong: rgba(10, 10, 10, 0.18);
+        --green: #0F6E56;
+        --green-tint: rgba(15, 110, 86, 0.10);
+        --green-bg: rgba(15, 110, 86, 0.06);
+        --red: #A32D2D;
+        --serif: "Fraunces", Georgia, serif;
+        --sans: "Space Grotesk", -apple-system, system-ui, sans-serif;
+        --mono: "JetBrains Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .header {
+        max-width: 1100px;
+        margin: 32px auto 18px;
+        padding: 0 28px;
+        color: var(--text-muted);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .header strong { color: var(--green); }
+
+      /* App shell mock */
+      .app {
+        max-width: 1100px;
+        margin: 0 auto 80px;
+        padding: 0 28px;
+      }
+      .page-title {
+        font-family: var(--serif);
+        font-size: 32px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+        font-variation-settings: "opsz" 96, "SOFT" 30;
+      }
+      .page-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      /* Paste hero (kept as-is — already perfect for a first-time user) */
+      .paste-hero {
+        position: relative;
+        margin-top: 14px;
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        padding: 24px 28px 22px;
+        overflow: hidden;
+      }
+      .paste-hero::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--green) 0%, var(--green) 28%, var(--green-tint) 55%, transparent 92%);
+      }
+      .eyebrow {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+        text-transform: uppercase; color: var(--text-muted); font-weight: 600;
+      }
+      .eyebrow-left { display: inline-flex; align-items: center; gap: 9px; }
+      .eyebrow-left::before {
+        content: ""; width: 6px; height: 6px; border-radius: 50%;
+        background: var(--green); box-shadow: 0 0 0 3px var(--green-tint);
+      }
+      .book-chip {
+        font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+        padding: 3px 11px; border-radius: 999px; color: var(--green);
+        background: var(--green-bg); border: 0.5px solid var(--green-tint);
+      }
+      .book-chip::before {
+        content: ""; display: inline-block; width: 5px; height: 5px;
+        background: var(--green); border-radius: 50%; margin-right: 7px; vertical-align: middle;
+      }
+      .hero-title {
+        font-family: var(--serif); font-size: 32px; font-weight: 500;
+        letter-spacing: -0.02em; margin: 0 0 8px;
+        font-variation-settings: "opsz" 48, "SOFT" 70;
+      }
+      .hero-title em {
+        font-style: italic; color: var(--green); font-weight: 500;
+        font-variation-settings: "opsz" 48, "SOFT" 100;
+      }
+      .hero-sub { font-size: 13.5px; color: var(--text-muted); margin: 0 0 20px; max-width: 640px; }
+      .hero-textarea {
+        width: 100%; min-height: 132px; padding: 14px 16px;
+        font-family: var(--mono); font-size: 13px; line-height: 1.65;
+        background: var(--surface-2); border: 0.5px solid var(--border-strong);
+        border-radius: 8px; color: var(--text); resize: vertical;
+        font-feature-settings: "tnum";
+      }
+      .hero-textarea::placeholder { color: var(--text-faint); }
+      .hero-foot {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 14px;
+      }
+      .tip { font-size: 11.5px; color: var(--text-faint); }
+      .tip code {
+        font-family: var(--mono); padding: 1px 5px; background: var(--surface-2);
+        border: 0.5px solid var(--border); border-radius: 3px; color: var(--text-muted);
+        font-size: 10.5px;
+      }
+      .btn-primary {
+        padding: 9px 18px; border-radius: 6px; font-size: 13px; font-weight: 600;
+        color: #fff; background: var(--green); border: 0.5px solid var(--green);
+        cursor: pointer;
+      }
+
+      /* THE NEW BIT — Welcome / Get started card */
+      .getstarted {
+        margin-top: 14px; background: var(--surface); border: 0.5px solid var(--border);
+        border-radius: 10px; padding: 22px 26px;
+      }
+      .getstarted-head {
+        display: flex; align-items: baseline; justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .getstarted-title {
+        font-family: var(--serif); font-size: 20px; font-weight: 500;
+        letter-spacing: -0.015em; margin: 0;
+      }
+      .getstarted-dismiss {
+        font-size: 11px; color: var(--text-faint); cursor: pointer; background: none;
+        border: 0; padding: 0;
+      }
+      .getstarted-cards {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      }
+      .step {
+        padding: 16px 18px; border: 0.5px solid var(--border);
+        border-radius: 8px; background: var(--surface-2); transition: border-color 0.1s;
+        cursor: pointer;
+      }
+      .step:hover { border-color: var(--border-strong); }
+      .step-num {
+        font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+        color: var(--text-faint); font-weight: 600;
+      }
+      .step-title {
+        font-family: var(--serif); font-size: 16px; font-weight: 500;
+        letter-spacing: -0.01em; margin: 6px 0 4px;
+      }
+      .step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+
+      /* KPI strip — empty version */
+      .kpi-strip {
+        display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 14px;
+      }
+      .kpi {
+        padding: 18px 22px; border: 0.5px solid var(--border);
+        border-radius: 10px; background: var(--surface);
+      }
+      .kpi-label {
+        font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--text-muted); font-weight: 600;
+      }
+      .kpi-value {
+        font-family: var(--mono); font-size: 22px; font-weight: 600;
+        margin: 6px 0 4px; color: var(--text-faint); font-variant-numeric: tabular-nums;
+      }
+      .kpi-foot {
+        font-size: 11px; color: var(--text-faint); line-height: 1.4;
+      }
+
+      /* Equity area — empty version */
+      .grid-2 {
+        display: grid; grid-template-columns: 1.7fr 1fr;
+        gap: 14px; margin-top: 14px;
+      }
+      .card {
+        background: var(--surface); border: 0.5px solid var(--border);
+        border-radius: 10px;
+      }
+      .card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 20px 14px; border-bottom: 0.5px solid var(--border);
+      }
+      .card-title { font-size: 13px; font-weight: 600; }
+      .card-meta { font-size: 11.5px; color: var(--text-muted); }
+      .empty-art {
+        height: 240px; display: flex; align-items: center; justify-content: center;
+        padding: 24px;
+      }
+      .empty-art-inner {
+        text-align: center; max-width: 320px;
+      }
+      .empty-line {
+        height: 1px; background: repeating-linear-gradient(90deg, var(--border-strong) 0 8px, transparent 8px 14px);
+        margin: 0 auto 18px; max-width: 240px;
+      }
+      .empty-headline {
+        font-family: var(--serif); font-size: 18px; font-weight: 500;
+        margin-bottom: 6px; color: var(--text-muted);
+        font-variation-settings: "opsz" 36, "SOFT" 60;
+      }
+      .empty-copy { font-size: 12px; color: var(--text-faint); line-height: 1.5; }
+      .preview-row {
+        display: flex; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid var(--border);
+        opacity: 0.45; align-items: center;
+      }
+      .preview-row:last-child { border-bottom: 0; }
+      .preview-label {
+        font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--text-faint); border: 0.5px solid var(--text-faint);
+        padding: 1px 6px; border-radius: 3px;
+      }
+      .preview-text { font-size: 12px; color: var(--text-faint); }
+
+      .arrow { color: var(--green); margin-left: 4px; }
+
+      .annotations {
+        margin-top: 32px; padding: 18px 22px;
+        background: rgba(15, 110, 86, 0.05); border: 0.5px solid var(--green-tint);
+        border-radius: 10px;
+      }
+      .annotations h3 {
+        font-family: var(--serif); font-size: 16px; font-weight: 500;
+        margin: 0 0 8px; color: var(--green);
+      }
+      .annotations ul { padding-left: 18px; margin: 0; }
+      .annotations li {
+        font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 4px;
+      }
+      .annotations strong { color: var(--green); }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <strong>Mockup</strong> · what a brand-new user sees on first sign-in. No tutorial overlays.
+    </div>
+
+    <div class="app">
+      <h1 class="page-title">Dashboard</h1>
+      <div class="page-subtitle">
+        <span style="color: var(--green)">●</span> Welcome to Am I Up. Log your first bet to start tracking.
+      </div>
+
+      <!-- Paste hero stays as-is -->
+      <div class="paste-hero">
+        <div class="eyebrow">
+          <span class="eyebrow-left">Paste &amp; parse · AI</span>
+          <span style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: var(--text-faint); font-weight: 600; text-transform: uppercase;">
+            Logging to <span class="book-chip">Personal</span>
+          </span>
+        </div>
+        <h2 class="hero-title">Paste <em>anything.</em></h2>
+        <p class="hero-sub">
+          X posts, Telegram channels, Substack tips, paper notes, bookmaker copy-paste.
+          AI extracts every bet — date, market, odds, stake, result — ready to commit.
+        </p>
+        <textarea
+          class="hero-textarea"
+          placeholder="Sunday
+Barcelona vs Real Madrid · Barcelona -0.75 @ 1.79 · 2u (win)
+Milan vs Atalanta · Atalanta +0.25 @ 2.00 · 2u (win)
+…"
+        ></textarea>
+        <div class="hero-foot">
+          <span class="tip">Tip: prefix parlays with <code>Double:</code> or <code>Treble:</code></span>
+          <button class="btn-primary">Parse bets →</button>
+        </div>
+      </div>
+
+      <!-- NEW: Get started card (auto-hides once they log 1 bet) -->
+      <div class="getstarted">
+        <div class="getstarted-head">
+          <h3 class="getstarted-title">Get started in 60 seconds</h3>
+          <button class="getstarted-dismiss">Dismiss</button>
+        </div>
+        <div class="getstarted-cards">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-title">Paste your bets</div>
+            <div class="step-desc">
+              Drop a tipping post, Substack, or screenshot transcript into the box above. AI does the rest.<span class="arrow"> ↑</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-title">Or import a CSV</div>
+            <div class="step-desc">
+              Got a Bettin.gs export? Drop it in — column mapping is automatic.<span class="arrow"> →</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-title">Or log one bet</div>
+            <div class="step-desc">
+              Type a single bet by hand to see how the tracker reads it.<span class="arrow"> →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI strip — empty/dimmed -->
+      <div class="kpi-strip">
+        <div class="kpi">
+          <div class="kpi-label">CLV</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-foot">populates as bets settle</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Yield</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-foot">profit ÷ turnover</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Return on capital</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-foot">on risk capital</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Max drawdown</div>
+          <div class="kpi-value">—</div>
+          <div class="kpi-foot">peak-to-trough</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Sample size</div>
+          <div class="kpi-value">0</div>
+          <div class="kpi-foot">log a bet to start</div>
+        </div>
+      </div>
+
+      <!-- Equity + Recent settled — both empty with quiet copy -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Cumulative P/L</div>
+              <div class="card-meta">No data yet</div>
+            </div>
+          </div>
+          <div class="empty-art">
+            <div class="empty-art-inner">
+              <div class="empty-line"></div>
+              <div class="empty-headline">Your curve will grow here</div>
+              <div class="empty-copy">
+                Once you log a bet, the cumulative P/L line will start tracking from zero. No phantom bankroll, no fake start.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent settled</div>
+              <div class="card-meta">Preview</div>
+            </div>
+          </div>
+          <div style="padding: 0">
+            <div class="preview-row">
+              <span class="preview-label">PREVIEW</span>
+              <div class="preview-text">Barcelona vs Real Madrid · Barcelona ML @ 1.79 · won · +1.58u</div>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">PREVIEW</span>
+              <div class="preview-text">Bayern vs Dortmund · Over 2.5 @ 1.85 · lost · −2.00u</div>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">PREVIEW</span>
+              <div class="preview-text">PSG vs Lens · BTTS yes @ 1.91 · won · +1.82u</div>
+            </div>
+            <div style="padding: 14px 16px; font-size: 11px; color: var(--text-faint); font-style: italic;">
+              Your settled bets will replace these previews.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annotations">
+        <h3>What you're looking at</h3>
+        <ul>
+          <li><strong>Paste hero stays untouched</strong> — it already is the onboarding. Just type something in.</li>
+          <li><strong>"Get started in 60 seconds" card</strong> — 3 clear paths to a first bet. Dismissable. Auto-hides once you've logged anything.</li>
+          <li><strong>KPI cards show "—"</strong> with one-line hints. No fake demo numbers, no zeros pretending to be data.</li>
+          <li><strong>Equity curve shows the headline copy</strong> — "your curve will grow here" — instead of an empty chart.</li>
+          <li><strong>Recent settled shows ghosted preview rows</strong> with PREVIEW labels — so you understand what populates here without seeing fake data.</li>
+          <li><strong>No tooltips, no overlays, no "skip"</strong>. The page is the tutorial.</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
