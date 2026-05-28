@@ -242,7 +242,7 @@ export function Sidebar() {
         />
       </div>
       <div className="sb-foot">
-        <span>v0.4.2</span>
+        <span>v0.4.3</span>
         <span>UTC+01</span>
       </div>
       </aside>
