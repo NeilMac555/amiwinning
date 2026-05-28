@@ -2026,6 +2026,248 @@ a.sb-item { cursor: pointer; }
 .paste-hero-success-text strong { color: var(--green); font-weight: 600; }
 .paste-hero-success-actions { display: inline-flex; gap: 8px; }
 
+/* === Public profile page ===========================================
+   The /u/[handle] page is a standalone marketing-feeling layout —
+   no sidebar, no topbar. Editorial typography, big lifetime number.
+================================================================== */
+
+.profile-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: var(--border-w) solid var(--border);
+  position: sticky;
+  top: 0;
+  background: color-mix(in oklab, var(--bg), transparent 8%);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  z-index: 10;
+}
+
+.profile-main {
+  flex: 1;
+  max-width: 920px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.profile-name {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  margin: 0;
+  font-variation-settings: "opsz" 60, "SOFT" 40;
+  line-height: 1.1;
+}
+.profile-handle {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.profile-meta {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+.profile-bio {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 560px;
+}
+
+/* Lifetime P/L hero number */
+.profile-pl {
+  padding: 28px 32px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-pl-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.profile-pl-value {
+  font-family: var(--serif);
+  font-size: 72px;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144, "SOFT" 20;
+  font-feature-settings: "ss01", "tnum";
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 6px 0 4px;
+}
+.profile-pl-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* KPI grid — 3 col on desktop */
+.profile-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.profile-kpi {
+  padding: 16px 18px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-kpi-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.profile-kpi-value {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
+.profile-kpi-sub {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+/* Chart card */
+.profile-chart {
+  padding: 22px 0 0;
+}
+.profile-chart-head {
+  padding: 0 22px 14px;
+  border-bottom: var(--border-w) solid var(--border);
+}
+.profile-chart-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.profile-chart-sub {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+.profile-empty {
+  padding: 40px;
+  text-align: center;
+  background: var(--surface);
+  border: var(--border-w) dashed var(--border);
+  border-radius: var(--radius-card);
+}
+
+.profile-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: var(--radius-card);
+  margin-top: 8px;
+}
+.profile-cta-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+}
+.profile-cta-sub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  max-width: 420px;
+}
+
+/* Mobile profile page */
+@media (max-width: 900px) {
+  .profile-topbar {
+    padding: 14px 16px;
+  }
+  .profile-main {
+    padding: 24px 16px 48px;
+    gap: 18px;
+  }
+  .profile-name {
+    font-size: 24px;
+  }
+  .profile-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 15px;
+  }
+  .profile-pl {
+    padding: 20px 18px;
+  }
+  .profile-pl-value {
+    font-size: 52px;
+  }
+  .profile-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .profile-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+}
+
 /* === Mobile breakpoints ===========================================
    Two tiers:
      - <900px: sidebar drawer, single-column app, KPI strips 2-col,

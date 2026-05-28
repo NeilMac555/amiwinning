@@ -8,6 +8,7 @@ import { useSettings, saveSettings, type Theme, type UserSettings } from "@/lib/
 import { clearBets, loadBets } from "@/lib/import/store";
 import { useAuth } from "@/lib/auth";
 import { createBook, deleteBook, updateBook, type OddsFormat } from "@/lib/books";
+import { ProfilePanel } from "@/components/ProfilePanel";
 
 const UNIT_OPTIONS: Array<{ value: DisplayUnit; label: string; sublabel: string }> = [
   { value: "u", label: "Units (u)", sublabel: "Stake-to-bankroll ratio. Used by most pro bettors and trackers like bettin.gs / Track-A-Bet." },
@@ -112,6 +113,13 @@ export default function SettingsPage() {
                 </span>
               )}
             </div>
+
+            <Section
+              title="Public profile"
+              subtitle="Share your lifetime stats with a single link. Stats only — individual bets are never shown publicly."
+            >
+              <ProfilePanel />
+            </Section>
 
             <Section title="Display unit" subtitle="How stakes and P/L are shown across the app.">
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
