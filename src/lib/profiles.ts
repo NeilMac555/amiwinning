@@ -252,14 +252,16 @@ export async function getPublicProfileServer(
 ): Promise<PublicProfileFetchResult> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !anonKey) return { profile: null, bets: [] };
 
-  // Service-role key when available so we can read the user's books table
-  // (which has owner-only RLS) and filter bets to the chosen public book.
-  // The profile.is_public check below is the privacy gate — if a profile
-  // isn't public we never return rows. Falls back to anon when not set.
-  const client = createClient(url, serviceKey ?? anonKey, {
+  // Anon client — RLS gates everything. We rely on three policies:
+  //   - profiles_select_public: lets us read public profile rows
+  //   - books_select_public_profile (mig 0005): lets us read books
+  //     for users with public profiles, so we can pick which to share
+  //   - bets_select_public_profile (mig 0003): lets us read bets the
+  //     same way
+  // The profile.is_public WHERE clause below is the privacy gate.
+  const client = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
@@ -300,30 +302,45 @@ export async function getPublicProfileServer(
   const selectedBook = (publicBooks[0] ?? books[0]) as BookRow;
 
   // 3. Fetch every bet in that book. Paginate to dodge Supabase's
-  //    default 1000-row cap. Also include legacy bets without a book_id
-  //    (created before the books system existed) — those belong with
-  //    the user's oldest book by convention.
+  //    default 1000-row cap.
   const PAGE_SIZE = 1000;
   const MAX_PAGES = 100;
-  const isOldestBook = selectedBook.id === books[0].id;
   const allRows: RawBetRow[] = [];
   for (let page = 0; page < MAX_PAGES; page++) {
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    let q = client
+    const { data: pageRows, error } = await client
       .from("bets")
       .select("*")
       .eq("user_id", profile.userId)
+      .eq("book_id", selectedBook.id)
       .order("kickoff", { ascending: true })
       .range(from, to);
-    q = isOldestBook
-      ? q.or(`book_id.eq.${selectedBook.id},book_id.is.null`)
-      : q.eq("book_id", selectedBook.id);
-    const { data: pageRows, error } = await q;
     if (error) break;
     const rows = (pageRows ?? []) as RawBetRow[];
     allRows.push(...rows);
     if (rows.length < PAGE_SIZE) break;
+  }
+
+  // Also pick up any legacy bets without a book_id (pre-books system),
+  // but only when the chosen book is the user's oldest — by convention
+  // those belong to the "Personal" book.
+  if (selectedBook.id === books[0].id) {
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data: pageRows, error } = await client
+        .from("bets")
+        .select("*")
+        .eq("user_id", profile.userId)
+        .is("book_id", null)
+        .order("kickoff", { ascending: true })
+        .range(from, to);
+      if (error) break;
+      const rows = (pageRows ?? []) as RawBetRow[];
+      allRows.push(...rows);
+      if (rows.length < PAGE_SIZE) break;
+    }
   }
 
   const bets = allRows.map(supabaseRowToImportedBet);
