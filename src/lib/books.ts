@@ -63,7 +63,7 @@ export async function listBooks(): Promise<Book[]> {
     .select("*")
     .order("created_at", { ascending: true });
   if (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] listBooks failed:", error.message);
     return [];
   }
@@ -90,7 +90,7 @@ export async function createBook(
     .select()
     .single();
   if (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] createBook failed:", error.message);
     return null;
   }
@@ -123,7 +123,7 @@ export async function updateBook(
   if (patch.oddsFormat !== undefined) row.odds_format = patch.oddsFormat;
   const { error } = await supabase.from("books").update(row).eq("id", id);
   if (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] updateBook failed:", error.message);
   }
 }
@@ -132,7 +132,7 @@ export async function deleteBook(id: string): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from("books").delete().eq("id", id);
   if (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] deleteBook failed:", error.message);
   }
 }

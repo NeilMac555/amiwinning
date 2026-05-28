@@ -172,9 +172,8 @@ export function monthCalendar(
     byDate.set(k, cur);
   }
 
-  // First day of the month and how many days it has.
+  // First day of the month.
   const first = new Date(year, month, 1);
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   // Pikkit uses Sunday-first but UK convention is Monday-first. We stick
   // with Monday-first for consistency with byDayOfWeek elsewhere in the app.

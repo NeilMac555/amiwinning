@@ -68,7 +68,7 @@ export async function migrateLocalToSupabase(
   const bets = allBets.filter((b) => !!b.bookId);
   const skipped = allBets.length - bets.length;
   if (skipped > 0) {
-    // eslint-disable-next-line no-console
+     
     console.warn(
       `[aiw] migrateLocalToSupabase: skipping ${skipped} bets without bookId`,
     );

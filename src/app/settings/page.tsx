@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
-import { loadSettings, saveSettings, type Theme, type UserSettings } from "@/lib/settings";
+import { useSettings, saveSettings, type Theme, type UserSettings } from "@/lib/settings";
 import { clearBets, loadBets } from "@/lib/import/store";
 import { useAuth } from "@/lib/auth";
 import { createBook, deleteBook, updateBook, type OddsFormat } from "@/lib/books";
@@ -17,9 +17,11 @@ const UNIT_OPTIONS: Array<{ value: DisplayUnit; label: string; sublabel: string 
 ];
 
 export default function SettingsPage() {
-  const { user, books, activeBook, setActiveBook, refreshBooks } = useAuth();
-  const [settings, setSettings] = useState<UserSettings>({ unit: "u", theme: "light" });
-  const [importedCount, setImportedCount] = useState(0);
+  const { user, books, activeBook, setActiveBook, refreshBooks, betsVersion } =
+    useAuth();
+  // Settings come from the reactive store hook — SSR-safe, no effect needed.
+  const settings = useSettings();
+  const [clearTick, setClearTick] = useState(0);
   const [confirmClear, setConfirmClear] = useState(false);
   const [savedNotice, setSavedNotice] = useState(false);
   const [newBookName, setNewBookName] = useState("");
@@ -28,10 +30,14 @@ export default function SettingsPage() {
     null,
   );
 
-  useEffect(() => {
-    setSettings(loadSettings());
-    setImportedCount(loadBets().length);
-  }, []);
+  // Derive the bet count on every render — keyed by the auth context's
+  // betsVersion so it re-runs after a Supabase pull, plus a local tick
+  // bumped after "Clear all bets" so the count updates immediately.
+  const importedCount = useMemo(() => {
+    if (typeof window === "undefined") return 0;
+    return loadBets().length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [betsVersion, clearTick]);
 
   const onCreateBook = async () => {
     if (!user || !newBookName.trim() || creatingBook) return;
@@ -62,7 +68,7 @@ export default function SettingsPage() {
 
   const update = (patch: Partial<UserSettings>) => {
     const next = { ...settings, ...patch };
-    setSettings(next);
+    // saveSettings notifies subscribers; useSettings() picks up the change.
     saveSettings(next);
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 1200);
@@ -74,7 +80,7 @@ export default function SettingsPage() {
       return;
     }
     clearBets();
-    setImportedCount(0);
+    setClearTick((t) => t + 1);
     setConfirmClear(false);
   };
 

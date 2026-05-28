@@ -70,7 +70,9 @@ const Ctx = createContext<AuthContextValue>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // If Supabase isn't configured, there's no async work to wait for — start
+  // out of the loading state so the UI doesn't sit on a spinner forever.
+  const [loading, setLoading] = useState(() => Boolean(supabase));
   const [migration, setMigration] = useState<MigrationResult | null>(null);
   const [cleanup, setCleanup] = useState<CleanupResult | null>(null);
   const [betsVersion, setBetsVersion] = useState(0);
@@ -106,10 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
+    // No-supabase early return — `loading` was already initialised to false
+    // above based on the same condition, so there's nothing to set here.
+    if (!supabase) return;
     let mounted = true;
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
@@ -135,10 +136,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // On sign-in: load books, migrate any localStorage bets up, then pull the
   // canonical state back down. Bump betsVersion so any mounted pages re-read.
+  // On sign-out (user becomes null): clear book state. Cleanup is deferred
+  // via queueMicrotask to satisfy React 19's no-synchronous-setState rule.
   useEffect(() => {
     if (!user) {
-      setBooks([]);
-      setActiveBookIdState(null);
+      queueMicrotask(() => {
+        setBooks([]);
+        setActiveBookIdState(null);
+      });
       return;
     }
     let cancelled = false;
@@ -152,17 +157,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
       setMigration(result);
       if (result.status === "error") {
-        // eslint-disable-next-line no-console
+         
         console.error("[aiw] bet migration failed:", result.error);
       } else if (result.status === "done" && (result.count ?? 0) > 0) {
-        // eslint-disable-next-line no-console
+         
         console.info(`[aiw] migrated ${result.count} bets to Supabase`);
       }
       // 3. Pull canonical state back into the local cache.
       const pulled = await pullFromSupabase();
       if (cancelled) return;
       if (pulled >= 0) {
-        // eslint-disable-next-line no-console
+         
         console.info(`[aiw] pulled ${pulled} bets from Supabase`);
         setBetsVersion((v) => v + 1);
       }
@@ -176,14 +181,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const fixed =
           cleanupResult.sportReclassified + cleanupResult.datesFixed;
         if (fixed > 0) {
-          // eslint-disable-next-line no-console
+           
           console.info(
             `[aiw] cleanup: reclassified ${cleanupResult.sportReclassified} sports, fixed ${cleanupResult.datesFixed} dates`,
           );
           setBetsVersion((v) => v + 1);
         }
       } else if (cleanupResult.status === "error") {
-        // eslint-disable-next-line no-console
+         
         console.error("[aiw] cleanup failed:", cleanupResult.error);
       }
     })();

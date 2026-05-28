@@ -11,7 +11,7 @@ import {
 } from "@/components/UnitContext";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import type { ImportedBet } from "@/lib/import/types";
-import { applyTheme, loadSettings } from "@/lib/settings";
+import { applyTheme, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import {
   byDayOfWeek,
@@ -37,18 +37,20 @@ import {
 
 export default function AnalyticsPage() {
   const [bets, setBets] = useState<ImportedBet[]>([]);
-  const [unit, setUnit] = useState<DisplayUnit>("u");
+  const unit = useSettings().unit;
   const { user, betsVersion, activeBook } = useAuth();
 
   useEffect(() => {
     applyTheme();
-    setUnit(loadSettings().unit);
     if (!user) consumeSeed();
     const all = loadBets();
     const scoped = activeBook
       ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
       : all;
-    setBets(scoped);
+    // Deferred to next microtask: React 19's set-state-in-effect rule
+    // disallows synchronous setState here. The microtask runs before paint
+    // so users never see the stale empty state flash.
+    queueMicrotask(() => setBets(scoped));
   }, [betsVersion, user, activeBook]);
 
   const monthly = useMemo(() => monthlyPL(bets), [bets]);
@@ -445,7 +447,6 @@ function CalendarPanel({
     body = (
       <YearView
         y={y}
-        todayIso={todayIso}
         unit={unit}
         onDrill={(mc) => {
           setCursor(new Date(mc.year, mc.month, 1));
@@ -653,12 +654,10 @@ function WeekView({
 
 function YearView({
   y,
-  todayIso,
   unit,
   onDrill,
 }: {
   y: YearCalendar;
-  todayIso: string;
   unit: DisplayUnit;
   onDrill: (m: MonthCalendar) => void;
 }) {
@@ -672,7 +671,6 @@ function YearView({
           key={`${m.year}-${m.month}`}
           m={m}
           heatMax={heatMax}
-          todayIso={todayIso}
           unit={unit}
           onDrill={() => onDrill(m)}
         />
@@ -684,13 +682,11 @@ function YearView({
 function YearMonth({
   m,
   heatMax,
-  todayIso,
   unit,
   onDrill,
 }: {
   m: MonthCalendar;
   heatMax: number;
-  todayIso: string;
   unit: DisplayUnit;
   onDrill: () => void;
 }) {

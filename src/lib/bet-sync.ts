@@ -110,7 +110,7 @@ export async function pullFromSupabase(): Promise<number> {
       .order("kickoff", { ascending: false })
       .range(from, from + PAGE - 1);
     if (error) {
-      // eslint-disable-next-line no-console
+       
       console.error("[aiw] pullFromSupabase failed:", error.message);
       return -1;
     }
@@ -128,7 +128,7 @@ export async function pullFromSupabase(): Promise<number> {
 export async function pushBet(bet: ImportedBet, userId: string): Promise<void> {
   if (!supabase) return;
   if (!bet.bookId) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] pushBet skipped — bet has no bookId:", bet.id);
     return;
   }
@@ -136,7 +136,7 @@ export async function pushBet(bet: ImportedBet, userId: string): Promise<void> {
     .from("bets")
     .upsert([betToRow(bet, userId)], { onConflict: "id" });
   if (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] pushBet failed:", error.message, "(id:", bet.id, ")");
   }
 }
@@ -150,7 +150,7 @@ export async function pushBets(
   const valid = bets.filter((b) => b.bookId);
   if (valid.length === 0) return;
   if (valid.length !== bets.length) {
-    // eslint-disable-next-line no-console
+     
     console.warn(
       `[aiw] pushBets: skipping ${bets.length - valid.length} bets without bookId`,
     );
@@ -162,7 +162,7 @@ export async function pushBets(
       .from("bets")
       .upsert(slice, { onConflict: "id" });
     if (error) {
-      // eslint-disable-next-line no-console
+       
       console.error("[aiw] pushBets batch failed:", error.message);
       return;
     }
@@ -174,7 +174,7 @@ export async function deleteBetRemote(id: string): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from("bets").delete().eq("id", id);
   if (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[aiw] deleteBetRemote failed:", error.message, "(id:", id, ")");
   }
 }

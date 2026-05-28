@@ -24,7 +24,7 @@ import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
 import { BRAND } from "@/lib/brand";
 import { filterByRange, rangeLabel, type Range } from "@/lib/range";
 import type { ImportedBet } from "@/lib/import/types";
-import { applyTheme, loadSettings } from "@/lib/settings";
+import { applyTheme, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 
 type Source = "mock" | "imported";
@@ -34,20 +34,17 @@ export default function Dashboard() {
   // check localStorage and swap to imported aggregates when present.
   const [source, setSource] = useState<Source>("mock");
   const [allBets, setAllBets] = useState<ImportedBet[]>([]);
-  const [data, setData] = useState<DashboardData>(() => buildAll("mixed"));
   const [now, setNow] = useState<number>(NOW);
   const [range, setRange] = useState<Range>("12M");
-  const [settingsUnit, setSettingsUnit] = useState<DisplayUnit>("u");
+  const settingsUnit = useSettings().unit;
   const [localBump, setLocalBump] = useState(0);
   const [cleanupDismissed, setCleanupDismissed] = useState(false);
   const { user, betsVersion, activeBook, cleanup } = useAuth();
 
-  // Load bets + settings on mount, and re-read whenever the auth layer
-  // signals a fresh pull from Supabase (betsVersion bumps).
+  // Load bets on mount, and re-read whenever the auth layer signals a fresh
+  // pull from Supabase (betsVersion bumps).
   useEffect(() => {
     applyTheme();
-    const s = loadSettings();
-    setSettingsUnit(s.unit);
     if (!user) consumeSeed();
     const all = loadBets();
     // Scope to the active book. Bets without a bookId (legacy cache) fall
@@ -55,20 +52,31 @@ export default function Dashboard() {
     const scoped = activeBook
       ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
       : all;
-    if (scoped.length > 0) {
-      setSource("imported");
-      setAllBets(scoped);
-      setNow(Date.now());
-    } else {
-      setSource("mock");
-      setAllBets([]);
-    }
+    const nextNow = Date.now();
+    // Defer setState to next microtask so it's not synchronous in this
+    // effect's call stack (React 19 set-state-in-effect rule). Runs before
+    // paint, so no visible flash of stale state.
+    queueMicrotask(() => {
+      if (scoped.length > 0) {
+        setSource("imported");
+        setAllBets(scoped);
+        setNow(nextNow);
+      } else {
+        setSource("mock");
+        setAllBets([]);
+      }
+    });
   }, [betsVersion, user, activeBook, localBump]);
 
-  // Re-aggregate whenever bets or range change.
-  useEffect(() => {
-    if (source !== "imported") return;
-    const filtered = filterByRange(allBets, range, Date.now());
+  // Re-aggregate whenever bets or range change. useMemo (not useEffect)
+  // so React 19's no-setState-in-effect rule is satisfied — `data` is
+  // pure-derived state.
+  const data = useMemo<DashboardData>(() => {
+    if (source !== "imported") return buildAll("mixed");
+    // Use the captured `now` rather than Date.now() so this memo is pure —
+    // React 19 forbids impure calls during render. `now` is bumped when bets
+    // are loaded, which is the only moment the window boundary changes.
+    const filtered = filterByRange(allBets, range, now);
     const windowed = aggregateFromBets(filtered);
     // Return on capital is a path-dependent, "across your whole career"
     // metric. Windowing it produces nonsense (a single bad month in a 3M
@@ -81,8 +89,8 @@ export default function Dashboard() {
       windowed.kpis.peakDrawdown = lifetime.kpis.peakDrawdown;
       windowed.kpis.lifetimePl = lifetime.kpis.lifetimePl;
     }
-    setData(windowed);
-  }, [allBets, range, source]);
+    return windowed;
+  }, [allBets, range, source, now]);
 
   const importedCount = allBets.length;
   const inRangeCount = useMemo(

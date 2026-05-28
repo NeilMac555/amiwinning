@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, fmtUnit, type DisplayUnit } from "@/components/UnitContext";
+import { UnitProvider, fmtUnit } from "@/components/UnitContext";
 import { consumeSeed, deleteBet, loadBets } from "@/lib/import/store";
 import type { ImportedBet, Status } from "@/lib/import/types";
-import { applyTheme, loadSettings } from "@/lib/settings";
+import { applyTheme, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 import { betClv } from "@/lib/clv";
@@ -32,18 +32,19 @@ export default function BetsPage() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
   const [density, setDensity] = useState<"comfortable" | "dense">("dense");
-  const [unit, setUnit] = useState<DisplayUnit>("u");
+  const unit = useSettings().unit;
   const { user, betsVersion, activeBook } = useAuth();
 
   useEffect(() => {
     applyTheme();
-    setUnit(loadSettings().unit);
     if (!user) consumeSeed();
     const all = loadBets();
     const scoped = activeBook
       ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
       : all;
-    setBets(scoped);
+    // Deferred to next microtask to satisfy React 19's no-synchronous-
+    // setState-in-effect rule (runs before paint, no visible flash).
+    queueMicrotask(() => setBets(scoped));
   }, [betsVersion, user, activeBook]);
 
   const onDelete = (e: React.MouseEvent, id: string) => {

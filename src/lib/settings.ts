@@ -1,6 +1,7 @@
 // User display preferences. Persists in localStorage so settings survive
 // reloads. When Supabase auth lands, this module is the swap-out point.
 
+import { useSyncExternalStore } from "react";
 import type { DisplayUnit } from "@/components/UnitContext";
 
 export type Theme = "light" | "dark";
@@ -17,7 +18,15 @@ const DEFAULTS: UserSettings = {
   theme: "light",
 };
 
-export function loadSettings(): UserSettings {
+// In-memory mirror of what's in localStorage. Used as the stable snapshot
+// for useSyncExternalStore — without this, getSnapshot() would allocate a
+// fresh object every render and React would think the value changed.
+let cachedSnapshot: UserSettings = DEFAULTS;
+let snapshotInitialised = false;
+
+const listeners = new Set<() => void>();
+
+function readFromStorage(): UserSettings {
   if (typeof window === "undefined") return DEFAULTS;
   try {
     const raw = window.localStorage.getItem(KEY);
@@ -32,11 +41,50 @@ export function loadSettings(): UserSettings {
   }
 }
 
+function ensureSnapshot(): UserSettings {
+  if (!snapshotInitialised && typeof window !== "undefined") {
+    cachedSnapshot = readFromStorage();
+    snapshotInitialised = true;
+  }
+  return cachedSnapshot;
+}
+
+function notify(): void {
+  for (const cb of listeners) cb();
+}
+
+export function loadSettings(): UserSettings {
+  return ensureSnapshot();
+}
+
 export function saveSettings(s: UserSettings): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(KEY, JSON.stringify(s));
   // Apply theme immediately so it works across pages without a reload.
   document.documentElement.dataset.theme = s.theme;
+  // Update the in-memory snapshot + wake every subscriber so useSettings()
+  // returns the new value on the next render.
+  cachedSnapshot = s;
+  snapshotInitialised = true;
+  notify();
+}
+
+// useSyncExternalStore subscription. Called whenever a consumer mounts.
+function subscribe(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
+// React 19's preferred way to consume a client-only store. The third argument
+// (server snapshot) ensures SSR renders the same defaults the client uses on
+// first paint, so hydration matches and no setState-in-effect is needed.
+//
+// Use this from any component that needs the current unit / theme. Updates
+// are pushed automatically when saveSettings() is called from anywhere.
+export function useSettings(): UserSettings {
+  return useSyncExternalStore(subscribe, ensureSnapshot, () => DEFAULTS);
 }
 
 /**

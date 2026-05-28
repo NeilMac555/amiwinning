@@ -1,32 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { loadSettings, saveSettings, type Theme } from "@/lib/settings";
+import { useSettings, saveSettings, type Theme } from "@/lib/settings";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme | null>(null);
-
-  // Read once on mount. Avoids a hydration mismatch — the server can't know
-  // the user's saved preference.
-  useEffect(() => {
-    setTheme(loadSettings().theme);
-  }, []);
+  // useSettings subscribes to the settings store; SSR sees the defaults, the
+  // client swaps to the localStorage-backed value on first paint. No effect.
+  const settings = useSettings();
+  const theme: Theme = settings.theme;
+  const isDark = theme === "dark";
 
   const toggle = () => {
-    if (theme == null) return;
     const next: Theme = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    saveSettings({ ...loadSettings(), theme: next });
+    saveSettings({ ...settings, theme: next });
   };
-
-  // Render a placeholder of the right size on first paint to avoid layout shift.
-  const isDark = theme === "dark";
 
   return (
     <button
       type="button"
       onClick={toggle}
-      title={theme == null ? "Theme" : `Switch to ${isDark ? "light" : "dark"} mode`}
+      title={`Switch to ${isDark ? "light" : "dark"} mode`}
       aria-label="Toggle theme"
       style={{
         width: 26,
@@ -51,7 +43,7 @@ export function ThemeToggle() {
         e.currentTarget.style.borderColor = "transparent";
       }}
     >
-      {theme == null ? null : isDark ? <SunIcon /> : <MoonIcon />}
+      {isDark ? <SunIcon /> : <MoonIcon />}
     </button>
   );
 }

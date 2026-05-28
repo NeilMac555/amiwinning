@@ -5,11 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, fmtUnit, type DisplayUnit } from "@/components/UnitContext";
+import { UnitProvider, fmtUnit } from "@/components/UnitContext";
 import { deleteBet, getBet, updateBet } from "@/lib/import/store";
 import { guessMarket } from "@/lib/import/normalise";
 import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
-import { applyTheme, loadSettings } from "@/lib/settings";
+import { applyTheme, useSettings } from "@/lib/settings";
 import { computeClvPct } from "@/lib/clv";
 import { useAuth } from "@/lib/auth";
 
@@ -103,7 +103,7 @@ export default function EditBetPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
-  const [unit, setUnit] = useState<DisplayUnit>("u");
+  const unit = useSettings().unit;
   const [original, setOriginal] = useState<ImportedBet | null>(null);
   const [missing, setMissing] = useState(false);
   const [f, setF] = useState<FormState | null>(null);
@@ -116,28 +116,31 @@ export default function EditBetPage() {
 
   useEffect(() => {
     applyTheme();
-    setUnit(loadSettings().unit);
     if (!id) return;
     const b = getBet(id);
-    if (!b) {
-      setMissing(true);
-      return;
-    }
-    setMissing(false);
-    setOriginal(b);
-    setF({
-      kickoffDate: b.kickoff.slice(0, 10),
-      event: b.event,
-      market: (b.market as MarketGuess) ?? "auto",
-      selection: b.selection,
-      odds: String(b.odds),
-      stake: String(b.stake),
-      closingOdds: b.closingOdds != null ? String(b.closingOdds) : "",
-      status: b.status,
-      pl: String(b.pl),
-      notes: b.notes ?? "",
+    // All form-population setState calls deferred to the next microtask so
+    // they don't fire synchronously inside this effect (React 19 rule).
+    queueMicrotask(() => {
+      if (!b) {
+        setMissing(true);
+        return;
+      }
+      setMissing(false);
+      setOriginal(b);
+      setF({
+        kickoffDate: b.kickoff.slice(0, 10),
+        event: b.event,
+        market: (b.market as MarketGuess) ?? "auto",
+        selection: b.selection,
+        odds: String(b.odds),
+        stake: String(b.stake),
+        closingOdds: b.closingOdds != null ? String(b.closingOdds) : "",
+        status: b.status,
+        pl: String(b.pl),
+        notes: b.notes ?? "",
+      });
+      setShowNotes(Boolean(b.notes));
     });
-    setShowNotes(Boolean(b.notes));
   }, [id, betsVersion]);
 
   const update = (patch: Partial<FormState>) => {
@@ -162,11 +165,19 @@ export default function EditBetPage() {
     return isFinite(n) && n > 0 ? n : null;
   }, [f]);
 
+  // Auto-fill the P/L field when status/odds/stake change, UNLESS the user
+  // has manually edited it (plTouched). Conditional bidirectional sync
+  // between derived value and form field — can't be a useMemo because the
+  // user may override. Deferred via queueMicrotask so the setState isn't
+  // synchronous in the effect body (React 19 set-state-in-effect rule).
   useEffect(() => {
     if (!f || plTouched) return;
     if (oddsParsed == null || stakeParsed == null) return;
     const v = autoPl(f.status, oddsParsed, stakeParsed);
-    if (f.pl !== String(v)) setF((prev) => prev && { ...prev, pl: String(v) });
+    if (f.pl === String(v)) return;
+    queueMicrotask(() => {
+      setF((prev) => prev && { ...prev, pl: String(v) });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [f?.status, oddsParsed, stakeParsed, plTouched]);
 

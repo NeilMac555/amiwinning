@@ -6,10 +6,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, fmtUnit, type DisplayUnit } from "@/components/UnitContext";
+// useSettings replaces the local unit useState/useEffect pattern.
 import { appendBets } from "@/lib/import/store";
 import { guessMarket } from "@/lib/import/normalise";
 import type { ImportedBet, MarketGuess } from "@/lib/import/types";
-import { applyTheme, loadSettings } from "@/lib/settings";
+import { applyTheme, useSettings } from "@/lib/settings";
 import { computeClvPct } from "@/lib/clv";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
@@ -99,7 +100,7 @@ function uid(): string {
 export default function NewBetPage() {
   const router = useRouter();
   const { activeBook } = useAuth();
-  const [unit, setUnit] = useState<DisplayUnit>("u");
+  const unit = useSettings().unit;
   const [f, setF] = useState<FormState>({
     kickoffDate: defaultKickoffDate(),
     event: "",
@@ -201,7 +202,6 @@ export default function NewBetPage() {
 
   useEffect(() => {
     applyTheme();
-    setUnit(loadSettings().unit);
   }, []);
 
   const update = (patch: Partial<FormState>) => {

@@ -8,11 +8,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
+import { UnitProvider } from "@/components/UnitContext";
 import { useAuth } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { supabase } from "@/lib/supabase";
-import { applyTheme, loadSettings } from "@/lib/settings";
+import { applyTheme, useSettings } from "@/lib/settings";
 
 interface UserRow {
   id: string;
@@ -59,7 +59,7 @@ function fmtRelative(iso: string | null): string {
 
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
-  const [unit, setUnit] = useState<DisplayUnit>("u");
+  const unit = useSettings().unit;
   const [rows, setRows] = useState<UserRow[] | null>(null);
   const [totals, setTotals] = useState<Totals | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +69,6 @@ export default function AdminPage() {
 
   useEffect(() => {
     applyTheme();
-    setUnit(loadSettings().unit);
   }, []);
 
   const canSeeAdmin =
@@ -103,8 +102,14 @@ export default function AdminPage() {
     }
   }, [user]);
 
+  // Kick off the user fetch once admin access is confirmed. fetchUsers
+  // itself calls setLoading/setRows; we defer the call so those don't fire
+  // synchronously inside this effect's body (React 19 rule).
   useEffect(() => {
-    if (canSeeAdmin) void fetchUsers();
+    if (!canSeeAdmin) return;
+    queueMicrotask(() => {
+      void fetchUsers();
+    });
   }, [canSeeAdmin, fetchUsers]);
 
   const sorted = useMemo(() => {
