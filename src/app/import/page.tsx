@@ -8,6 +8,7 @@ import { detectPreset, ALL_PRESETS } from "@/lib/import/presets/bettings";
 import { normalise } from "@/lib/import/normalise";
 import { appendBets, summarise } from "@/lib/import/store";
 import { useAuth } from "@/lib/auth";
+import { authedFetch } from "@/lib/authed-fetch";
 import { Sidebar } from "@/components/Sidebar";
 import {
   FIELD_LABELS,
@@ -396,7 +397,7 @@ function ReadyView({
     setAiError(null);
     setAiReasons(null);
     try {
-      const res = await fetch("/api/import/auto-map", {
+      const res = await authedFetch("/api/import/auto-map", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

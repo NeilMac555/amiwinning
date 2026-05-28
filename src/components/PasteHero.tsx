@@ -11,6 +11,7 @@ import Link from "next/link";
 import { appendBets } from "@/lib/import/store";
 import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
 import { useAuth } from "@/lib/auth";
+import { authedFetch } from "@/lib/authed-fetch";
 import { classifySport } from "@/lib/sport-classify";
 import { fmtUnit, useUnit } from "./UnitContext";
 
@@ -69,7 +70,7 @@ export function PasteHero({ onCommitted }: Props) {
     setIssues([]);
     setJustAdded(null);
     try {
-      const res = await fetch("/api/bets/parse", {
+      const res = await authedFetch("/api/bets/parse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

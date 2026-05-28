@@ -9,6 +9,13 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ColumnMap, FieldKey } from "@/lib/import/types";
+import { requireUser } from "@/lib/api-auth";
+import { claimAiQuota } from "@/lib/ai-quota";
+
+// Caps on input shape. Bounded above what real spreadsheets ever need.
+const MAX_HEADERS = 60;
+const MAX_SAMPLE_ROWS = 20;
+const MAX_CELL_BYTES = 1000; // truncate any monster cell before sending
 
 const VALID_FIELDS: FieldKey[] = [
   "skip",
@@ -84,6 +91,10 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
+  // 1. Auth gate.
+  const auth = await requireUser(req);
+  if ("error" in auth) return auth.error;
+
   let payload: { headers?: string[]; rows?: string[][] };
   try {
     payload = await req.json();
@@ -99,12 +110,43 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
+  // 2. Shape caps. Real spreadsheets have under 30 columns and we only need
+  //    a handful of sample rows to map them.
+  if (headers.length > MAX_HEADERS) {
+    return NextResponse.json(
+      {
+        error: `Spreadsheet has too many columns (${headers.length}). Maximum is ${MAX_HEADERS}.`,
+      },
+      { status: 413 },
+    );
+  }
+
+  // 3. Per-user daily quota.
+  const quota = await claimAiQuota(auth.user.id, "auto_map");
+  if (!quota.allowed) {
+    return NextResponse.json(
+      {
+        error: `Daily AI mapping limit reached (${quota.max}/${quota.max}). Resets at midnight UTC. You can still map columns manually.`,
+      },
+      { status: 429 },
+    );
+  }
+
+  // Truncate individual cells so a sheet with one giant note column can't
+  // balloon the prompt size.
+  const truncate = (s: unknown): string => {
+    const str = String(s ?? "");
+    return str.length > MAX_CELL_BYTES
+      ? str.slice(0, MAX_CELL_BYTES) + "…"
+      : str;
+  };
+
   const samples = rows
-    .slice(0, 10)
+    .slice(0, MAX_SAMPLE_ROWS)
     .map((row, i) =>
       `Row ${i + 1}: ` +
       headers
-        .map((h, ci) => `${h}=${JSON.stringify(row[ci] ?? "")}`)
+        .map((h, ci) => `${truncate(h)}=${JSON.stringify(truncate(row[ci]))}`)
         .join(" · "),
     )
     .join("\n");

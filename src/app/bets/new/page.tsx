@@ -12,6 +12,7 @@ import type { ImportedBet, MarketGuess } from "@/lib/import/types";
 import { applyTheme, loadSettings } from "@/lib/settings";
 import { computeClvPct } from "@/lib/clv";
 import { useAuth } from "@/lib/auth";
+import { authedFetch } from "@/lib/authed-fetch";
 import { classifySport } from "@/lib/sport-classify";
 
 interface FormState {
@@ -127,7 +128,7 @@ export default function NewBetPage() {
     setParsedBets(null);
     setParsedIssues([]);
     try {
-      const res = await fetch("/api/bets/parse", {
+      const res = await authedFetch("/api/bets/parse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

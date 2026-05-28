@@ -7,6 +7,13 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { MarketGuess, Status } from "@/lib/import/types";
+import { requireUser } from "@/lib/api-auth";
+import { claimAiQuota } from "@/lib/ai-quota";
+
+// Hard caps on input size. The model is the expensive part of this route,
+// so we bound it before we ever call Anthropic.
+const MAX_TEXT_BYTES = 50_000; // ~50KB of paste — generous for normal use.
+const MAX_CHUNKS = 20; // ≈300 lines at 15 lines per chunk. More than enough.
 
 const VALID_MARKETS: MarketGuess[] = [
   "1X2",
@@ -79,6 +86,10 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
+  // 1. Auth gate. Anonymous callers can't burn budget.
+  const auth = await requireUser(req);
+  if ("error" in auth) return auth.error;
+
   let payload: { text?: string; today?: string };
   try {
     payload = await req.json();
@@ -90,8 +101,33 @@ export async function POST(req: Request): Promise<Response> {
   if (!text) {
     return NextResponse.json({ error: "text is required" }, { status: 400 });
   }
+
+  // 2. Size cap — reject huge pastes outright instead of paying Anthropic
+  //    to chunk them. Byte length, not char count, to handle multibyte.
+  const bytes = new TextEncoder().encode(text).byteLength;
+  if (bytes > MAX_TEXT_BYTES) {
+    return NextResponse.json(
+      {
+        error: `Paste too large (${(bytes / 1024).toFixed(0)}KB). Maximum is ${MAX_TEXT_BYTES / 1024}KB. Split it into smaller batches or use the spreadsheet importer.`,
+      },
+      { status: 413 },
+    );
+  }
+
   const today =
     payload.today ?? new Date().toISOString().slice(0, 10);
+
+  // 3. Per-user daily quota. Skipped silently when service key isn't set
+  //    (dev). In prod this should always run.
+  const quota = await claimAiQuota(auth.user.id, "parse");
+  if (!quota.allowed) {
+    return NextResponse.json(
+      {
+        error: `Daily AI parse limit reached (${quota.max}/${quota.max}). Resets at midnight UTC. Tap the "Add bet" button to log manually in the meantime.`,
+      },
+      { status: 429 },
+    );
+  }
 
   // Chunk the input by lines so each LLM call has a small, bounded payload.
   // Large pastes were truncating Claude's tool_use response and returning
@@ -103,6 +139,17 @@ export async function POST(req: Request): Promise<Response> {
     chunks.push(allLines.slice(i, i + CHUNK_LINES).join("\n"));
   }
   if (chunks.length === 0) chunks.push(text);
+
+  // Hard ceiling on chunks even if MAX_TEXT_BYTES would allow more — belt
+  // and braces against pathological inputs (e.g. one character per line).
+  if (chunks.length > MAX_CHUNKS) {
+    return NextResponse.json(
+      {
+        error: `Too many lines (${allLines.length}). Maximum is ~${MAX_CHUNKS * CHUNK_LINES} per parse — split into smaller batches.`,
+      },
+      { status: 413 },
+    );
+  }
 
   const client = new Anthropic({ apiKey });
   const TOOL_DEF = {
