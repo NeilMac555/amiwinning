@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, JetBrains_Mono, Fraunces } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import { MobileNavProvider } from "@/lib/mobile-nav";
 import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
@@ -49,7 +50,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: 1480,
+  // device-width lets phones render at native scale instead of force-zooming
+  // a 1480px desktop layout. Mobile-specific CSS in globals.css picks up at
+  // 900px and again at 500px to reflow the layout for small viewports.
+  width: "device-width",
   initialScale: 1,
 };
 
@@ -65,7 +69,9 @@ export default function RootLayout({
       className={`${sans.variable} ${jetbrainsMono.variable} ${fraunces.variable}`}
     >
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <MobileNavProvider>{children}</MobileNavProvider>
+        </AuthProvider>
       </body>
     </html>
   );

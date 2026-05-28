@@ -2025,3 +2025,214 @@ a.sb-item { cursor: pointer; }
 [data-theme="dark"] .paste-hero-success-check { color: #0A0A09; }
 .paste-hero-success-text strong { color: var(--green); font-weight: 600; }
 .paste-hero-success-actions { display: inline-flex; gap: 8px; }
+
+/* === Mobile breakpoints ===========================================
+   Two tiers:
+     - <900px: sidebar drawer, single-column app, KPI strips 2-col,
+       tables horizontally scrollable, tighter chrome.
+     - <500px: KPIs and most grids collapse to 1-col; nav action
+       labels hide leaving icons only.
+   `!important` is used in a few places to override inline styles
+   that hardcode `gridTemplateColumns` for desktop layouts (admin and
+   analytics KPI strips, side-by-side form grids).
+================================================================== */
+
+/* Hamburger button — display managed by mobile @media. */
+.tb-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: -8px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.tb-hamburger:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Sidebar backdrop — hidden by default, shown only on mobile when
+   the drawer is open. Tap closes the drawer (handler on the element). */
+.sb-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  /* App shell: drop the desktop min-width and the 2-col grid. */
+  .app {
+    min-width: 0;
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide the off-canvas sidebar by default. The data-mobile-open
+     attribute on .sidebar (set from React) slides it back in. */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    width: 264px;
+    max-width: 80vw;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease-out;
+  }
+  .sidebar[data-mobile-open="true"] {
+    transform: translateX(0);
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Backdrop: fades in to dim the page behind the open drawer. */
+  .sb-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    transition: background 0.22s ease-out;
+  }
+  .sb-backdrop[data-open="true"] {
+    background: rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+  }
+
+  /* Surface the hamburger. */
+  .tb-hamburger {
+    display: inline-flex;
+  }
+
+  /* TopBar: tighter padding, hide the desktop-only widgets. */
+  .topbar-inner {
+    padding: 0 12px;
+    gap: 10px;
+  }
+  .search-trigger {
+    display: none;
+  }
+  .topbar-actions {
+    gap: 12px;
+  }
+  .topbar-actions .kbd {
+    display: none;
+  }
+
+  /* Page chrome: reduce padding, stack the header. */
+  .page {
+    padding: 0 14px 48px;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0 14px;
+  }
+  .page-title {
+    font-size: 22px;
+  }
+
+  /* KPI strips: 2 columns. Borders rearrange to a checkerboard so
+     each cell still gets a visible separator. `!important` overrides
+     inline grid-template-columns set in admin/page and analytics/page. */
+  .kpi-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .kpi-strip .kpi {
+    padding: 14px 14px 12px;
+    border-right: 0;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .kpi-strip .kpi:nth-child(odd) {
+    border-right: var(--border-w) solid var(--border);
+  }
+  /* No bottom border on the last row. */
+  .kpi-strip .kpi:nth-last-child(-n+2):nth-child(odd) {
+    border-bottom: 0;
+  }
+  .kpi-strip .kpi:last-child {
+    border-bottom: 0;
+  }
+
+  /* Featured (hero) KPIs: stack vertically, shrink hero number. */
+  .kpi-featured {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .kpi-featured .kpi {
+    min-height: 0;
+    padding: 18px 18px 16px;
+  }
+  .kpi-featured .kpi.hero .kpi-value {
+    font-size: 42px;
+  }
+  .kpi-featured .kpi .kpi-value {
+    font-size: 28px;
+  }
+  /* Sparklines look noisy at this width — hide them. */
+  .kpi-featured .kpi-spark {
+    display: none;
+  }
+
+  /* Tables overflow their cards horizontally rather than reflowing —
+     a bet log row has 8+ columns and any squeeze ruins readability. */
+  .card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tbl {
+    min-width: 600px;
+  }
+
+  /* Two-column form rows (and `1fr 1fr 240px` mapping rows on /import)
+     hardcode their grid via inline styles. Stack them on mobile. */
+  .page [style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Dashboard's dense secondary widget rows: stack vertically. */
+  .dense-grid.row-2,
+  .dense-grid.row-3,
+  .grid.cols-2,
+  .grid.curve-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Secondary stats row (6 narrow columns on desktop): wrap to 3-col. */
+  .stat-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  /* Tighter still — single column for KPI strips. */
+  .kpi-strip {
+    grid-template-columns: 1fr !important;
+  }
+  .kpi-strip .kpi {
+    border-right: 0 !important;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .kpi-strip .kpi:last-child {
+    border-bottom: 0;
+  }
+
+  /* Topbar actions: keep just the icons. Hide the "New bet" label. */
+  .topbar-actions a span:not(.kbd) {
+    display: none;
+  }
+
+  /* Page header even tighter. */
+  .page-title {
+    font-size: 20px;
+  }
+
+  /* Secondary stats row → 2 columns at narrow widths. */
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

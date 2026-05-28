@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { BRAND } from "@/lib/brand";
 import { isAdminEmail } from "@/lib/admin";
+import { useMobileNav } from "@/lib/mobile-nav";
 import { BookSwitcher } from "./BookSwitcher";
 
 interface ItemProps {
@@ -62,6 +63,7 @@ export function Sidebar() {
   const path = usePathname();
   const is = (p: string) => path === p;
   const { user, configured, signOut } = useAuth();
+  const { isOpen, close } = useMobileNav();
 
   // Derive initials + display label from the signed-in email.
   let avatar = "—";
@@ -75,7 +77,16 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="sidebar">
+    <>
+      {/* Backdrop — invisible on desktop, dims the page on mobile when the
+          drawer is open. Tapping it closes the drawer. */}
+      <div
+        className="sb-backdrop"
+        data-open={isOpen ? "true" : undefined}
+        onClick={close}
+        aria-hidden="true"
+      />
+      <aside className="sidebar" data-mobile-open={isOpen ? "true" : undefined}>
       <div className="sb-brand">
         <div className="brand-mark" aria-hidden="true"></div>
         {BRAND.name}
@@ -234,6 +245,7 @@ export function Sidebar() {
         <span>v0.4.2</span>
         <span>UTC+01</span>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

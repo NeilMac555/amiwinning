@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { useMobileNav } from "@/lib/mobile-nav";
 
 export function TopBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { isOpen, toggle } = useMobileNav();
 
   // Global "n" shortcut → /bets/new. Plain key (no modifier) avoids
   // hijacking ⌘N which the browser uses for new windows. Ignore the key when
@@ -34,6 +36,41 @@ export function TopBar() {
   return (
     <div className="topbar">
       <div className="topbar-inner">
+        {/* Hamburger — visible only below the mobile breakpoint via CSS. */}
+        <button
+          type="button"
+          className="tb-hamburger"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
+          onClick={toggle}
+        >
+          {isOpen ? (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            >
+              <path d="M4 4l10 10M14 4L4 14" />
+            </svg>
+          ) : (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            >
+              <path d="M3 5h12M3 9h12M3 13h12" />
+            </svg>
+          )}
+        </button>
+
         <div
           className="search-trigger"
           role="button"
