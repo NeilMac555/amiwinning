@@ -269,15 +269,30 @@ export async function getPublicProfileServer(
 
   const profile = rowToProfile(profileRow as ProfileRow);
 
-  const { data: betRows } = await client
-    .from("bets")
-    .select("*")
-    .eq("user_id", profile.userId)
-    .order("kickoff", { ascending: true });
+  // Supabase REST caps queries at 1000 rows by default. We need every bet
+  // the user has ever logged — paginate with .range() until we've drained
+  // the table. Hard ceiling at 100k rows just in case.
+  const PAGE_SIZE = 1000;
+  const MAX_PAGES = 100;
+  const allRows: RawBetRow[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data: pageRows, error } = await client
+      .from("bets")
+      .select("*")
+      .eq("user_id", profile.userId)
+      .order("kickoff", { ascending: true })
+      .range(from, to);
+    if (error) break;
+    const rows = (pageRows ?? []) as RawBetRow[];
+    allRows.push(...rows);
+    if (rows.length < PAGE_SIZE) break; // last page
+  }
 
   // Map snake_case rows to the ImportedBet shape used by the analytics
   // helpers. Mirrors the mapper in bet-sync.ts.
-  const bets = (betRows ?? []).map(supabaseRowToImportedBet);
+  const bets = allRows.map(supabaseRowToImportedBet);
 
   return { profile, bets };
 }
