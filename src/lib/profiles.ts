@@ -252,13 +252,18 @@ export async function getPublicProfileServer(
 ): Promise<PublicProfileFetchResult> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !anonKey) return { profile: null, bets: [] };
 
-  // Anon-only client. RLS will reject anything we shouldn't see.
-  const client = createClient(url, anonKey, {
+  // Service-role key when available so we can read the user's books table
+  // (which has owner-only RLS) and filter bets to the chosen public book.
+  // The profile.is_public check below is the privacy gate — if a profile
+  // isn't public we never return rows. Falls back to anon when not set.
+  const client = createClient(url, serviceKey ?? anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  // 1. Profile — gated on is_public = true. Critical privacy check.
   const { data: profileRow } = await client
     .from("profiles")
     .select("*")
@@ -269,29 +274,58 @@ export async function getPublicProfileServer(
 
   const profile = rowToProfile(profileRow as ProfileRow);
 
-  // Supabase REST caps queries at 1000 rows by default. We need every bet
-  // the user has ever logged — paginate with .range() until we've drained
-  // the table. Hard ceiling at 100k rows just in case.
+  // 2. Pick which book to share publicly. Order of preference:
+  //    a. Any book the user has explicitly marked is_public = true
+  //    b. The oldest book — auto-created "Personal" on first sign-in
+  // The user's other books (e.g. "Ylose Tennis") stay private unless they
+  // flip is_public on them. This stops the profile from accidentally
+  // mixing strategies together.
+  interface BookRow {
+    id: string;
+    name: string;
+    is_public: boolean;
+    created_at: string;
+  }
+  const { data: bookRows } = await client
+    .from("books")
+    .select("id, name, is_public, created_at")
+    .eq("user_id", profile.userId)
+    .order("created_at", { ascending: true });
+  const books = (bookRows ?? []) as BookRow[];
+  if (books.length === 0) {
+    // User has no books — return empty bets but still show the profile.
+    return { profile, bets: [] };
+  }
+  const publicBooks = books.filter((b) => b.is_public);
+  const selectedBook = (publicBooks[0] ?? books[0]) as BookRow;
+
+  // 3. Fetch every bet in that book. Paginate to dodge Supabase's
+  //    default 1000-row cap. Also include legacy bets without a book_id
+  //    (created before the books system existed) — those belong with
+  //    the user's oldest book by convention.
   const PAGE_SIZE = 1000;
   const MAX_PAGES = 100;
+  const isOldestBook = selectedBook.id === books[0].id;
   const allRows: RawBetRow[] = [];
   for (let page = 0; page < MAX_PAGES; page++) {
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    const { data: pageRows, error } = await client
+    let q = client
       .from("bets")
       .select("*")
       .eq("user_id", profile.userId)
       .order("kickoff", { ascending: true })
       .range(from, to);
+    q = isOldestBook
+      ? q.or(`book_id.eq.${selectedBook.id},book_id.is.null`)
+      : q.eq("book_id", selectedBook.id);
+    const { data: pageRows, error } = await q;
     if (error) break;
     const rows = (pageRows ?? []) as RawBetRow[];
     allRows.push(...rows);
-    if (rows.length < PAGE_SIZE) break; // last page
+    if (rows.length < PAGE_SIZE) break;
   }
 
-  // Map snake_case rows to the ImportedBet shape used by the analytics
-  // helpers. Mirrors the mapper in bet-sync.ts.
   const bets = allRows.map(supabaseRowToImportedBet);
 
   return { profile, bets };
