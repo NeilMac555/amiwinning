@@ -178,7 +178,9 @@ export default async function ProfilePage({ params }: PageProps) {
             />
             <Kpi
               label="Win rate"
-              value={`${(data.secondary.winRate * 100).toFixed(1)}%`}
+              // secondary.winRate is already a percentage (e.g. 55.5), not a
+              // decimal — don't multiply by 100 again.
+              value={`${data.secondary.winRate.toFixed(1)}%`}
               tone="flat"
               sub={`break-even ${((1 / data.secondary.avgOdds) * 100).toFixed(1)}%`}
             />
