@@ -91,6 +91,29 @@ export default async function Image({ params }: OgProps) {
         : C.textMuted;
   const name = profile.displayName ?? profile.handle;
 
+  // Pick a palette for the avatar fallback — same hash → same gradient as
+  // the live page's GeneratedAvatar. Kept in sync manually with the
+  // component's PALETTES array.
+  const avatarPalettes: Array<[string, string]> = [
+    ["#2D4A3E", "#5A7B6B"],
+    ["#7A3F2B", "#B5402E"],
+    ["#3E4A6E", "#6B7BA5"],
+    ["#5F3D6B", "#8B6BA0"],
+    ["#1E5F4F", "#3FA083"],
+    ["#6B5230", "#A88A4F"],
+    ["#2D3D4F", "#5F7589"],
+    ["#5A3030", "#8B5252"],
+  ];
+  let h = 0;
+  for (let i = 0; i < profile.handle.length; i++) {
+    h = (h * 31 + profile.handle.charCodeAt(i)) >>> 0;
+  }
+  const [avA, avB] = avatarPalettes[h % avatarPalettes.length];
+  const avatarInitials = (profile.displayName ?? profile.handle)
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0, 2)
+    .toUpperCase() || "·";
+
   // Pre-compute the equity sparkline. computeEquity already gives us the
   // cumulative series — pluck the equity value off each point.
   const equity =
@@ -150,18 +173,55 @@ export default async function Image({ params }: OgProps) {
           </div>
         </div>
 
-        {/* Middle — name + lifetime P/L */}
+        {/* Middle — avatar + name + lifetime P/L */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div
-            style={{
-              fontSize: 38,
-              fontWeight: 500,
-              fontFamily: "serif",
-              letterSpacing: "-0.02em",
-              color: C.text,
-            }}
-          >
-            {name}
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            {profile.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatarUrl}
+                alt=""
+                width="96"
+                height="96"
+                style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: 12,
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: 12,
+                  background: `linear-gradient(135deg, ${avA} 0%, ${avB} 100%)`,
+                  color: C.surface,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "monospace",
+                  fontSize: 36,
+                  fontWeight: 600,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {avatarInitials}
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: 38,
+                fontWeight: 500,
+                fontFamily: "serif",
+                letterSpacing: "-0.02em",
+                color: C.text,
+              }}
+            >
+              {name}
+            </div>
           </div>
           <div
             style={{

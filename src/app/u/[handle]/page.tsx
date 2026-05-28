@@ -11,6 +11,7 @@ import Link from "next/link";
 import { getPublicProfileServer } from "@/lib/profiles";
 import { aggregateFromBets } from "@/lib/aggregate";
 import { BRAND } from "@/lib/brand";
+import { GeneratedAvatar } from "@/components/GeneratedAvatar";
 import { ProfileEquity } from "./ProfileEquity";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
@@ -122,8 +123,26 @@ export default async function ProfilePage({ params }: PageProps) {
         {/* Identity block */}
         <section className="profile-hero">
           <div className="profile-identity">
-            <div className="profile-avatar" aria-hidden="true">
-              {profile.handle.slice(0, 2).toUpperCase()}
+            <div
+              className="profile-avatar"
+              style={{ padding: 0, overflow: "hidden" }}
+              aria-hidden="true"
+            >
+              {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatarUrl}
+                  alt=""
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <GeneratedAvatar
+                  handle={profile.handle}
+                  displayName={profile.displayName}
+                  size={56}
+                  style={{ borderRadius: 0 }}
+                />
+              )}
             </div>
             <div>
               <h1 className="profile-name">{name}</h1>

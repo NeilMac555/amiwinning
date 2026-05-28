@@ -14,6 +14,7 @@ export interface Profile {
   isPublic: boolean;
   displayName: string | null;
   bio: string | null;
+  avatarUrl: string | null;
   createdAt: string;
 }
 
@@ -23,6 +24,7 @@ interface ProfileRow {
   is_public: boolean;
   display_name: string | null;
   bio: string | null;
+  avatar_url: string | null;
   created_at: string;
 }
 
@@ -33,6 +35,7 @@ function rowToProfile(r: ProfileRow): Profile {
     isPublic: r.is_public,
     displayName: r.display_name,
     bio: r.bio,
+    avatarUrl: r.avatar_url,
     createdAt: r.created_at,
   };
 }
@@ -96,6 +99,7 @@ interface ProfileUpdate {
   isPublic?: boolean;
   displayName?: string | null;
   bio?: string | null;
+  avatarUrl?: string | null;
 }
 
 /**
@@ -115,6 +119,7 @@ export async function updateMyProfile(
   if (patch.isPublic !== undefined) row.is_public = patch.isPublic;
   if (patch.displayName !== undefined) row.display_name = patch.displayName;
   if (patch.bio !== undefined) row.bio = patch.bio;
+  if (patch.avatarUrl !== undefined) row.avatar_url = patch.avatarUrl;
 
   const { data, error } = await supabase
     .from("profiles")
@@ -129,6 +134,104 @@ export async function updateMyProfile(
   }
   if (!data) return { error: "Profile not found." };
   return { profile: rowToProfile(data as ProfileRow) };
+}
+
+// ─ Avatar upload / delete ─────────────────────────────────────────────────
+
+const AVATAR_BUCKET = "avatars";
+
+/**
+ * Client-side resize before upload. Big-camera-JPEGs are easily 5MB+; we
+ * never need higher than 512x512 for a profile pic. Returns a JPEG blob
+ * at quality 0.9 — small enough to upload over a phone connection.
+ */
+async function resizeImage(file: File, maxSize = 512): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  const ratio = Math.min(maxSize / bitmap.width, maxSize / bitmap.height, 1);
+  const w = Math.round(bitmap.width * ratio);
+  const h = Math.round(bitmap.height * ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context not available");
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Encode failed"))),
+      "image/jpeg",
+      0.9,
+    );
+  });
+}
+
+/**
+ * Upload a new avatar for the signed-in user. Resizes client-side,
+ * overwrites any existing avatar (single canonical path per user), and
+ * updates profiles.avatar_url with the public URL.
+ *
+ * Returns the new public URL on success, or an error string.
+ */
+export async function uploadMyAvatar(
+  file: File,
+): Promise<{ url?: string; error?: string }> {
+  if (!supabase) return { error: "Supabase not configured" };
+  const { data: session } = await supabase.auth.getSession();
+  const userId = session.session?.user.id;
+  if (!userId) return { error: "Sign in required" };
+
+  if (!file.type.startsWith("image/")) {
+    return { error: "That doesn't look like an image." };
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return { error: "Image is too large (max 10MB)." };
+  }
+
+  let blob: Blob;
+  try {
+    blob = await resizeImage(file);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Resize failed." };
+  }
+
+  // Canonical path: <user_id>/avatar.jpg. Reusing the same name lets us
+  // upsert without leaving orphaned files behind.
+  const path = `${userId}/avatar.jpg`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(path, blob, {
+      contentType: "image/jpeg",
+      cacheControl: "300", // 5min — short enough that updates show fast.
+      upsert: true,
+    });
+  if (uploadError) return { error: uploadError.message };
+
+  const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+  // Append a cache-buster so the new image shows immediately even if a
+  // cached version is in the browser/CDN.
+  const url = `${data.publicUrl}?v=${Date.now()}`;
+
+  const upd = await updateMyProfile({ avatarUrl: url });
+  if (upd.error) return { error: upd.error };
+  return { url };
+}
+
+/** Remove the avatar — deletes the file and clears profiles.avatar_url. */
+export async function removeMyAvatar(): Promise<{ error?: string }> {
+  if (!supabase) return { error: "Supabase not configured" };
+  const { data: session } = await supabase.auth.getSession();
+  const userId = session.session?.user.id;
+  if (!userId) return { error: "Sign in required" };
+
+  // Best-effort delete; even if the file is already gone, we still want to
+  // clear the column. Ignore the storage error.
+  await supabase.storage
+    .from(AVATAR_BUCKET)
+    .remove([`${userId}/avatar.jpg`]);
+
+  const upd = await updateMyProfile({ avatarUrl: null });
+  return { error: upd.error };
 }
 
 // ─ Server-side fetchers ────────────────────────────────────────────────────

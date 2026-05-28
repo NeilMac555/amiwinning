@@ -14,10 +14,13 @@ import {
   loadMyProfile,
   isHandleAvailable,
   updateMyProfile,
+  uploadMyAvatar,
+  removeMyAvatar,
   validateHandle,
   type Profile,
 } from "@/lib/profiles";
 import { useAuth } from "@/lib/auth";
+import { GeneratedAvatar } from "./GeneratedAvatar";
 
 const SITE = "amiup.io";
 const MAX_BIO = 200;
@@ -48,6 +51,9 @@ export function ProfilePanel() {
     null,
   );
   const [copied, setCopied] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initial load.
   useEffect(() => {
@@ -149,6 +155,36 @@ export function ProfilePanel() {
     setSaving(false);
   };
 
+  const onPickAvatar = () => fileInputRef.current?.click();
+
+  const onAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // reset so picking the same file again still fires
+    if (!file || !profile) return;
+    setAvatarBusy(true);
+    setAvatarError(null);
+    const result = await uploadMyAvatar(file);
+    if (result.error) {
+      setAvatarError(result.error);
+    } else if (result.url) {
+      setProfile({ ...profile, avatarUrl: result.url });
+    }
+    setAvatarBusy(false);
+  };
+
+  const onRemoveAvatar = async () => {
+    if (!profile) return;
+    setAvatarBusy(true);
+    setAvatarError(null);
+    const result = await removeMyAvatar();
+    if (result.error) {
+      setAvatarError(result.error);
+    } else {
+      setProfile({ ...profile, avatarUrl: null });
+    }
+    setAvatarBusy(false);
+  };
+
   const shareUrl =
     profile && profile.isPublic ? `https://${SITE}/u/${profile.handle}` : null;
 
@@ -189,6 +225,104 @@ export function ProfilePanel() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {/* Avatar */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          padding: "8px 0",
+        }}
+      >
+        <div
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: 10,
+            overflow: "hidden",
+            position: "relative",
+            border: "var(--border-w) solid var(--border)",
+            background: "var(--surface)",
+            flexShrink: 0,
+          }}
+        >
+          {profile.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatarUrl}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <GeneratedAvatar
+              handle={profile.handle}
+              displayName={profile.displayName}
+              size={72}
+              style={{ borderRadius: 0 }}
+            />
+          )}
+          {avatarBusy && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0,0,0,0.5)",
+                color: "white",
+                fontSize: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              …
+            </div>
+          )}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={onPickAvatar}
+              disabled={avatarBusy}
+              className="btn-ghost"
+              style={{ padding: "6px 12px", fontSize: 12 }}
+            >
+              {profile.avatarUrl ? "Change photo" : "Upload photo"}
+            </button>
+            {profile.avatarUrl && (
+              <button
+                type="button"
+                onClick={onRemoveAvatar}
+                disabled={avatarBusy}
+                className="btn-ghost"
+                style={{
+                  padding: "6px 12px",
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          <div style={{ fontSize: 11.5, color: "var(--text-faint)" }}>
+            JPG, PNG, or WebP. Resized to 512×512 on upload.
+          </div>
+          {avatarError && (
+            <div style={{ fontSize: 11.5, color: "var(--red)" }}>
+              {avatarError}
+            </div>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={onAvatarFile}
+          style={{ display: "none" }}
+        />
+      </div>
+
       {/* Public toggle */}
       <div
         style={{
