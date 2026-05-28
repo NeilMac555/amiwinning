@@ -101,6 +101,10 @@ export interface TickerItem {
 export interface SecondaryStats {
   winRate: number;
   avgOdds: number;
+  /** Median odds — robust to longshot outliers. Used as the headline
+   *  number on the public /u/<handle> profile. Optional for back-compat
+   *  with the mock data path. */
+  medianOdds?: number;
   avgStake: number;
   turnover: number;
   stakeRoll: number;

@@ -339,6 +339,18 @@ function computeSecondary(bets: ImportedBet[]): SecondaryStats {
     settled.length > 0
       ? settled.reduce((s, b) => s + b.odds, 0) / settled.length
       : 0;
+  // Median odds — robust to longshot outliers. A single bet at 11.00 can
+  // pull the mean above 2.5 even when 95% of the user's bets are 1.80-2.10.
+  // The public profile uses median as the headline; the dashboard still
+  // shows mean (more familiar to power users looking at their own data).
+  const medianOdds = (() => {
+    if (settled.length === 0) return 0;
+    const sorted = settled.map((b) => b.odds).sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0
+      ? (sorted[mid - 1] + sorted[mid]) / 2
+      : sorted[mid];
+  })();
   const avgStake =
     settled.length > 0
       ? settled.reduce((s, b) => s + b.stake, 0) / settled.length
@@ -352,6 +364,7 @@ function computeSecondary(bets: ImportedBet[]): SecondaryStats {
   return {
     winRate: round(winRate, 1),
     avgOdds: round(avgOdds, 2),
+    medianOdds: round(medianOdds, 2),
     avgStake: Math.round(avgStake),
     turnover: Math.round(turnover),
     stakeRoll: avgStake > 0 ? round((avgStake / Math.max(turnover, 1)) * 100, 2) : 0,

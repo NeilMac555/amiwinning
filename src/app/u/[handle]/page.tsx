@@ -198,10 +198,15 @@ export default async function ProfilePage({ params }: PageProps) {
             <Kpi
               label="Win rate"
               // secondary.winRate is already a percentage (e.g. 55.5), not a
-              // decimal — don't multiply by 100 again.
+              // decimal — don't multiply by 100 again. Break-even is
+              // computed off MEDIAN odds because that's the headline below.
               value={`${data.secondary.winRate.toFixed(1)}%`}
               tone="flat"
-              sub={`break-even ${((1 / data.secondary.avgOdds) * 100).toFixed(1)}%`}
+              sub={`break-even ${(
+                (1 /
+                  (data.secondary.medianOdds ?? data.secondary.avgOdds)) *
+                100
+              ).toFixed(1)}%`}
             />
             <Kpi
               label="Max DD"
@@ -210,9 +215,15 @@ export default async function ProfilePage({ params }: PageProps) {
               sub="peak-to-trough"
             />
             <Kpi
-              label="Avg odds"
-              value={data.secondary.avgOdds.toFixed(2)}
+              label="Median odds"
+              // Median is robust to longshot skew. Mean shown as fineprint
+              // for transparency — a sceptical viewer can verify we're
+              // not gaming the headline number.
+              value={(
+                data.secondary.medianOdds ?? data.secondary.avgOdds
+              ).toFixed(2)}
               tone="flat"
+              sub={`${data.secondary.avgOdds.toFixed(2)} mean`}
             />
           </section>
         )}
