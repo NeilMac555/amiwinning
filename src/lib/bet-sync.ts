@@ -97,6 +97,17 @@ function betToRow(b: ImportedBet, userId: string) {
  */
 export async function pullFromSupabase(): Promise<number> {
   if (!supabase) return 0;
+  // RLS gates rows, but the bets_select_public_profile policy (migration
+  // 0003) intentionally grants every signed-in user SELECT access to
+  // every public-profile user's bets — that's what powers the /u/<handle>
+  // page from anon clients. The client must therefore pin every pull to
+  // its own user_id, or else it ingests other users' bets into the
+  // localStorage cache. Get the current session's user once up front;
+  // bail out if not signed in.
+  const { data: sess } = await supabase.auth.getSession();
+  const userId = sess.session?.user.id;
+  if (!userId) return 0;
+
   // Pull in pages to avoid huge response bodies and Supabase's 1k default cap.
   const PAGE = 1000;
   let from = 0;
@@ -107,10 +118,11 @@ export async function pullFromSupabase(): Promise<number> {
     const { data, error } = await supabase
       .from("bets")
       .select("*")
+      .eq("user_id", userId)
       .order("kickoff", { ascending: false })
       .range(from, from + PAGE - 1);
     if (error) {
-       
+
       console.error("[aiw] pullFromSupabase failed:", error.message);
       return -1;
     }

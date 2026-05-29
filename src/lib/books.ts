@@ -55,15 +55,28 @@ function slugify(name: string): string {
 // Supabase calls
 // ─────────────────────────────────────────────────────────────────────────
 
-/** Fetch all books for the current user (RLS handles the user filter). */
+/** Fetch all books for the current user.
+ *
+ *  Important: explicitly filters by user_id even though RLS exists. The
+ *  books_select_public_profile policy (migration 0005) grants every
+ *  signed-in user SELECT on every public-profile user's books — that's
+ *  what powers the /u/<handle> server route. Without an explicit filter,
+ *  a signed-in user would see other users' "Personal" books in their
+ *  switcher dropdown. The check pins the result set to the current
+ *  session's user.
+ */
 export async function listBooks(): Promise<Book[]> {
   if (!supabase) return [];
+  const { data: sess } = await supabase.auth.getSession();
+  const userId = sess.session?.user.id;
+  if (!userId) return [];
   const { data, error } = await supabase
     .from("books")
     .select("*")
+    .eq("user_id", userId)
     .order("created_at", { ascending: true });
   if (error) {
-     
+
     console.error("[aiw] listBooks failed:", error.message);
     return [];
   }
