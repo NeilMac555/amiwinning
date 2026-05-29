@@ -10,9 +10,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPublicProfileServer } from "@/lib/profiles";
 import { aggregateFromBets } from "@/lib/aggregate";
+import { monthlyPL } from "@/lib/analytics";
+import { classifySport } from "@/lib/sport-classify";
 import { BRAND } from "@/lib/brand";
 import { GeneratedAvatar } from "@/components/GeneratedAvatar";
+import { Breakdown } from "@/components/Breakdown";
+import { ClvDistribution } from "@/components/ClvDistribution";
 import { ProfileEquity } from "./ProfileEquity";
+import type { ImportedBet } from "@/lib/import/types";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
 // so newly-published profiles are reachable without a redeploy.
@@ -102,6 +107,11 @@ export default async function ProfilePage({ params }: PageProps) {
   const lifetimePl = bets.reduce((s, b) => s + b.pl, 0);
   const lifetime = fmtPl(lifetimePl);
   const name = profile.displayName ?? profile.handle;
+  // Capture once before render — passed down to children that need it
+  // for recency sorts. This is an async server component (one render per
+  // request) so Date.now() is safe; the React purity rule can't tell.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
 
   return (
     <div className="profile-page">
@@ -241,6 +251,44 @@ export default async function ProfilePage({ params }: PageProps) {
           </section>
         )}
 
+        {/* Breakdowns: sport / market / odds bucket */}
+        {settledCount > 0 && (
+          <section className="profile-breakdown-row">
+            {data.sportBd && data.sportBd.length > 0 && (
+              <Breakdown title="By sport" rows={data.sportBd.slice(0, 8)} />
+            )}
+            {data.marketBd.length > 0 && (
+              <Breakdown title="By market" rows={data.marketBd.slice(0, 8)} />
+            )}
+            {data.oddsBd.length > 0 && (
+              <Breakdown title="By odds range" rows={data.oddsBd} />
+            )}
+          </section>
+        )}
+
+        {/* Monthly P/L bars */}
+        {settledCount > 0 && (
+          <section className="profile-chart card">
+            <div className="profile-chart-head">
+              <h2 className="profile-chart-title">Monthly P/L</h2>
+              <div className="profile-chart-sub">
+                last 18 months · green = profit · red = loss
+              </div>
+            </div>
+            <MonthlyBars bets={bets} />
+          </section>
+        )}
+
+        {/* CLV distribution — credibility chart */}
+        {settledCount > 0 && data.clvDist.length > 0 && (
+          <ClvDistribution dist={data.clvDist} mean={data.kpis.clvPct} />
+        )}
+
+        {/* Recent 30 settled */}
+        {settledCount > 0 && (
+          <RecentSettledTable bets={bets} nowMs={nowMs} />
+        )}
+
         {settledCount === 0 && (
           <section className="profile-empty">
             <p>No settled bets yet.</p>
@@ -289,5 +337,166 @@ function Kpi({
       <div className={`profile-kpi-value num-${tone}`}>{value}</div>
       {sub && <div className="profile-kpi-sub">{sub}</div>}
     </div>
+  );
+}
+
+// ─ MonthlyBars ─────────────────────────────────────────────────────────────
+// Inline server component — shows the last 18 months of P/L as bars.
+// Each bar is green when the month was net positive, red when negative.
+
+function MonthlyBars({ bets }: { bets: ImportedBet[] }) {
+  const rows = monthlyPL(bets, 18);
+  if (rows.length === 0) {
+    return (
+      <div style={{ padding: 32, textAlign: "center", color: "var(--text-faint)", fontSize: 12 }}>
+        Not enough history to plot.
+      </div>
+    );
+  }
+  const maxAbs = Math.max(...rows.map((r) => Math.abs(r.pl)), 1);
+  const W = 920;
+  const H = 140;
+  const padL = 40;
+  const padR = 16;
+  const padT = 12;
+  const padB = 24;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+  const zeroY = padT + innerH / 2;
+  const barW = innerW / rows.length;
+
+  return (
+    <div className="profile-monthly-wrap">
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="profile-monthly-svg">
+        {/* Zero baseline */}
+        <line
+          x1={padL}
+          x2={W - padR}
+          y1={zeroY}
+          y2={zeroY}
+          stroke="var(--border-strong)"
+          strokeWidth="0.6"
+        />
+        {/* Bars */}
+        {rows.map((r, i) => {
+          const h = (Math.abs(r.pl) / maxAbs) * (innerH / 2 - 4);
+          const x = padL + i * barW + barW * 0.15;
+          const w = barW * 0.7;
+          const y = r.pl >= 0 ? zeroY - h : zeroY;
+          const fill = r.pl > 0 ? "var(--green)" : r.pl < 0 ? "var(--red)" : "var(--text-faint)";
+          return <rect key={i} x={x} y={y} width={w} height={Math.max(h, 1)} fill={fill} rx="1" />;
+        })}
+        {/* Y-axis labels */}
+        <text x="6" y={padT + 8} fontSize="9" fill="var(--text-faint)" fontFamily="var(--mono)">
+          +{Math.round(maxAbs)}u
+        </text>
+        <text x="6" y={H - padB + 12} fontSize="9" fill="var(--text-faint)" fontFamily="var(--mono)">
+          -{Math.round(maxAbs)}u
+        </text>
+      </svg>
+      <div className="profile-monthly-labels">
+        {rows.map((r, i) => {
+          // Label every third month to avoid overlap. r.label is e.g. "Aug '25".
+          if (i % 3 !== 0 && i !== rows.length - 1) return <span key={i} />;
+          return <span key={i}>{r.label}</span>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─ RecentSettledTable ─────────────────────────────────────────────────────
+// Last 30 settled bets. Server-rendered, no interactivity. Pending bets
+// excluded — strangers should never see what the tipster is about to bet.
+
+function RecentSettledTable({
+  bets,
+  nowMs,
+}: {
+  bets: ImportedBet[];
+  nowMs: number;
+}) {
+  const isSettled = (s: string) =>
+    s === "won" || s === "lost" || s === "push" || s === "half_won" || s === "half_lost";
+  const settled = bets
+    .filter((b) => isSettled(b.status))
+    .map((b) => ({
+      ...b,
+      _sort: Math.min(new Date(b.kickoff).getTime(), nowMs),
+    }))
+    .sort((a, b) => b._sort - a._sort)
+    .slice(0, 30);
+
+  if (settled.length === 0) return null;
+
+  return (
+    <section className="card profile-bets-card">
+      <div className="profile-chart-head">
+        <h2 className="profile-chart-title">Recent settled</h2>
+        <div className="profile-chart-sub">
+          last 30 results · pending bets stay private
+        </div>
+      </div>
+      <div style={{ overflowX: "auto" }}>
+        <table className="tbl" data-density="dense">
+          <thead>
+            <tr>
+              <th>Kickoff</th>
+              <th>Event</th>
+              <th>Selection</th>
+              <th className="num">Odds</th>
+              <th className="num">Stake</th>
+              <th className="num">P/L</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {settled.map((b) => {
+              const sport = classifySport(b);
+              const tone = b.pl > 0 ? "pos" : b.pl < 0 ? "neg" : "flat";
+              const plStr =
+                b.pl > 0 ? `+${b.pl.toFixed(2)}u` : `${b.pl.toFixed(2)}u`;
+              const date = new Date(b.kickoff).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "2-digit",
+              });
+              return (
+                <tr key={b.id}>
+                  <td className="mono" style={{ fontSize: 11 }}>
+                    {date}
+                  </td>
+                  <td className="event">
+                    <span className="league">{sport}</span>
+                    {b.event}
+                  </td>
+                  <td className="selection">
+                    <span className="sel-main">{b.selection}</span>
+                  </td>
+                  <td className="num mono">{b.odds.toFixed(2)}</td>
+                  <td className="num mono">{b.stake.toFixed(1)}u</td>
+                  <td className={`num mono num-${tone}`}>{plStr}</td>
+                  <td>
+                    <span className={`badge ${
+                      b.status === "won"
+                        ? "win"
+                        : b.status === "lost"
+                          ? "lose"
+                          : "void"
+                    }`}>
+                      {b.status === "half_won"
+                        ? "half W"
+                        : b.status === "half_lost"
+                          ? "half L"
+                          : b.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }

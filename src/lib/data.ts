@@ -141,6 +141,9 @@ export interface DashboardData {
   marketBd: BreakdownRow[];
   /** Was "by bookmaker"; bookmaker tracking removed. Now "by odds range". */
   oddsBd: BreakdownRow[];
+  /** Yield breakdown by sport. Optional for back-compat with the mock
+   *  data path which doesn't compute it. */
+  sportBd?: BreakdownRow[];
   weekly: number[];
 }
 

@@ -554,6 +554,13 @@ export function aggregateFromBets(bets: ImportedBet[]): DashboardData {
       (k) => MARKET_LABELS[k] ?? k,
     ),
     oddsBd: computeOddsRangeBreakdown(bets),
+    // Sport breakdown — reuse the classifier so untagged "Other" rows are
+    // bucketed correctly. Used on the public /u/<handle> page; the
+    // dashboard already shows market and odds-range, this fills the gap.
+    sportBd: computeBreakdown(
+      bets,
+      (b) => classifySport(b) || "Other",
+    ),
     weekly: computeWeekly(bets),
   };
 }

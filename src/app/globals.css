@@ -2211,6 +2211,50 @@ a.sb-item { cursor: pointer; }
   border-radius: var(--radius-card);
 }
 
+/* Breakdown row — sport / market / odds bucket side-by-side */
+.profile-breakdown-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.profile-breakdown-row .card {
+  padding: 0;
+}
+
+/* Monthly P/L bars (server-rendered) */
+.profile-monthly-wrap {
+  padding: 18px 22px 14px;
+}
+.profile-monthly-svg {
+  width: 100%;
+  height: 140px;
+  display: block;
+}
+.profile-monthly-labels {
+  display: grid;
+  grid-template-columns: repeat(18, 1fr);
+  margin-top: 4px;
+  padding-left: 40px;
+  padding-right: 16px;
+  gap: 0;
+}
+.profile-monthly-labels span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text-faint);
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+/* Recent bets card */
+.profile-bets-card {
+  padding: 0;
+}
+.profile-bets-card .profile-chart-head {
+  padding: 18px 22px 14px;
+  border-bottom: var(--border-w) solid var(--border);
+}
+
 .profile-cta {
   display: flex;
   align-items: center;
@@ -2265,6 +2309,9 @@ a.sb-item { cursor: pointer; }
     flex-direction: column;
     align-items: flex-start;
     padding: 20px;
+  }
+  .profile-breakdown-row {
+    grid-template-columns: 1fr;
   }
 }
 
