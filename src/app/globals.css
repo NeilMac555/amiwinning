@@ -63,6 +63,110 @@
   color-scheme: dark;
 }
 
+/* Terminal — Bloomberg/Reuters phosphor-green-on-black. Wins glow,
+   losses coral. Amber accent for links. Hard-edged, quant vibes. */
+[data-theme="terminal"] {
+  --bg: #050805;
+  --bg-sidebar: #030503;
+  --surface: #0A0F0A;
+  --surface-2: #0E140E;
+  --text: #5FE19E;
+  --text-muted: #3B9D6E;
+  --text-faint: #245D44;
+  --border: rgba(95, 225, 158, 0.12);
+  --border-strong: rgba(95, 225, 158, 0.28);
+  --green: #5FE19E;
+  --green-rgb: 95, 225, 158;
+  --green-tint: rgba(95, 225, 158, 0.16);
+  --green-bg: rgba(95, 225, 158, 0.08);
+  --red: #FF6B5B;
+  --red-rgb: 255, 107, 91;
+  --red-tint: rgba(255, 107, 91, 0.16);
+  --red-bg: rgba(255, 107, 91, 0.08);
+  --blue: #FFB546;
+  --blue-tint: rgba(255, 181, 70, 0.14);
+  --pulse: #FFB546;
+  color-scheme: dark;
+}
+
+/* Newspaper — FT salmon-pink paper, ink-black type, one headline red.
+   For users who want their tracker to feel like a print column. */
+[data-theme="newspaper"] {
+  --bg: #F1E1D0;
+  --bg-sidebar: #EAD8C4;
+  --surface: #F6E9DA;
+  --surface-2: #ECDDC9;
+  --text: #1A1612;
+  --text-muted: #6B5F52;
+  --text-faint: #A89B89;
+  --border: rgba(26, 22, 18, 0.12);
+  --border-strong: rgba(26, 22, 18, 0.22);
+  --green: #2B6E3A;
+  --green-rgb: 43, 110, 58;
+  --green-tint: rgba(43, 110, 58, 0.12);
+  --green-bg: rgba(43, 110, 58, 0.07);
+  --red: #B92434;
+  --red-rgb: 185, 36, 52;
+  --red-tint: rgba(185, 36, 52, 0.12);
+  --red-bg: rgba(185, 36, 52, 0.06);
+  --blue: #1F4F8A;
+  --blue-tint: rgba(31, 79, 138, 0.14);
+  --pulse: #B92434;
+  color-scheme: light;
+}
+
+/* Solar — warm cream, olive green for wins, terracotta for losses,
+   amber accent. Bright, analog, "tracking is fun, not stressful." */
+[data-theme="solar"] {
+  --bg: #FAF3E3;
+  --bg-sidebar: #F5ECDA;
+  --surface: #FEF8E8;
+  --surface-2: #F0E6CC;
+  --text: #2A1F12;
+  --text-muted: #7C6A4F;
+  --text-faint: #B5A483;
+  --border: rgba(42, 31, 18, 0.10);
+  --border-strong: rgba(42, 31, 18, 0.20);
+  --green: #5A8A3C;
+  --green-rgb: 90, 138, 60;
+  --green-tint: rgba(90, 138, 60, 0.12);
+  --green-bg: rgba(90, 138, 60, 0.07);
+  --red: #C9603C;
+  --red-rgb: 201, 96, 60;
+  --red-tint: rgba(201, 96, 60, 0.12);
+  --red-bg: rgba(201, 96, 60, 0.07);
+  --blue: #B86E1E;
+  --blue-tint: rgba(184, 110, 30, 0.14);
+  --pulse: #B86E1E;
+  color-scheme: light;
+}
+
+/* Slate — Linear/Notion-style cool industrial grey, electric blue
+   accent. Reads like a modern SaaS dashboard. */
+[data-theme="slate"] {
+  --bg: #1B1F24;
+  --bg-sidebar: #15181C;
+  --surface: #21262D;
+  --surface-2: #2A3038;
+  --text: #E6EBF0;
+  --text-muted: #97A3B0;
+  --text-faint: #5F6B78;
+  --border: rgba(230, 235, 240, 0.08);
+  --border-strong: rgba(230, 235, 240, 0.20);
+  --green: #4AC68E;
+  --green-rgb: 74, 198, 142;
+  --green-tint: rgba(74, 198, 142, 0.14);
+  --green-bg: rgba(74, 198, 142, 0.08);
+  --red: #E76B6B;
+  --red-rgb: 231, 107, 107;
+  --red-tint: rgba(231, 107, 107, 0.14);
+  --red-bg: rgba(231, 107, 107, 0.08);
+  --blue: #4D9DFF;
+  --blue-tint: rgba(77, 157, 255, 0.16);
+  --pulse: #4D9DFF;
+  color-scheme: dark;
+}
+
 /* Bridge design tokens into Tailwind utilities (bg-surface, text-muted, etc.) */
 @theme inline {
   --color-bg: var(--bg);
@@ -2025,6 +2129,115 @@ a.sb-item { cursor: pointer; }
 [data-theme="dark"] .paste-hero-success-check { color: #0A0A09; }
 .paste-hero-success-text strong { color: var(--green); font-weight: 600; }
 .paste-hero-success-actions { display: inline-flex; gap: 8px; }
+
+/* === Dark-scheme overrides (Terminal + Slate inherit these) ============
+   The dark-theme block above sets contrast colors that assume a dark
+   background with light green/red highlights. The same logic applies to
+   any other dark theme, so mirror those rules. */
+
+[data-theme="terminal"] .btn-primary,
+[data-theme="slate"] .btn-primary {
+  color: #0A0A09;
+}
+
+[data-theme="terminal"] .hm-cell.empty,
+[data-theme="slate"] .hm-cell.empty {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="terminal"] .cal-cell--green .cal-cell-pl,
+[data-theme="terminal"] .cal-cell--red .cal-cell-pl,
+[data-theme="slate"] .cal-cell--green .cal-cell-pl,
+[data-theme="slate"] .cal-cell--red .cal-cell-pl {
+  color: #0A0A09;
+}
+[data-theme="terminal"] .cal-cell--green .cal-cell-day,
+[data-theme="terminal"] .cal-cell--red .cal-cell-day,
+[data-theme="slate"] .cal-cell--green .cal-cell-day,
+[data-theme="slate"] .cal-cell--red .cal-cell-day {
+  color: rgba(10, 10, 9, 0.7);
+}
+
+[data-theme="terminal"] .cal-week-cell--green .cal-week-cell-pl,
+[data-theme="terminal"] .cal-week-cell--green .cal-week-cell-day,
+[data-theme="terminal"] .cal-week-cell--red .cal-week-cell-pl,
+[data-theme="terminal"] .cal-week-cell--red .cal-week-cell-day,
+[data-theme="slate"] .cal-week-cell--green .cal-week-cell-pl,
+[data-theme="slate"] .cal-week-cell--green .cal-week-cell-day,
+[data-theme="slate"] .cal-week-cell--red .cal-week-cell-pl,
+[data-theme="slate"] .cal-week-cell--red .cal-week-cell-day {
+  color: #0A0A09;
+}
+[data-theme="terminal"] .cal-week-cell--green .cal-week-cell-name,
+[data-theme="terminal"] .cal-week-cell--green .cal-week-cell-meta,
+[data-theme="terminal"] .cal-week-cell--red .cal-week-cell-name,
+[data-theme="terminal"] .cal-week-cell--red .cal-week-cell-meta,
+[data-theme="slate"] .cal-week-cell--green .cal-week-cell-name,
+[data-theme="slate"] .cal-week-cell--green .cal-week-cell-meta,
+[data-theme="slate"] .cal-week-cell--red .cal-week-cell-name,
+[data-theme="slate"] .cal-week-cell--red .cal-week-cell-meta {
+  color: rgba(10, 10, 9, 0.7);
+}
+
+[data-theme="terminal"] .paste-hero-success-check,
+[data-theme="slate"] .paste-hero-success-check {
+  color: #0A0A09;
+}
+
+/* === Theme picker grid (Settings page) =============================== */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: var(--border-w) solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.1s, box-shadow 0.1s;
+  font: inherit;
+  color: inherit;
+}
+.theme-card:hover {
+  border-color: var(--border-strong);
+}
+.theme-card[data-active="true"] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
+}
+.theme-card-preview {
+  height: 56px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+.theme-card-preview span {
+  display: block;
+}
+.theme-card-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.theme-card-sub {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 600px) {
+  .theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
 /* === Public profile page ===========================================
    The /u/[handle] page is a standalone marketing-feeling layout —

@@ -4,7 +4,22 @@
 import { useSyncExternalStore } from "react";
 import type { DisplayUnit } from "@/components/UnitContext";
 
-export type Theme = "light" | "dark";
+export type Theme =
+  | "light"
+  | "dark"
+  | "terminal"
+  | "newspaper"
+  | "solar"
+  | "slate";
+
+/** Themes whose color-scheme is dark (light text on dark background).
+ *  Used by ThemeToggle so its sun/moon icon and toggle target stay correct
+ *  even when the user picks Terminal or Slate via the Settings picker. */
+export const DARK_SCHEME_THEMES: ReadonlySet<Theme> = new Set([
+  "dark",
+  "terminal",
+  "slate",
+]);
 
 export interface UserSettings {
   unit: DisplayUnit;

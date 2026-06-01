@@ -1,16 +1,25 @@
 "use client";
 
-import { useSettings, saveSettings, type Theme } from "@/lib/settings";
+import {
+  useSettings,
+  saveSettings,
+  DARK_SCHEME_THEMES,
+  type Theme,
+} from "@/lib/settings";
 
 export function ThemeToggle() {
   // useSettings subscribes to the settings store; SSR sees the defaults, the
   // client swaps to the localStorage-backed value on first paint. No effect.
   const settings = useSettings();
   const theme: Theme = settings.theme;
-  const isDark = theme === "dark";
+  const isDark = DARK_SCHEME_THEMES.has(theme);
 
+  // Quick toggle in the topbar — flips between light <-> dark schemes.
+  // From any dark-scheme theme (dark, terminal, slate) → "light".
+  // From any light-scheme theme (light, newspaper, solar) → "dark".
+  // Users who want the full palette use the picker on Settings.
   const toggle = () => {
-    const next: Theme = theme === "light" ? "dark" : "light";
+    const next: Theme = isDark ? "light" : "dark";
     saveSettings({ ...settings, theme: next });
   };
 

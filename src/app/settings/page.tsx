@@ -17,6 +17,54 @@ const UNIT_OPTIONS: Array<{ value: DisplayUnit; label: string; sublabel: string 
   { value: "€", label: "Euro (€)", sublabel: "Real money tracking in EUR." },
 ];
 
+// Six themes, each shown as a swatch card. The `swatch` array is three
+// representative colors from the palette: surface, primary text, accent
+// (green). Lifted directly from the [data-theme] blocks in globals.css —
+// keep these in sync if you change the palette.
+const THEME_OPTIONS: Array<{
+  value: Theme;
+  label: string;
+  tagline: string;
+  swatch: [string, string, string];
+}> = [
+  {
+    value: "light",
+    label: "Light",
+    tagline: "Editorial cream",
+    swatch: ["#F1F0EB", "#0A0A0A", "#0F6E56"],
+  },
+  {
+    value: "dark",
+    label: "Dark",
+    tagline: "Editorial inverted",
+    swatch: ["#0A0A09", "#F2F2EE", "#4FB494"],
+  },
+  {
+    value: "terminal",
+    label: "Terminal",
+    tagline: "Phosphor on black",
+    swatch: ["#050805", "#5FE19E", "#FFB546"],
+  },
+  {
+    value: "newspaper",
+    label: "Newspaper",
+    tagline: "FT pink paper",
+    swatch: ["#F1E1D0", "#1A1612", "#B92434"],
+  },
+  {
+    value: "solar",
+    label: "Solar",
+    tagline: "Warm cream & olive",
+    swatch: ["#FAF3E3", "#2A1F12", "#5A8A3C"],
+  },
+  {
+    value: "slate",
+    label: "Slate",
+    tagline: "Industrial SaaS",
+    swatch: ["#1B1F24", "#E6EBF0", "#4D9DFF"],
+  },
+];
+
 export default function SettingsPage() {
   const { user, books, activeBook, setActiveBook, refreshBooks, betsVersion } =
     useAuth();
@@ -135,21 +183,26 @@ export default function SettingsPage() {
               </div>
             </Section>
 
-            <Section title="Theme" subtitle="Light is the default. Dark mode swaps the surface, text, and accent tokens.">
-              <div style={{ display: "flex", gap: 8 }}>
-                {(["light", "dark"] as Theme[]).map((t) => (
+            <Section title="Theme" subtitle="Pick a palette. The whole app re-skins instantly — no reload.">
+              <div className="theme-grid">
+                {THEME_OPTIONS.map((t) => (
                   <button
-                    key={t}
-                    className="btn-ghost"
-                    data-active={settings.theme === t ? "true" : undefined}
-                    onClick={() => update({ theme: t })}
-                    style={{
-                      padding: "8px 16px",
-                      fontSize: 13,
-                      textTransform: "capitalize",
-                    }}
+                    key={t.value}
+                    type="button"
+                    className="theme-card"
+                    data-active={settings.theme === t.value ? "true" : undefined}
+                    onClick={() => update({ theme: t.value })}
                   >
-                    {t}
+                    <div
+                      className="theme-card-preview"
+                      aria-hidden="true"
+                    >
+                      <span style={{ background: t.swatch[0] }} />
+                      <span style={{ background: t.swatch[1] }} />
+                      <span style={{ background: t.swatch[2] }} />
+                    </div>
+                    <div className="theme-card-name">{t.label}</div>
+                    <div className="theme-card-sub">{t.tagline}</div>
                   </button>
                 ))}
               </div>
