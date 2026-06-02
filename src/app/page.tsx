@@ -141,21 +141,32 @@ export default function Dashboard() {
       <Sidebar />
       <div className="main-col">
         <TopBar />
-        <Ticker items={data.ticker} />
+        {/* Hide the recent-bets ticker for empty users — otherwise they
+            see mock fixtures scrolling at the top of a brand-new
+            dashboard, which is exactly what we just removed from the
+            body. */}
+        {allBets.length > 0 && <Ticker items={data.ticker} />}
 
         <div className="page" data-screen-label="Dashboard">
           <div className="page-header">
             <div>
               <h1 className="page-title">Dashboard</h1>
-              <div className="page-subtitle">
-                <span className="dot-live"></span>
-                Updated {updatedAt} ·{" "}
-                {source === "imported"
-                  ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${rangeLabel(range, now)} · CLV pending`
-                  : "Soccer (EPL, UCL) · Pinnacle & 4 others"}
-              </div>
+              {/* No subtitle / no range tabs when the user is empty:
+                  shows the mock subtitle "Soccer (EPL, UCL) · Pinnacle"
+                  otherwise, which is misleading on a fresh signup. */}
+              {allBets.length > 0 && (
+                <div className="page-subtitle">
+                  <span className="dot-live"></span>
+                  Updated {updatedAt} ·{" "}
+                  {source === "imported"
+                    ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${rangeLabel(range, now)} · CLV pending`
+                    : "Soccer (EPL, UCL) · Pinnacle & 4 others"}
+                </div>
+              )}
             </div>
-            <RangeTabs value={range} onChange={setRange} />
+            {allBets.length > 0 && (
+              <RangeTabs value={range} onChange={setRange} />
+            )}
           </div>
 
           {!user && allBets.length > 0 && <SampleDataBanner />}
