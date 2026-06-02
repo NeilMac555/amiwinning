@@ -39,16 +39,20 @@ export default function Image() {
           justifyContent: "space-between",
         }}
       >
-        {/* Top — brand mark + name */}
+        {/* Top — Delta-A mark + name */}
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              background: C.text,
-              borderRadius: 7,
-            }}
-          />
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 100 100"
+            style={{ display: "block" }}
+          >
+            <path
+              fillRule="evenodd"
+              d="M50 16 L85 84 L15 84 Z M50 46 L67 79 L33 79 Z"
+              fill={C.text}
+            />
+          </svg>
           <div
             style={{
               fontSize: 30,

@@ -374,25 +374,23 @@ a.sb-item { cursor: pointer; }
   font-size: 13.5px;
   letter-spacing: -0.01em;
 }
+/* Brand mark — Delta-A (the letter A as an upward delta).
+   Implemented as a CSS mask over /mark.svg so the fill always
+   matches the current text color (var(--text) via inheritance),
+   which means it adapts automatically across all six themes. */
 .brand-mark {
   width: 18px;
   height: 18px;
-  border: 1px solid var(--text);
-  border-radius: 4px;
-  position: relative;
+  background-color: currentColor;
+  -webkit-mask: url("/mark.svg") center / contain no-repeat;
+  mask: url("/mark.svg") center / contain no-repeat;
 }
-.brand-mark::before, .brand-mark::after {
-  content: "";
-  position: absolute;
-  background: var(--text);
-}
-.brand-mark::before {
-  left: 3px; right: 3px; top: 9px; height: 1px;
-}
+/* Old ::before/::after artefacts from the bar-chart mark explicitly
+   neutralised — leaving them defined was leaking back into themes
+   where currentColor mask doesn't fully cover. */
+.brand-mark::before,
 .brand-mark::after {
-  left: 3px; bottom: 3px; width: 4px; height: 4px;
-  background: var(--green);
-  border-radius: 1px;
+  content: none;
 }
 .brand-sep { color: var(--text-faint); }
 .brand-account {

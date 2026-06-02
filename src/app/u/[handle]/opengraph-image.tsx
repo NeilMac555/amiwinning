@@ -144,14 +144,18 @@ export default async function Image({ params }: OgProps) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                background: C.text,
-                borderRadius: 6,
-              }}
-            />
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 100 100"
+              style={{ display: "block" }}
+            >
+              <path
+                fillRule="evenodd"
+                d="M50 16 L85 84 L15 84 Z M50 46 L67 79 L33 79 Z"
+                fill={C.text}
+              />
+            </svg>
             <div
               style={{
                 fontSize: 28,
