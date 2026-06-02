@@ -104,7 +104,7 @@ export default function Image() {
         >
           <div style={{ display: "flex", gap: 38, fontSize: 18 }}>
             {[
-              { n: "01", t: "Paste anything · AI parses it" },
+              { n: "01", t: "Paste anything · no more typing" },
               { n: "02", t: "CLV tracking · skill vs variance" },
               { n: "03", t: "Shareable public profile" },
             ].map((f) => (
