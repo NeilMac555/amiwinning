@@ -153,59 +153,12 @@ const NBA_TEAMS: string[] = [
   "clippers",
 ];
 
-// Star NBA players — surname match. Used for player-prop bets where the
-// team isn't mentioned ("LeBron 25+ points"). Lower-cased, word-boundary.
-const NBA_PLAYERS: string[] = [
-  "lebron", "james", "curry", "durant", "giannis", "antetokounmpo", "jokic",
-  "embiid", "doncic", "luka", "tatum", "brown", "harden", "kyrie", "irving",
-  "dame", "lillard", "kawhi", "leonard", "paul george", "westbrook", "booker",
-  "kd", "ja morant", "morant", "edwards", "anthony edwards", "shai", "sga",
-  "gilgeous-alexander", "haliburton", "wembanyama", "wemby", "victor",
-  "anthony davis", "ad", "klay", "thompson", "draymond", "green", "butler",
-  "jimmy", "demar", "derozan", "siakam", "trae young", "donovan mitchell",
-  "mitchell", "zion", "williamson", "lamelo", "ball", "barnes", "scottie",
-  "paolo", "banchero", "chet", "holmgren", "cade cunningham", "cunningham",
-  "anthony", "edwards", "brunson", "jalen", "tyrese", "maxey", "porzingis",
-  "kristaps", "george", "kawhi", "lavine", "vucevic", "fox", "deaaron",
-  "sabonis", "domantas", "townes", "karl-anthony", "kat", "mikal bridges",
-  "garland", "darius", "lavert", "mobley", "evan", "rj barrett", "barrett",
-  "obi toppin", "haliburton",
-];
-
 const NFL_TEAMS: string[] = [
   "patriots", "bills", "dolphins", "jets", "ravens", "bengals", "browns",
   "steelers", "texans", "colts", "jaguars", "titans", "broncos", "chiefs",
   "raiders", "chargers", "cowboys", "giants", "eagles", "commanders",
   "bears", "lions", "packers", "vikings", "falcons", "panthers", "saints",
   "buccaneers", "cardinals", "rams", "49ers", "seahawks",
-];
-
-// Star NFL players — surname or distinctive name. QBs lead because they
-// dominate prop-bet text ("Mahomes over 1.5 TDs"). RBs / WRs / TEs after.
-const NFL_PLAYERS: string[] = [
-  // Quarterbacks
-  "mahomes", "burrow", "allen", "josh allen", "lamar", "jackson", "hurts",
-  "jalen hurts", "tua", "tagovailoa", "herbert", "justin herbert", "rodgers",
-  "aaron rodgers", "kyler", "murray", "kyler murray", "stafford", "matthew stafford",
-  "prescott", "dak", "lawrence", "trevor lawrence", "fields", "justin fields",
-  "young", "bryce young", "love", "jordan love", "purdy", "brock purdy",
-  "stroud", "cj stroud", "richardson", "anthony richardson", "maye", "drake maye",
-  "daniels", "jayden daniels", "williams", "caleb williams", "nix", "bo nix",
-  "geno smith", "geno", "jared goff", "goff", "wilson", "russell wilson",
-  "cousins", "kirk cousins", "carr", "derek carr", "garoppolo", "minshew",
-  "tannehill", "wentz", "trubisky",
-  // Running backs / wide receivers / tight ends
-  "henry", "derrick henry", "mccaffrey", "cmc", "barkley", "saquon",
-  "kelce", "travis kelce", "tyreek", "tyreek hill", "lamb", "ceedee", "ceedee lamb",
-  "jefferson", "justin jefferson", "chase", "ja'marr", "ja'marr chase",
-  "hopkins", "deandre hopkins", "adams", "davante adams", "diggs", "stefon diggs",
-  "kupp", "cooper kupp", "evans", "mike evans", "godwin", "smith-schuster",
-  "metcalf", "dk metcalf", "kittle", "george kittle", "andrews", "mark andrews",
-  "waddle", "jaylen waddle", "olave", "chris olave", "smith", "devonta smith",
-  "brown", "aj brown", "wilson", "garrett wilson", "jeudy", "jerry jeudy",
-  "moore", "dj moore", "samuel", "deebo", "kamara", "alvin kamara", "ekeler",
-  "austin ekeler", "achane", "de'von achane", "robinson", "bijan robinson",
-  "gibbs", "jahmyr gibbs", "etienne", "travis etienne", "swift", "d'andre swift",
 ];
 
 const MLB_TEAMS: string[] = [
@@ -291,16 +244,7 @@ const MLB_MARKETS = [
 
 const NFL_MARKETS = [
   /\b(?:first|1st)\s*touchdown\b/i,
-  /\b(?:anytime\s*)?td\s*scorer\b/i,
-  /\banytime\s*touchdown\b/i,
-  /\bover\s+\d+(?:\.\d+)?\s*(?:passing|rushing|receiving)\s*yards?\b/i,
-  /\bunder\s+\d+(?:\.\d+)?\s*(?:passing|rushing|receiving)\s*yards?\b/i,
-  /\bover\s+\d+(?:\.\d+)?\s*(?:passing|rushing|receiving)?\s*tds?\b/i,
-  /\b\d+(?:\.\d+)?\s*passing\s*yards?\b/i,
-  /\b\d+(?:\.\d+)?\s*rushing\s*yards?\b/i,
-  /\b\d+(?:\.\d+)?\s*receiving\s*yards?\b/i,
   /\bspread\s*[+\-−]\d+(?:\.\d+)?\b/i,
-  /\b(?:1st|2nd)\s*half\s*(?:line|spread|total)\b/i,
 ];
 
 const HORSE_RACING_MARKETS = [
@@ -353,9 +297,7 @@ const SOCCER_CLUB_RE = nameMatcher(SOCCER_CLUBS);
 const SOCCER_LEAGUE_RE = nameMatcher(SOCCER_LEAGUES);
 const TENNIS_TOURNAMENT_RE = nameMatcher(TENNIS_TOURNAMENTS);
 const NBA_RE = nameMatcher(NBA_TEAMS);
-const NBA_PLAYER_RE = nameMatcher(NBA_PLAYERS);
 const NFL_RE = nameMatcher(NFL_TEAMS);
-const NFL_PLAYER_RE = nameMatcher(NFL_PLAYERS);
 const MLB_RE = nameMatcher(MLB_TEAMS);
 const NHL_RE = nameMatcher(NHL_TEAMS);
 
@@ -429,16 +371,11 @@ function detectSignal(input: ClassifyInput): Signal | null {
     return { label: "Soccer", confidence: "high" };
   }
 
-  // ── Basketball — markets, teams, then star players. Markets first
-  //    because they're the strongest signal (BASKETBALL_MARKETS catches
-  //    quarters / point/rebound/assist props which only happen in NBA).
+  // ── Basketball
   if (BASKETBALL_MARKETS.some((re) => re.test(haystack))) {
     return { label: "Basketball", confidence: "high" };
   }
   if (NBA_RE.test(haystack)) {
-    return { label: "Basketball", confidence: "high" };
-  }
-  if (NBA_PLAYER_RE.test(haystack)) {
     return { label: "Basketball", confidence: "high" };
   }
 
@@ -458,15 +395,11 @@ function detectSignal(input: ClassifyInput): Signal | null {
     return { label: "Baseball", confidence: "high" };
   }
 
-  // ── NFL — markets, teams, then star players (esp. QBs since they
-  //    dominate prop-bet text).
+  // ── NFL
   if (NFL_MARKETS.some((re) => re.test(haystack))) {
     return { label: "American Football", confidence: "high" };
   }
   if (NFL_RE.test(haystack)) {
-    return { label: "American Football", confidence: "high" };
-  }
-  if (NFL_PLAYER_RE.test(haystack)) {
     return { label: "American Football", confidence: "high" };
   }
 
