@@ -403,9 +403,9 @@ function ImportedBanner({ count }: { count: number }) {
     >
       <span>
         <span style={{ fontWeight: 600, color: "var(--green)" }}>
-          {count.toLocaleString()} bets imported.
+          {count.toLocaleString()} bets tracked.
         </span>{" "}
-        Stored in your browser. CLV will start populating once you log bets through the app pre-kickoff.
+        Synced to your account · daily cloud backups · access from any device. CLV starts populating once you log bets pre-kickoff.
       </span>
       <Link
         href="/import"

@@ -8,6 +8,7 @@ import { useSettings, saveSettings, type Theme, type UserSettings } from "@/lib/
 import { clearBets, loadBets } from "@/lib/import/store";
 import { useAuth } from "@/lib/auth";
 import { createBook, deleteBook, updateBook, type OddsFormat } from "@/lib/books";
+import { downloadBetsCsv } from "@/lib/export";
 import { ProfilePanel } from "@/components/ProfilePanel";
 
 const UNIT_OPTIONS: Array<{ value: DisplayUnit; label: string; sublabel: string }> = [
@@ -78,6 +79,24 @@ export default function SettingsPage() {
   const [confirmDeleteBookId, setConfirmDeleteBookId] = useState<string | null>(
     null,
   );
+  const [exporting, setExporting] = useState(false);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
+
+  const onExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportMsg(null);
+    const count = await downloadBetsCsv();
+    if (count == null) {
+      setExportMsg("Export failed. Try again, or refresh and retry.");
+    } else if (count === 0) {
+      setExportMsg("Nothing to export — no bets yet.");
+    } else {
+      setExportMsg(`Downloaded ${count.toLocaleString()} bets.`);
+    }
+    setExporting(false);
+    setTimeout(() => setExportMsg(null), 4000);
+  };
 
   // Derive the bet count on every render — keyed by the auth context's
   // betsVersion so it re-runs after a Supabase pull, plus a local tick
@@ -373,34 +392,138 @@ export default function SettingsPage() {
               )}
             </Section>
 
-            <Section title="Imported data" subtitle="Bets imported from a spreadsheet, synced to your account.">
+            <Section
+              title="Your data"
+              subtitle="Where it lives, how it's protected, and how to take it with you."
+            >
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
+                  flexDirection: "column",
                   gap: 14,
                 }}
               >
-                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
-                  {importedCount > 0
-                    ? `${importedCount.toLocaleString()} bets currently stored.`
-                    : "No imported bets."}
-                </span>
-                {importedCount > 0 && (
-                  <button
-                    className="btn-ghost"
-                    onClick={onClearData}
+                {/* Architecture explainer */}
+                <ul
+                  style={{
+                    margin: 0,
+                    padding: 0,
+                    listStyle: "none",
+                    fontSize: 12.5,
+                    color: "var(--text-muted)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 6,
+                  }}
+                >
+                  <li>
+                    <strong style={{ color: "var(--text)" }}>
+                      Stored in the cloud.
+                    </strong>{" "}
+                    Your bets live in a managed Postgres database (Supabase).
+                    The browser keeps a fast local copy for speed, but the
+                    cloud is the source of truth.
+                  </li>
+                  <li>
+                    <strong style={{ color: "var(--text)" }}>
+                      Daily backups.
+                    </strong>{" "}
+                    Automatic snapshots with 7-day point-in-time recovery
+                    via Supabase Pro. You don&rsquo;t need to do anything.
+                  </li>
+                  <li>
+                    <strong style={{ color: "var(--text)" }}>
+                      Locked to you.
+                    </strong>{" "}
+                    Row-Level Security means nobody else (signed in or not)
+                    can see your private books or bets.
+                  </li>
+                  <li>
+                    <strong style={{ color: "var(--text)" }}>
+                      Exportable anytime.
+                    </strong>{" "}
+                    Download a CSV of every bet you&rsquo;ve ever logged
+                    below.
+                  </li>
+                </ul>
+
+                {/* Export + count + clear */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    gap: 10,
+                    paddingTop: 10,
+                    borderTop: "var(--border-w) solid var(--border)",
+                  }}
+                >
+                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                    {importedCount > 0
+                      ? `${importedCount.toLocaleString()} bets in this browser's cache.`
+                      : "No bets cached locally yet."}
+                  </span>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={onExport}
+                      disabled={exporting}
+                      style={{
+                        padding: "6px 14px",
+                        fontSize: 12,
+                        cursor: exporting ? "wait" : "pointer",
+                      }}
+                    >
+                      {exporting ? "Preparing…" : "Export to CSV"}
+                    </button>
+                    {importedCount > 0 && (
+                      <button
+                        type="button"
+                        className="btn-ghost"
+                        onClick={onClearData}
+                        style={{
+                          padding: "6px 14px",
+                          fontSize: 12,
+                          color: confirmClear
+                            ? "var(--red)"
+                            : "var(--text-muted)",
+                          border: confirmClear
+                            ? "var(--border-w) solid var(--red)"
+                            : undefined,
+                        }}
+                      >
+                        {confirmClear
+                          ? "Click again to confirm"
+                          : "Clear local cache"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {exportMsg && (
+                  <div
                     style={{
-                      padding: "6px 14px",
-                      fontSize: 12,
-                      color: confirmClear ? "var(--red)" : "var(--text-muted)",
-                      border: confirmClear ? "var(--border-w) solid var(--red)" : undefined,
+                      fontSize: 11.5,
+                      color: exportMsg.startsWith("Downloaded")
+                        ? "var(--green)"
+                        : "var(--text-muted)",
+                      fontFamily: "var(--mono)",
                     }}
                   >
-                    {confirmClear ? "Click again to confirm" : "Clear all imported data"}
-                  </button>
+                    {exportMsg}
+                  </div>
                 )}
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "var(--text-faint)",
+                    fontFamily: "var(--mono)",
+                  }}
+                >
+                  Clearing the local cache only wipes the copy in your browser.
+                  Your cloud data stays intact and will re-sync on next sign-in.
+                </div>
               </div>
             </Section>
 
@@ -417,11 +540,10 @@ export default function SettingsPage() {
                   gap: 6,
                 }}
               >
-                <li>· Profile: handle, avatar, bio, public toggle</li>
                 <li>· Bookmaker accounts and balances</li>
                 <li>· CLV preferences (devig method, source priority)</li>
                 <li>· Connected accounts (X / Twitter OAuth)</li>
-                <li>· Data export (CSV / JSON)</li>
+                <li>· Pending-sync retry queue (durability)</li>
                 <li>· Account deletion</li>
               </ul>
             </Section>
