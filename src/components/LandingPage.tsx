@@ -96,9 +96,10 @@ export function LandingPage() {
               <span className="landing-headline-accent">serious punters.</span>
             </h1>
             <p className="landing-sub">
-              Track your bets. Prove your edge with closing-line value.
-              Share a single link that backs every claim with eight years
-              of receipts.
+              No more painstaking data entry. Paste any source —
+              screenshots, X posts, group chats — and AI extracts every
+              bet. Then track your real edge with CLV, equity curves,
+              and a shareable profile.
             </p>
             <div className="landing-cta-row">
               <Link
