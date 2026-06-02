@@ -292,7 +292,19 @@ export default function BetsPage() {
               />
             </div>
 
-            <div className="card" style={{ marginTop: 14, padding: 0, overflow: "hidden" }}>
+            {/* overflowX: auto lets very long parlay-selection rows scroll
+                horizontally inside the card instead of clipping the
+                rightmost P/L column. overflowY: hidden preserves the
+                card's rounded corners — no awkward vertical scrollbar. */}
+            <div
+              className="card"
+              style={{
+                marginTop: 14,
+                padding: 0,
+                overflowX: "auto",
+                overflowY: "hidden",
+              }}
+            >
               <table className="tbl" data-density={density}>
                 <thead>
                   <tr>
