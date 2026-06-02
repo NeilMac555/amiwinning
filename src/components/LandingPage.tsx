@@ -11,6 +11,42 @@ import { BRAND } from "@/lib/brand";
 
 const SAMPLE_HANDLE = "sample";
 
+// Tiny sparkline. 40x14 viewbox — fits under a KPI value in the preview
+// tile. tone picks the stroke color from the existing palette tokens so
+// it adapts when the visitor switches themes.
+function Spark({
+  d,
+  tone,
+}: {
+  d: string;
+  tone: "pos" | "neg" | "neutral";
+}) {
+  const stroke =
+    tone === "pos"
+      ? "var(--green)"
+      : tone === "neg"
+        ? "var(--red)"
+        : "var(--text-muted)";
+  return (
+    <svg
+      className="landing-preview-spark"
+      viewBox="0 0 40 14"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path
+        d={d}
+        stroke={stroke}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.85"
+      />
+    </svg>
+  );
+}
+
 export function LandingPage() {
   return (
     <div className="landing-page">
@@ -92,17 +128,37 @@ export function LandingPage() {
               across ~150 settled bets
             </div>
             <div className="landing-preview-kpi-row">
-              <div>
+              <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">Yield</div>
                 <div className="landing-preview-kpi-value num-pos">+4.1%</div>
+                <Spark
+                  d="M0,10 L7,8 L14,8 L21,6 L28,5 L35,4 L40,3"
+                  tone="pos"
+                />
               </div>
-              <div>
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">ROC</div>
+                <div className="landing-preview-kpi-value num-pos">+28%</div>
+                <Spark
+                  d="M0,11 L8,10 L16,7 L24,6 L32,4 L40,3"
+                  tone="pos"
+                />
+              </div>
+              <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">Win rate</div>
                 <div className="landing-preview-kpi-value">53%</div>
+                <Spark
+                  d="M0,7 L6,5 L12,8 L18,6 L24,4 L30,7 L36,6 L40,5"
+                  tone="neutral"
+                />
               </div>
-              <div>
+              <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">CLV</div>
                 <div className="landing-preview-kpi-value num-pos">+0.8%</div>
+                <Spark
+                  d="M0,8 L8,8 L16,7 L24,7 L32,6 L40,5"
+                  tone="pos"
+                />
               </div>
             </div>
           </div>
