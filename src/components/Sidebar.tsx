@@ -8,6 +8,7 @@ import { BRAND } from "@/lib/brand";
 import { isAdminEmail } from "@/lib/admin";
 import { useMobileNav } from "@/lib/mobile-nav";
 import { BookSwitcher } from "./BookSwitcher";
+import { SyncStatus } from "./SyncStatus";
 
 interface ItemProps {
   label: string;
@@ -241,8 +242,9 @@ export function Sidebar() {
           )}
         />
       </div>
+      <SyncStatus />
       <div className="sb-foot">
-        <span>v0.4.3</span>
+        <span>v0.4.4</span>
         <span>UTC+01</span>
       </div>
       </aside>

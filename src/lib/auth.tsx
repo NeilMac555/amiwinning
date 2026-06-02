@@ -18,7 +18,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "./supabase";
 import { migrateLocalToSupabase, type MigrationResult } from "./migration";
-import { pullFromSupabase } from "./bet-sync";
+import { flushPendingSyncs, pullFromSupabase } from "./bet-sync";
 import { runDataCleanup, type CleanupResult } from "./data-cleanup";
 import { setCurrentUserId } from "./import/store";
 import {
@@ -163,15 +163,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
          
         console.info(`[aiw] migrated ${result.count} bets to Supabase`);
       }
-      // 3. Pull canonical state back into the local cache.
+      // 3. Flush any locally-pending writes BEFORE the pull. Without
+      //    this, the pull would happily wipe an unsynced bet from the
+      //    cache.
+      const flushed = await flushPendingSyncs(user.id);
+      if (cancelled) return;
+      if (flushed.pushed + flushed.deleted > 0) {
+
+        console.info(
+          `[aiw] flushed ${flushed.pushed} pending writes, ${flushed.deleted} pending deletes` +
+            (flushed.failed > 0 ? ` (${flushed.failed} still pending)` : ""),
+        );
+      }
+      // 4. Pull canonical state back into the local cache.
       const pulled = await pullFromSupabase();
       if (cancelled) return;
       if (pulled >= 0) {
-         
+
         console.info(`[aiw] pulled ${pulled} bets from Supabase`);
         setBetsVersion((v) => v + 1);
       }
-      // 4. One-shot data cleanup — reclassify sports + clamp future-dated
+      // 5. One-shot data cleanup — reclassify sports + clamp future-dated
       //    settled kickoffs. Runs after the pull so it operates on the
       //    canonical post-Supabase data, and pushes its changes back up.
       const cleanupResult = await runDataCleanup({ userId: user.id });
@@ -196,6 +208,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Background sync watchdog. Two triggers:
+  //   1. `online` event — browser just regained connectivity, flush any
+  //      writes that failed while offline.
+  //   2. 60s interval — defensive sweep for the long-tail case where the
+  //      online event didn't fire (e.g. wifi flickered briefly without
+  //      tripping the navigator.onLine flag).
+  // Both call flushPendingSyncs which is a no-op when no rows are
+  // flagged, so the wake-up is cheap.
+  useEffect(() => {
+    if (!user) return;
+    const userId = user.id;
+    const runFlush = async () => {
+      const r = await flushPendingSyncs(userId);
+      if (r.pushed + r.deleted > 0) {
+
+        console.info(`[aiw] background flush: ${r.pushed} pushed, ${r.deleted} deleted`);
+        setBetsVersion((v) => v + 1);
+      }
+    };
+    const onOnline = () => void runFlush();
+    window.addEventListener("online", onOnline);
+    const interval = window.setInterval(() => void runFlush(), 60_000);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.clearInterval(interval);
+    };
   }, [user]);
 
   const signInWithEmail = useCallback(async (email: string) => {

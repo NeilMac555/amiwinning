@@ -61,6 +61,17 @@ export interface ImportedBet {
   source: string; // e.g. "import:bettings" / "import:manual"
   importedAt: string;
   raw: Record<string, string>;
+  /** Local-only durability flag. Set true when the bet was written
+   *  locally but hasn't been confirmed in Supabase yet. Cleared by
+   *  pushBet/pushBets on a successful upsert. The flush-pending worker
+   *  in bet-sync retries any bets that still carry this flag.
+   *  Never persisted to Supabase. */
+  _pending?: boolean;
+  /** Local-only "this bet has been deleted locally but the delete
+   *  hasn't reached Supabase yet". The flush worker retries deletes
+   *  too. Tombstone is kept until the remote delete succeeds, then
+   *  the row is fully removed from the cache. */
+  _pendingDelete?: boolean;
 }
 
 // Fields a column can be mapped to.
