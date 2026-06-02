@@ -2053,6 +2053,10 @@ a.sb-item { cursor: pointer; }
   aspect-ratio: 1 / 1;
   border-radius: 2px;
   background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 .cal-year-cell--out { background: transparent; }
 .cal-year-cell--green {
@@ -2064,6 +2068,26 @@ a.sb-item { cursor: pointer; }
 .cal-year-cell--break {
   background: var(--surface);
   border: var(--border-w) solid var(--border-strong);
+}
+/* P/L number embedded in the cell. Mono, tabular, tight. Color is dark
+   by default — works on light themes against the green/red cells, and
+   the dark-scheme overrides below also keep it dark since the cells
+   are bright enough (intensity ≥ 0.6) for dark text on dark themes. */
+.cal-year-cell-pl {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: rgba(10, 10, 9, 0.82);
+  /* Faint shadow gives an extra crispness on busy bg. */
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.25);
+  user-select: none;
+}
+.cal-year-cell--break .cal-year-cell-pl {
+  color: var(--text-muted);
+  text-shadow: none;
 }
 
 .cal-foot {

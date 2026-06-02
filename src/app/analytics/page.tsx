@@ -724,15 +724,29 @@ function YearMonth({
             return <div className="cal-year-cell cal-year-cell--out" key={c.dateIso} />;
           }
           const cls = ["cal-year-cell"];
+          // Bumped min from 0.5 to 0.6 so cells stay saturated enough for
+          // the embedded P/L text to read on dark themes (terminal, slate).
           let intensity = 0.7;
           if (c.pl > 0) {
-            intensity = 0.5 + 0.45 * Math.min(1, Math.abs(c.pl) / heatMax);
+            intensity = 0.6 + 0.35 * Math.min(1, Math.abs(c.pl) / heatMax);
             cls.push("cal-year-cell--green");
           } else if (c.pl < 0) {
-            intensity = 0.5 + 0.45 * Math.min(1, Math.abs(c.pl) / heatMax);
+            intensity = 0.6 + 0.35 * Math.min(1, Math.abs(c.pl) / heatMax);
             cls.push("cal-year-cell--red");
           } else if (c.bets > 0) {
             cls.push("cal-year-cell--break");
+          }
+          // Render P/L as a small signed integer inside the cell. Three
+          // states:
+          //   - no bets that day  → empty cell
+          //   - net non-zero      → "+4" / "-2"
+          //   - net exactly zero  → "·" (push/void day, has bets but flat)
+          let label: string | null = null;
+          if (c.bets > 0) {
+            const n = Math.round(c.pl);
+            if (n > 0) label = `+${n}`;
+            else if (n < 0) label = `${n}`;
+            else label = "·";
           }
           return (
             <div
@@ -744,7 +758,11 @@ function YearMonth({
                   ? c.dateIso
                   : `${c.dateIso} · ${c.bets} bet${c.bets === 1 ? "" : "s"} · ${fmtUnit(c.pl, unit, { signed: true, dp: 0 })}`
               }
-            />
+            >
+              {label && (
+                <span className="cal-year-cell-pl">{label}</span>
+              )}
+            </div>
           );
         })}
       </div>
