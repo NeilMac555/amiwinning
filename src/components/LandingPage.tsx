@@ -124,9 +124,12 @@ export function LandingPage() {
               <div className="landing-feature-num">02</div>
               <h3 className="landing-feature-title">CLV vs the close</h3>
               <p className="landing-feature-body">
-                Pinnacle closing line auto-captured at kickoff. Track your
-                real edge over the market, not just your luck. Edge or
-                luck? The chart tells you.
+                Log the Pinnacle close on each bet and we compute your
+                real edge over the market. The chart separates skill
+                from variance.{" "}
+                <span style={{ color: "var(--text-faint)" }}>
+                  Bookmaker auto-capture coming.
+                </span>
               </p>
             </div>
             <div className="landing-feature">
