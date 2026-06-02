@@ -9,7 +9,7 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
-const SAMPLE_HANDLE = "neilmac555";
+const SAMPLE_HANDLE = "sample";
 
 export function LandingPage() {
   return (
@@ -76,32 +76,33 @@ export function LandingPage() {
           </div>
 
           {/* A mock "preview card" — looks like a tiny version of the
-              profile page hero. */}
+              profile page hero. Values are illustrative; the real demo
+              numbers live at /u/sample. */}
           <div className="landing-preview" aria-hidden="true">
             <div className="landing-preview-head">
-              <div className="landing-preview-avatar">NE</div>
+              <div className="landing-preview-avatar">SA</div>
               <div>
-                <div className="landing-preview-name">Neil Mac</div>
-                <div className="landing-preview-handle">@neilmac555</div>
+                <div className="landing-preview-name">Sample tipster</div>
+                <div className="landing-preview-handle">@sample</div>
               </div>
             </div>
             <div className="landing-preview-label">Lifetime P/L</div>
-            <div className="landing-preview-pl">+369.4u</div>
+            <div className="landing-preview-pl">+42.6u</div>
             <div className="landing-preview-sub">
-              across 8,330 settled bets
+              across ~150 settled bets
             </div>
             <div className="landing-preview-kpi-row">
               <div>
                 <div className="landing-preview-kpi-label">Yield</div>
-                <div className="landing-preview-kpi-value num-pos">+3.7%</div>
+                <div className="landing-preview-kpi-value num-pos">+4.1%</div>
               </div>
               <div>
                 <div className="landing-preview-kpi-label">Win rate</div>
-                <div className="landing-preview-kpi-value">50.3%</div>
+                <div className="landing-preview-kpi-value">53%</div>
               </div>
               <div>
                 <div className="landing-preview-kpi-label">CLV</div>
-                <div className="landing-preview-kpi-value num-pos">+1.30%</div>
+                <div className="landing-preview-kpi-value num-pos">+0.8%</div>
               </div>
             </div>
           </div>
@@ -166,7 +167,7 @@ export function LandingPage() {
                 textDecoration: "none",
               }}
             >
-              View {SAMPLE_HANDLE}&rsquo;s profile →
+              View the sample profile →
             </Link>
           </div>
         </section>

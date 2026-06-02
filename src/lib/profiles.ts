@@ -250,6 +250,14 @@ interface PublicProfileFetchResult {
 export async function getPublicProfileServer(
   handle: string,
 ): Promise<PublicProfileFetchResult> {
+  // Special case: /u/sample is the demo profile linked from the landing
+  // page. Hardcoded data, no Supabase query — ensures the demo always
+  // renders identically and doesn't rely on any real user existing.
+  if (handle === "sample") {
+    const { SAMPLE_PROFILE, SAMPLE_BETS } = await import("./sample-profile");
+    return { profile: SAMPLE_PROFILE, bets: SAMPLE_BETS };
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return { profile: null, bets: [] };
