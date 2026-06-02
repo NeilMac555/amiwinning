@@ -72,7 +72,7 @@ export function LandingPage() {
         {/* Hero ───────────────────────────────────────────────────── */}
         <section className="landing-hero">
           <div className="landing-hero-text">
-            <p className="landing-eyebrow">For tipsters who give a damn.</p>
+            <p className="landing-eyebrow">For punters who give a damn.</p>
             <h1 className="landing-headline">
               The terminal for{" "}
               <span className="landing-headline-accent">serious punters.</span>
