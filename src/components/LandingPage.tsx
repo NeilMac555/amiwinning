@@ -124,6 +124,40 @@ export function LandingPage() {
             </div>
             <div className="landing-preview-label">Lifetime P/L</div>
             <div className="landing-preview-pl">+42.6u</div>
+            {/* Mini equity curve — fills the dead space below the hero
+                number and signals "this is a journey, not a snapshot." */}
+            <svg
+              className="landing-preview-equity"
+              viewBox="0 0 200 36"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {/* Faint zero-baseline */}
+              <line
+                x1="0"
+                x2="200"
+                y1="30"
+                y2="30"
+                stroke="var(--border)"
+                strokeWidth="0.5"
+              />
+              {/* Sample equity path — choppy but trending up.
+                  Hand-tuned to look like real punter variance. */}
+              <path
+                d="M0,30 L8,28 L18,26 L28,29 L40,22 L52,24 L64,18 L78,21 L92,14 L106,17 L120,11 L134,15 L146,9 L160,12 L174,6 L188,8 L200,4"
+                stroke="var(--green)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+              />
+              {/* Subtle area fill under the curve */}
+              <path
+                d="M0,30 L8,28 L18,26 L28,29 L40,22 L52,24 L64,18 L78,21 L92,14 L106,17 L120,11 L134,15 L146,9 L160,12 L174,6 L188,8 L200,4 L200,36 L0,36 Z"
+                fill="var(--green)"
+                opacity="0.08"
+              />
+            </svg>
             <div className="landing-preview-sub">
               across ~150 settled bets
             </div>
@@ -150,6 +184,15 @@ export function LandingPage() {
                 <Spark
                   d="M0,7 L6,5 L12,8 L18,6 L24,4 L30,7 L36,6 L40,5"
                   tone="neutral"
+                />
+              </div>
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">Max DD</div>
+                <div className="landing-preview-kpi-value num-neg">−8.4%</div>
+                {/* Classic drawdown shape: dip then recovery. */}
+                <Spark
+                  d="M0,4 L7,6 L14,9 L21,11 L28,9 L34,7 L40,5"
+                  tone="neg"
                 />
               </div>
               <div className="landing-preview-kpi">
