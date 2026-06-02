@@ -11,15 +11,18 @@ import { BRAND } from "@/lib/brand";
 
 const SAMPLE_HANDLE = "sample";
 
-// Tiny sparkline. 40x14 viewbox — fits under a KPI value in the preview
+// Tiny sparkline. 40x14 viewBox — fits under a KPI value in the preview
 // tile. tone picks the stroke color from the existing palette tokens so
-// it adapts when the visitor switches themes.
+// it adapts when the visitor switches themes. endDot adds a small filled
+// circle at the path's endpoint, like a live "current value" marker.
 function Spark({
   d,
   tone,
+  endDot,
 }: {
   d: string;
   tone: "pos" | "neg" | "neutral";
+  endDot?: boolean;
 }) {
   const stroke =
     tone === "pos"
@@ -27,6 +30,18 @@ function Spark({
       : tone === "neg"
         ? "var(--red)"
         : "var(--text-muted)";
+  // Extract the endpoint from the path data — last absolute x,y the
+  // path string ends with. Simple regex parse; good enough for our
+  // hand-tuned paths which always end in an L or numeric coord pair.
+  let endX: number | null = null;
+  let endY: number | null = null;
+  if (endDot) {
+    const match = d.match(/([0-9.]+)\s*,\s*([0-9.]+)\s*$/);
+    if (match) {
+      endX = parseFloat(match[1]);
+      endY = parseFloat(match[2]);
+    }
+  }
   return (
     <svg
       className="landing-preview-spark"
@@ -43,6 +58,9 @@ function Spark({
         fill="none"
         opacity="0.85"
       />
+      {endX != null && endY != null && (
+        <circle cx={endX} cy={endY} r="1.2" fill={stroke} />
+      )}
     </svg>
   );
 }
@@ -165,42 +183,56 @@ export function LandingPage() {
               <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">Yield</div>
                 <div className="landing-preview-kpi-value num-pos">+4.1%</div>
+                {/* Yield is naturally volatile — choppy uptrend. */}
                 <Spark
-                  d="M0,10 L7,8 L14,8 L21,6 L28,5 L35,4 L40,3"
+                  d="M0,11 L3,12 L6,9 L9,10 L12,8 L15,9 L18,6 L21,7 L24,5 L27,6 L30,4 L33,5 L36,3 L40,2"
                   tone="pos"
+                  endDot
                 />
               </div>
               <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">ROC</div>
                 <div className="landing-preview-kpi-value num-pos">+28%</div>
+                {/* ROC = drawdown-adjusted, so smoother by construction.
+                    Quadratic bezier with T-shorthand for a clean accelerating
+                    curve instead of polygonal lines. */}
                 <Spark
-                  d="M0,11 L8,10 L16,7 L24,6 L32,4 L40,3"
+                  d="M0,12 Q6,11.5 12,10 T24,7 T36,3 L40,2"
                   tone="pos"
+                  endDot
                 />
               </div>
               <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">Win rate</div>
                 <div className="landing-preview-kpi-value">53%</div>
+                {/* High-frequency oscillation around the mid line — every
+                    day's hit rate swings widely even when the long-run is
+                    stable. */}
                 <Spark
-                  d="M0,7 L6,5 L12,8 L18,6 L24,4 L30,7 L36,6 L40,5"
+                  d="M0,7 L3,4 L6,9 L9,5 L12,8 L15,4 L18,7 L21,3 L24,9 L27,5 L30,7 L33,4 L36,7 L40,5"
                   tone="neutral"
                 />
               </div>
               <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">Max DD</div>
                 <div className="landing-preview-kpi-value num-neg">−8.4%</div>
-                {/* Classic drawdown shape: dip then recovery. */}
+                {/* One dominant valley = the max drawdown moment, then
+                    recovery. Smaller dips on either side give it real-
+                    chart character rather than a triangle. */}
                 <Spark
-                  d="M0,4 L7,6 L14,9 L21,11 L28,9 L34,7 L40,5"
+                  d="M0,2 L4,3 L8,3 L12,5 L16,7 L20,11 L24,10 L28,8 L32,6 L36,4 L40,4"
                   tone="neg"
                 />
               </div>
               <div className="landing-preview-kpi">
                 <div className="landing-preview-kpi-label">CLV</div>
                 <div className="landing-preview-kpi-value num-pos">+0.8%</div>
+                {/* Slow persistent positive crawl with mild noise — that's
+                    what real CLV looks like when you have an edge. */}
                 <Spark
-                  d="M0,8 L8,8 L16,7 L24,7 L32,6 L40,5"
+                  d="M0,9 L4,9 L8,8 L12,8 L16,7 L20,8 L24,6 L28,7 L32,5 L36,6 L40,4"
                   tone="pos"
+                  endDot
                 />
               </div>
             </div>
