@@ -244,8 +244,32 @@ export function Sidebar() {
       </div>
       <SyncStatus />
       <div className="sb-foot">
-        <span>v0.4.4</span>
+        <span>v0.4.5</span>
         <span>UTC+01</span>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          padding: "4px 4px 0",
+          fontSize: 10,
+          color: "var(--text-faint)",
+          fontFamily: "var(--mono)",
+          letterSpacing: "0.04em",
+        }}
+      >
+        <Link
+          href="/terms"
+          style={{ color: "inherit", textDecoration: "none" }}
+        >
+          Terms
+        </Link>
+        <Link
+          href="/privacy"
+          style={{ color: "inherit", textDecoration: "none" }}
+        >
+          Privacy
+        </Link>
       </div>
       </aside>
     </>
