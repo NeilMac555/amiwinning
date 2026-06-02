@@ -3353,3 +3353,349 @@ a.sb-item { cursor: pointer; }
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   UserMenu — popover that opens from the sidebar account row. Surfaces
+   share link, theme picker, and inline name/bio editor so they're not
+   buried in Settings. See src/components/UserMenu.tsx.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* The sidebar account row, now rendered as a button (signed-in) or link
+   (signed-out). Restyle to look interactive — hover + open states. */
+.sb-account--button,
+.sb-account--link {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.sb-account--button:hover,
+.sb-account--link:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+.sb-account--button[data-open="true"] {
+  background: var(--surface-2);
+  border-color: var(--text);
+}
+.sb-account--button .avatar {
+  overflow: hidden;
+}
+.sb-account--button .avatar img {
+  display: block;
+}
+
+/* The popover itself — position: fixed so it floats over everything and
+   ignores the sidebar's sticky positioning context. Anchor coords come
+   from JS (getBoundingClientRect) at open-time. */
+.user-menu {
+  position: fixed;
+  z-index: 60;
+  width: 340px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  font-family: var(--sans);
+  animation: user-menu-in 0.12s ease-out;
+}
+@keyframes user-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-menu-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: var(--border-w) solid var(--border);
+}
+.user-menu-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.user-menu-name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-menu-handle {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+}
+
+/* Each section gets its own grouping with a tiny eyebrow label. */
+.user-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.user-menu-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.user-menu-hint,
+.user-menu-loading {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  padding: 4px 0;
+}
+
+/* Share link row — pillar of the menu. URL on the left, copy on the right. */
+.user-menu-share {
+  display: flex;
+  align-items: stretch;
+  border: var(--border-w) solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.user-menu-share-url {
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--surface-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+.user-menu-copy {
+  padding: 0 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--text);
+  border: 0;
+  cursor: pointer;
+  transition: background 0.08s;
+  white-space: nowrap;
+}
+.user-menu-copy:hover {
+  background: var(--text-muted);
+}
+.user-menu-row-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border: var(--border-w) solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  transition: background 0.08s, color 0.08s;
+}
+.user-menu-row-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Inline name + bio editor. */
+.user-menu-input,
+.user-menu-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  font-family: var(--sans);
+  background: var(--surface-2);
+  border: var(--border-w) solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  outline: none;
+}
+.user-menu-input:focus,
+.user-menu-textarea:focus {
+  border-color: var(--text);
+}
+.user-menu-textarea {
+  resize: vertical;
+  line-height: 1.4;
+  min-height: 62px;
+}
+.user-menu-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.user-menu-counter {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  margin-right: auto;
+}
+.user-menu-save {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--sans);
+  border: var(--border-w) solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transition: background 0.08s, color 0.08s, border-color 0.08s;
+}
+.user-menu-save[data-dirty="true"] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  cursor: pointer;
+}
+.user-menu-save[data-dirty="true"]:hover {
+  background: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+/* Theme picker — six swatches laid out 3-up, swatch on top of label. */
+.user-menu-themes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.user-menu-theme {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.08s, border-color 0.08s;
+}
+.user-menu-theme:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+.user-menu-theme[data-active="true"] {
+  border-color: var(--text);
+  background: var(--surface-2);
+}
+.user-menu-theme-swatch {
+  display: flex;
+  width: 40px;
+  height: 18px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.user-menu-theme-swatch > span {
+  flex: 1;
+  display: block;
+}
+.user-menu-theme-label {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.user-menu-theme[data-active="true"] .user-menu-theme-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Footer — full-settings link + sign-out row. */
+.user-menu-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: var(--border-w) solid var(--border);
+}
+.user-menu-foot-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.08s, color 0.08s;
+}
+.user-menu-foot-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.user-menu-foot-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+.user-menu-email {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.user-menu-signout {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: var(--sans);
+  color: var(--text-muted);
+  background: transparent;
+  border: var(--border-w) solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.08s, border-color 0.08s;
+}
+.user-menu-signout:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+/* On mobile the popover should occupy most of the screen rather than try
+   to anchor to a 264px-wide drawer. Sidebar drawer is z-index 50, so the
+   menu at z-index 60 floats above it. */
+@media (max-width: 720px) {
+  .user-menu {
+    left: 8px !important;
+    right: 8px;
+    top: 8px !important;
+    width: auto;
+    max-width: none;
+  }
+}

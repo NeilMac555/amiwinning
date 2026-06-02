@@ -9,6 +9,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { useMobileNav } from "@/lib/mobile-nav";
 import { BookSwitcher } from "./BookSwitcher";
 import { SyncStatus } from "./SyncStatus";
+import { UserMenu } from "./UserMenu";
 
 interface ItemProps {
   label: string;
@@ -63,19 +64,8 @@ function ic(paths: ReactNode) {
 export function Sidebar() {
   const path = usePathname();
   const is = (p: string) => path === p;
-  const { user, configured, signOut } = useAuth();
+  const { user } = useAuth();
   const { isOpen, close } = useMobileNav();
-
-  // Derive initials + display label from the signed-in email.
-  let avatar = "—";
-  let displayName = "Not signed in";
-  let displaySub = configured ? "Sign in to sync" : "Local mode";
-  if (user?.email) {
-    const local = user.email.split("@")[0];
-    avatar = local.slice(0, 2).toUpperCase();
-    displayName = local;
-    displaySub = user.email;
-  }
 
   return (
     <>
@@ -92,68 +82,11 @@ export function Sidebar() {
         <div className="brand-mark" aria-hidden="true"></div>
         {BRAND.name}
       </div>
-      {user ? (
-        <div className="sb-account" title={user.email ?? ""}>
-          <div className="avatar">{avatar}</div>
-          <div className="meta">
-            <b>{displayName}</b>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-              {displaySub}
-            </span>
-          </div>
-          <button
-            onClick={() => signOut()}
-            title="Sign out"
-            style={{
-              padding: 4,
-              border: 0,
-              background: "none",
-              color: "var(--text-faint)",
-              cursor: "pointer",
-            }}
-          >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            >
-              <path d="M5.5 2.5H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2.5M9 4l3 3-3 3M5 7h7" />
-            </svg>
-          </button>
-        </div>
-      ) : (
-        <Link
-          href="/sign-in"
-          className="sb-account"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <div
-            className="avatar"
-            style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
-          >
-            ?
-          </div>
-          <div className="meta">
-            <b>{displayName}</b>
-            <span>{displaySub}</span>
-          </div>
-          <svg
-            className="chev"
-            width="12"
-            height="12"
-            viewBox="0 0 14 14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-          >
-            <path d="M5 3l4 4-4 4" />
-          </svg>
-        </Link>
-      )}
+
+      {/* UserMenu: the clickable account row that opens a popover with
+          share link + theme picker + inline name/bio editor. Previously
+          all of that was buried in Settings. */}
+      <UserMenu />
 
       <BookSwitcher />
 
