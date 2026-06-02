@@ -2208,6 +2208,463 @@ a.sb-item { cursor: pointer; }
   color: #0A0A09;
 }
 
+/* === Marketing landing page (signed-out visitors at /) =================
+   Standalone layout — no sidebar / topbar. Editorial typography, hero +
+   3 features + sample callout + final CTA. Pulls from the same CSS
+   variables so it adopts whatever theme the visitor picked previously. */
+
+.landing-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.landing-topbar {
+  display: flex;
+  align-items: center;
+  padding: 18px 40px;
+  border-bottom: var(--border-w) solid var(--border);
+  position: sticky;
+  top: 0;
+  background: color-mix(in oklab, var(--bg), transparent 8%);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  z-index: 10;
+}
+.landing-main {
+  flex: 1;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 40px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 96px;
+}
+
+/* Hero ─────────────────────────────────────────────────────────────── */
+.landing-hero {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.landing-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.landing-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin: 0;
+}
+.landing-headline {
+  font-family: var(--serif);
+  font-size: 64px;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.0;
+  margin: 0;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  color: var(--text);
+}
+.landing-headline-accent {
+  color: var(--green);
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 80;
+}
+.landing-sub {
+  font-size: 17px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 8px 0 0;
+  max-width: 520px;
+}
+.landing-cta-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.landing-fine {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  margin: 4px 0 0;
+}
+
+/* Preview card on the right of the hero — visual proof */
+.landing-preview {
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04);
+  transform: rotate(-1deg);
+}
+.landing-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.landing-preview-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+.landing-preview-name {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+.landing-preview-handle {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.landing-preview-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 6px;
+}
+.landing-preview-pl {
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  font-variation-settings: "opsz" 144, "SOFT" 20;
+  font-feature-settings: "ss01", "tnum";
+  color: var(--green);
+  line-height: 1;
+}
+.landing-preview-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.landing-preview-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: var(--border-w) solid var(--border);
+}
+.landing-preview-kpi-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.landing-preview-kpi-value {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+  letter-spacing: -0.005em;
+}
+
+/* Features ─────────────────────────────────────────────────────────── */
+.landing-features {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.landing-section-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
+}
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.landing-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 28px 26px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+}
+.landing-feature-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  font-weight: 600;
+}
+.landing-feature-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.018em;
+  margin: 0;
+  color: var(--text);
+}
+.landing-feature-body {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+.landing-mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  color: var(--text);
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* Sample callout ───────────────────────────────────────────────────── */
+.landing-sample {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 40px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+}
+.landing-sample-text {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+}
+.landing-sample-title {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  margin: 0;
+  color: var(--text);
+}
+.landing-sample-body {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Final CTA ────────────────────────────────────────────────────────── */
+.landing-final-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 56px 0 32px;
+  border-top: var(--border-w) solid var(--border);
+}
+.landing-final-title {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.0;
+  margin: 0;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+.landing-final-sub {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 520px;
+}
+
+/* Footer ───────────────────────────────────────────────────────────── */
+.landing-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 40px;
+  border-top: var(--border-w) solid var(--border);
+  background: var(--bg);
+}
+.landing-foot-links {
+  display: flex;
+  gap: 18px;
+  font-size: 12.5px;
+  font-family: var(--mono);
+}
+.landing-foot-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.landing-foot-links a:hover {
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .landing-topbar {
+    padding: 14px 18px;
+  }
+  .landing-main {
+    padding: 36px 18px 56px;
+    gap: 56px;
+  }
+  .landing-hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .landing-headline {
+    font-size: 42px;
+  }
+  .landing-preview {
+    transform: none;
+  }
+  .landing-features-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing-sample {
+    padding: 28px 22px;
+  }
+  .landing-sample-title {
+    font-size: 24px;
+  }
+  .landing-final-title {
+    font-size: 34px;
+  }
+  .landing-foot {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 22px 18px;
+  }
+}
+
+/* === Empty dashboard (first sign-in, zero bets) ======================
+   Shown instead of the data-driven dashboard when the user has nothing
+   logged yet. Three quick-start cards.                                  */
+.empty-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 0 40px;
+}
+.empty-dashboard-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+}
+.empty-dashboard-title {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
+  line-height: 1.05;
+  margin: 0;
+}
+.empty-dashboard-sub {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 540px;
+}
+.empty-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.empty-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 22px 18px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s, transform 0.08s;
+  min-height: 180px;
+}
+.empty-card:hover {
+  border-color: var(--text);
+  transform: translateY(-1px);
+}
+.empty-card-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+.empty-card-title {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.empty-card-body {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+.empty-card-cta {
+  font-size: 12.5px;
+  color: var(--green);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin-top: auto;
+}
+.empty-dashboard-foot {
+  padding-top: 16px;
+  border-top: var(--border-w) solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+@media (max-width: 900px) {
+  .empty-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .empty-card {
+    min-height: 0;
+  }
+  .empty-dashboard-title {
+    font-size: 26px;
+  }
+}
+
 /* === Legal / error standalone pages ================================= */
 .legal-page {
   min-height: 100vh;

@@ -31,21 +31,29 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  // metadataBase lets Next.js resolve relative OG image paths (the
+  // root opengraph-image.tsx and per-profile /u/[handle]/opengraph-
+  // image.tsx) to absolute URLs that Twitter / Facebook can fetch.
+  metadataBase: new URL("https://amiup.io"),
   title: {
     default: BRAND.fullTitle,
     template: `%s · ${BRAND.name}`,
   },
-  description: BRAND.fullTitle,
+  description:
+    "Track your bets, prove your edge, share results. A pro-grade bet tracker with closing-line value, equity curves, and shareable public profiles.",
   openGraph: {
     title: BRAND.fullTitle,
-    description: BRAND.fullTitle,
+    description:
+      "Track your bets, prove your edge, share results. A pro-grade bet tracker with closing-line value, equity curves, and shareable public profiles.",
     siteName: BRAND.name,
     type: "website",
+    url: "https://amiup.io",
   },
   twitter: {
     card: "summary_large_image",
     title: BRAND.fullTitle,
-    description: BRAND.fullTitle,
+    description:
+      "Track your bets, prove your edge, share results.",
   },
 };
 

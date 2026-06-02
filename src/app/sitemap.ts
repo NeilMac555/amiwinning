@@ -1,0 +1,33 @@
+// Sitemap for search engines. Includes only public surfaces — the
+// homepage and the two legal pages. Future enhancement: query Supabase
+// for every public profile and emit a /u/<handle> entry per row. Holding
+// that off until we have enough public profiles to make it worthwhile
+// (and to avoid leaking handle counts in the early days).
+
+import type { MetadataRoute } from "next";
+
+const BASE = "https://amiup.io";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date();
+  return [
+    {
+      url: `${BASE}/`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 1.0,
+    },
+    {
+      url: `${BASE}/terms`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${BASE}/privacy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+  ];
+}

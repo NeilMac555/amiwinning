@@ -17,6 +17,7 @@ import { Breakdown } from "@/components/Breakdown";
 import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
+import { EmptyDashboard } from "@/components/EmptyDashboard";
 import { ProfitPerStake } from "@/components/ProfitPerStake";
 import { RangeTabs } from "@/components/RangeTabs";
 import { WinRateGauge } from "@/components/WinRateGauge";
@@ -26,6 +27,7 @@ import { filterByRange, rangeLabel, type Range } from "@/lib/range";
 import type { ImportedBet } from "@/lib/import/types";
 import { applyTheme, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
+import { LandingPage } from "@/components/LandingPage";
 
 type Source = "mock" | "imported";
 
@@ -128,6 +130,11 @@ export default function Dashboard() {
   // the mock bankroll is dollar-denominated.
   const unit: DisplayUnit = source === "imported" ? settingsUnit : "$";
 
+  // Signed-out visitors see the marketing landing page instead of the
+  // sample dashboard. They came here from an X share, an OG card link,
+  // or word of mouth — not to look at someone else's seed bets.
+  if (!user) return <LandingPage />;
+
   return (
     <UnitProvider unit={unit}>
     <div className="app">
@@ -152,6 +159,15 @@ export default function Dashboard() {
           </div>
 
           {!user && allBets.length > 0 && <SampleDataBanner />}
+
+          {/* Signed-in but no bets yet: show the welcome / get-started
+              cards instead of mock charts. Bail out of the full layout. */}
+          {user && allBets.length === 0 ? (
+            <EmptyDashboard
+              displayName={user.email?.split("@")[0]}
+            />
+          ) : (
+            <>
 
           <PasteHero onCommitted={() => setLocalBump((n) => n + 1)} />
 
@@ -230,6 +246,8 @@ export default function Dashboard() {
             </span>
             <span>UTC+01:00</span>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>
