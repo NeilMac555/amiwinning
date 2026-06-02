@@ -61,7 +61,11 @@ CRITICAL:
 - For multi-leg bets (Double / Treble / Parlay / Accumulator / "leg 1 + leg 2"), output ONE bet with market="parlay" and selection summarising the legs ("Double: <leg 1> + <leg 2>"). The odds apply to the combined parlay.
 - Ignore bookmaker mentions ("Pinnacle", "Bet365", "with Pinnacle") — we don't track them.
 - Be aggressive about extraction even from messy tabular data. Each line/row that has odds + a pick is probably a bet.
-- Sport defaults to "Tennis" if the text mentions ATP / WTA / sets / games / known tennis players (Zverev, Sinner, Alcaraz, Djokovic, Sabalenka, Swiatek, Medvedev, Tsitsipas, Rublev, Auger-Aliassime, Monfils, Tien, Michelsen, etc.). Defaults to "Soccer" otherwise.`;
+- Sport detection — apply these checks in order, return the first match:
+  1. "Tennis" if the text mentions ATP / WTA / "set" or "sets" / "game" or "games" / known tennis players (Zverev, Sinner, Alcaraz, Djokovic, Sabalenka, Swiatek, Medvedev, Tsitsipas, Rublev, Auger-Aliassime, Monfils, Tien, Michelsen, etc.) or grand slams (Wimbledon, US Open, Australian Open, French Open / Roland Garros).
+  2. "Basketball" if the text mentions an NBA team (Lakers, Celtics, Warriors, Bulls, Heat, Knicks, Nets, 76ers, Bucks, Mavericks, Nuggets, Thunder, Clippers, Suns, etc.) or NBA stars (LeBron, Curry, Durant, Giannis, Jokic, Embiid, Doncic / Luka, Tatum, Brown, Kyrie, Lillard, Kawhi, KD, Ja Morant, Edwards, SGA, Wembanyama, Trae Young, etc.) or basketball props ("points", "rebounds", "assists", quarter handicaps, "1H/2H").
+  3. "American Football" if the text mentions an NFL team (Patriots, Bills, Dolphins, Jets, Ravens, Bengals, Browns, Steelers, Chiefs, Raiders, Chargers, Cowboys, Giants, Eagles, Commanders, Bears, Lions, Packers, Vikings, Falcons, Panthers, Saints, Buccaneers, Cardinals, Rams, 49ers, Seahawks, etc.) or NFL stars (Mahomes, Burrow, Allen, Lamar, Hurts, Tua, Herbert, Stafford, Prescott, Lawrence, Henry, McCaffrey / CMC, Barkley, Kelce, Tyreek Hill, Jefferson, Ja'Marr Chase, etc.) or American football props ("passing yards", "rushing yards", "receiving yards", "TD scorer", "1st TD", spread XX.X handicaps with whole/half points typical of NFL).
+  4. "Soccer" otherwise (the historical default — most non-American bettors track soccer primarily).`;
 
 interface ParsedBet {
   kickoff: string;
