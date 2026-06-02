@@ -82,7 +82,7 @@ export function LandingPage() {
             <div className="landing-preview-head">
               <div className="landing-preview-avatar">SA</div>
               <div>
-                <div className="landing-preview-name">Sample tipster</div>
+                <div className="landing-preview-name">Sample Bettor</div>
                 <div className="landing-preview-handle">@sample</div>
               </div>
             </div>

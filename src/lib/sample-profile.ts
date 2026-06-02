@@ -19,7 +19,7 @@ export const SAMPLE_PROFILE: Profile = {
   userId: SAMPLE_USER_ID,
   handle: SAMPLE_HANDLE,
   isPublic: true,
-  displayName: "Sample tipster",
+  displayName: "Sample Bettor",
   bio: "A demo profile showing what your public page could look like. Sign up to build your own.",
   avatarUrl: null,
   createdAt: "2026-01-01T00:00:00.000Z",
