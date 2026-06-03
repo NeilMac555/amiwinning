@@ -5,8 +5,12 @@
 // active book without leaving the dashboard.
 //
 // Three states: input → review → success.
+//
+// As of the launch-day v2, paste accepts EITHER text or screenshots
+// (or both). Vision input goes through the same /api/bets/parse route;
+// Claude Haiku 4.5 handles multimodal natively.
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { appendBets } from "@/lib/import/store";
 import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
@@ -52,18 +56,153 @@ function splitTeams(event: string): { home?: string; away?: string } {
   return {};
 }
 
+// Each attached screenshot kept as a base64 data URL so we can preview it
+// inline AND send it straight to the API without a separate upload step.
+interface AttachedImage {
+  id: string;
+  name: string;
+  dataUrl: string; // "data:image/png;base64,..."
+  mediaType: string; // "image/png", "image/jpeg" etc.
+  bytes: number;
+}
+
+// Anthropic accepts up to ~5MB per image. We cap at 4MB to leave headroom
+// for the base64 inflation overhead in the JSON body. Larger pasted screen-
+// shots get rejected with a clear error rather than a confusing 413 later.
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGES = 4;
+const SUPPORTED_IMAGE_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+]);
+
+function imageUid(): string {
+  return `img-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+// Read a File/Blob as a data URL (base64). Wraps the FileReader API so we
+// can `await` it cleanly.
+async function fileToDataUrl(file: File | Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read image file"));
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("Unexpected image read result"));
+        return;
+      }
+      resolve(result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export function PasteHero({ onCommitted }: Props) {
   const { activeBook } = useAuth();
   const unit = useUnit();
   const [text, setText] = useState("");
+  const [images, setImages] = useState<AttachedImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bets, setBets] = useState<ParsedBet[] | null>(null);
   const [issues, setIssues] = useState<string[]>([]);
   const [justAdded, setJustAdded] = useState<number | null>(null);
+  // Ref to the hidden file input so the "Attach screenshot" button can
+  // open the picker programmatically.
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Image attachment plumbing ──────────────────────────────────────────
+
+  // Accept a flat list of Files (from a paste event or a file picker) and
+  // append the valid ones to the attachments list. Surface a single error
+  // string if any image was rejected — better than silently dropping.
+  const addImages = async (files: File[]) => {
+    if (files.length === 0) return;
+    const accepted: AttachedImage[] = [];
+    const rejected: string[] = [];
+
+    for (const file of files) {
+      if (images.length + accepted.length >= MAX_IMAGES) {
+        rejected.push(
+          `Reached ${MAX_IMAGES}-image limit; "${file.name}" not added`,
+        );
+        continue;
+      }
+      if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
+        rejected.push(
+          `"${file.name}" is ${file.type || "unknown"}; we accept PNG, JPEG, WebP, GIF`,
+        );
+        continue;
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        rejected.push(
+          `"${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)}MB; max 4MB`,
+        );
+        continue;
+      }
+      try {
+        const dataUrl = await fileToDataUrl(file);
+        accepted.push({
+          id: imageUid(),
+          // Pasted images often come through as "image.png" — give them a
+          // friendlier label so the UI doesn't repeat the same name.
+          name: file.name && file.name !== "image.png" ? file.name : "Screenshot",
+          dataUrl,
+          mediaType: file.type,
+          bytes: file.size,
+        });
+      } catch (e) {
+        rejected.push(
+          `Could not read "${file.name}": ${e instanceof Error ? e.message : String(e)}`,
+        );
+      }
+    }
+
+    if (accepted.length > 0) {
+      setImages((prev) => [...prev, ...accepted]);
+      setError(null);
+    }
+    if (rejected.length > 0) {
+      setError(rejected.join(" · "));
+    }
+  };
+
+  // Catches paste events anywhere on the hero card so the user doesn't have
+  // to click into the textarea first. Image clipboard items get extracted
+  // and added; text falls through to the textarea's normal paste handling.
+  const onHeroPaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const items = Array.from(e.clipboardData.items);
+    const imageItems = items.filter((it) => it.kind === "file" && it.type.startsWith("image/"));
+    if (imageItems.length === 0) return; // textarea handles text paste itself
+    e.preventDefault();
+    const files = imageItems
+      .map((it) => it.getAsFile())
+      .filter((f): f is File => f != null);
+    await addImages(files);
+  };
+
+  const onFilePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    // Reset the input value so picking the same file twice still fires
+    // a change event.
+    e.target.value = "";
+    await addImages(files);
+  };
+
+  const removeImage = (id: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  // ── Parse trigger ──────────────────────────────────────────────────────
+
+  // Either text or at least one image is enough to attempt a parse.
+  const hasInput = text.trim().length > 0 || images.length > 0;
 
   const runParse = async () => {
-    if (!text.trim()) return;
+    if (!hasInput) return;
     setLoading(true);
     setError(null);
     setBets(null);
@@ -76,6 +215,12 @@ export function PasteHero({ onCommitted }: Props) {
         body: JSON.stringify({
           text,
           today: new Date().toISOString().slice(0, 10),
+          // Strip the "data:image/...;base64," prefix — Anthropic's API
+          // wants the raw base64 plus a separate media_type field.
+          images: images.map((img) => ({
+            mediaType: img.mediaType,
+            data: img.dataUrl.replace(/^data:[^;]+;base64,/, ""),
+          })),
         }),
       });
       const body = await res.json();
@@ -312,9 +457,14 @@ export function PasteHero({ onCommitted }: Props) {
 
   // -------------------------------------------------------------------------
   // Default state — empty textarea ready for paste.
+  //
+  // onPaste is attached to the WHOLE card (not just the textarea) so an
+  // image clipboard event fires even when focus isn't in the textarea.
+  // The handler only intercepts image items; text falls through to the
+  // textarea's native paste handling.
 
   return (
-    <div className="paste-hero paste-hero--input">
+    <div className="paste-hero paste-hero--input" onPaste={onHeroPaste}>
       {eyebrow}
 
       <h2 className="paste-hero-title">
@@ -322,8 +472,9 @@ export function PasteHero({ onCommitted }: Props) {
       </h2>
       <p className="paste-hero-subtitle">
         X posts, Telegram channels, Substack tips, paper notes, bookmaker
-        copy-paste. AI extracts every bet — date, market, odds, stake,
-        result — ready to commit.
+        copy-paste — <strong>or paste a screenshot directly</strong>. AI
+        extracts every bet — date, market, odds, stake, result — ready to
+        commit.
       </p>
 
       <textarea
@@ -334,21 +485,85 @@ export function PasteHero({ onCommitted }: Props) {
         placeholder={`Sunday
 Barcelona vs Real Madrid · Barcelona -0.75 @ 1.79 · 2u (win)
 Milan vs Atalanta · Atalanta +0.25 @ 2.00 · 2u (win)
-…`}
+…
+or drop a screenshot of your bet slip / X post / Telegram tip in here.`}
         spellCheck={false}
       />
+
+      {/* Thumbnail strip — only renders when at least one image is attached.
+          Each thumb has its own ✕ to detach. Filename + size shown for
+          quick "did the right image attach?" verification. */}
+      {images.length > 0 && (
+        <div className="paste-hero-thumbs">
+          {images.map((img) => (
+            <div key={img.id} className="paste-hero-thumb">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={img.dataUrl} alt={img.name} />
+              <div className="paste-hero-thumb-meta">
+                <span className="paste-hero-thumb-name" title={img.name}>
+                  {img.name}
+                </span>
+                <span className="paste-hero-thumb-size">
+                  {(img.bytes / 1024).toFixed(0)} KB
+                </span>
+              </div>
+              <button
+                type="button"
+                className="paste-hero-thumb-x"
+                onClick={() => removeImage(img.id)}
+                aria-label={`Remove ${img.name}`}
+                title="Remove"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {error && <div className="paste-hero-error">{error}</div>}
 
       <div className="paste-hero-footer">
-        <span className="paste-hero-tip">
-          Tip: prefix parlays with <code>Double:</code> or <code>Treble:</code>
+        <span className="paste-hero-footer-actions">
+          {/* Hidden file input + visible label/button. The button just
+              triggers the input via ref.click() — the standard way to
+              style file pickers without losing keyboard/click semantics. */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            multiple
+            style={{ display: "none" }}
+            onChange={onFilePicked}
+          />
+          <button
+            type="button"
+            className="paste-hero-attach"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading || images.length >= MAX_IMAGES}
+            title={
+              images.length >= MAX_IMAGES
+                ? `Limit ${MAX_IMAGES} images`
+                : "Attach a screenshot (or just Ctrl+V to paste one)"
+            }
+          >
+            <PaperclipIcon />
+            <span>
+              {images.length === 0
+                ? "Attach screenshot"
+                : `${images.length}/${MAX_IMAGES} image${images.length === 1 ? "" : "s"}`}
+            </span>
+          </button>
+          <span className="paste-hero-tip">
+            Tip: prefix parlays with <code>Double:</code> or{" "}
+            <code>Treble:</code>
+          </span>
         </span>
         <button
           type="button"
           className="btn-primary"
           onClick={runParse}
-          disabled={!text.trim() || loading}
+          disabled={!hasInput || loading}
         >
           {loading ? (
             <>Parsing…</>
@@ -361,5 +576,25 @@ Milan vs Atalanta · Atalanta +0.25 @ 2.00 · 2u (win)
         </button>
       </div>
     </div>
+  );
+}
+
+// Tiny inline paperclip icon for the attach button. Inline SVG so we don't
+// pull in a whole icon dep for one glyph.
+function PaperclipIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M11.5 6.5 7 11a3 3 0 0 1-4.2-4.2l5-5a2 2 0 0 1 2.8 2.8L5.7 9.5a1 1 0 0 1-1.4-1.4l4.2-4.2" />
+    </svg>
   );
 }

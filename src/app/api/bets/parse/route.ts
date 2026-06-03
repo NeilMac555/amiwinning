@@ -15,6 +15,19 @@ import { claimAiQuota } from "@/lib/ai-quota";
 const MAX_TEXT_BYTES = 50_000; // ~50KB of paste — generous for normal use.
 const MAX_CHUNKS = 20; // ≈300 lines at 15 lines per chunk. More than enough.
 
+// Image input caps. Anthropic accepts up to ~5MB per image; we cap at 4MB
+// per image and 4 images per request to bound both API spend and request
+// body size (base64 inflation makes the raw JSON 33% larger than the
+// underlying bytes).
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGES = 4;
+const SUPPORTED_IMAGE_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+]);
+
 const VALID_MARKETS: MarketGuess[] = [
   "1X2",
   "ah",
@@ -46,7 +59,7 @@ const VALID_STATUS: Status[] = [
   "half_lost",
 ];
 
-const SYSTEM_PROMPT = `You are a betting tracker's text parser. The user pastes descriptions of one or more sports bets — could be prose, could be tabular columns, could be a screenshot transcription. Extract each as a structured bet and call the submit_bets tool with the full list.
+const SYSTEM_PROMPT = `You are a betting tracker's input parser. The user pastes descriptions of one or more sports bets — could be prose, tabular columns, a screenshot transcription, OR a direct screenshot (bookmaker app, Telegram tip, X post, paper bet slip). If you receive an image, read every bet visible in it including kickoff dates/times, stakes, odds, selections, and results. If you receive both an image and accompanying text, the text is supplementary context (e.g. "these are from yesterday, 2u default stake"). Extract each bet as a structured record and call the submit_bets tool with the full list.
 
 Field guidance:
 - kickoff: ISO YYYY-MM-DD. Resolve relative dates ("Sunday", "yesterday") against TODAY. CRITICAL: A bet that is already settled (won/lost/push/half_won/half_lost) MUST have a kickoff in the past — never today or future. When a relative day is ambiguous (e.g. "Sunday" with no week) and the bet is settled, resolve to the MOST RECENT past occurrence of that day, not the upcoming one. Pending bets may use today or future.
@@ -90,7 +103,12 @@ export async function POST(req: Request): Promise<Response> {
   const auth = await requireUser(req);
   if ("error" in auth) return auth.error;
 
-  let payload: { text?: string; today?: string };
+  // Payload accepts text, images, or both. At least one must be present.
+  interface ImagePayload {
+    mediaType: string;
+    data: string; // raw base64 (no "data:..." prefix)
+  }
+  let payload: { text?: string; today?: string; images?: ImagePayload[] };
   try {
     payload = await req.json();
   } catch {
@@ -98,20 +116,67 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const text = (payload.text ?? "").trim();
-  if (!text) {
-    return NextResponse.json({ error: "text is required" }, { status: 400 });
+  const rawImages = Array.isArray(payload.images) ? payload.images : [];
+
+  if (!text && rawImages.length === 0) {
+    return NextResponse.json(
+      { error: "Provide text or at least one image" },
+      { status: 400 },
+    );
   }
 
-  // 2. Size cap — reject huge pastes outright instead of paying Anthropic
-  //    to chunk them. Byte length, not char count, to handle multibyte.
-  const bytes = new TextEncoder().encode(text).byteLength;
-  if (bytes > MAX_TEXT_BYTES) {
+  // 2. Size cap on text — reject huge pastes outright instead of paying
+  //    Anthropic to chunk them. Byte length, not char count, to handle
+  //    multibyte. Empty text (image-only paste) skips this.
+  if (text) {
+    const bytes = new TextEncoder().encode(text).byteLength;
+    if (bytes > MAX_TEXT_BYTES) {
+      return NextResponse.json(
+        {
+          error: `Paste too large (${(bytes / 1024).toFixed(0)}KB). Maximum is ${MAX_TEXT_BYTES / 1024}KB. Split it into smaller batches or use the spreadsheet importer.`,
+        },
+        { status: 413 },
+      );
+    }
+  }
+
+  // Validate images: count, mime type, and rough size (each base64 byte
+  // represents ~0.75 raw bytes, so 4MB raw = 5.33MB base64).
+  if (rawImages.length > MAX_IMAGES) {
     return NextResponse.json(
-      {
-        error: `Paste too large (${(bytes / 1024).toFixed(0)}KB). Maximum is ${MAX_TEXT_BYTES / 1024}KB. Split it into smaller batches or use the spreadsheet importer.`,
-      },
+      { error: `Maximum ${MAX_IMAGES} images per parse — drop a few and retry.` },
       { status: 413 },
     );
+  }
+  const images: ImagePayload[] = [];
+  for (let i = 0; i < rawImages.length; i++) {
+    const img = rawImages[i];
+    if (!img || typeof img.data !== "string" || typeof img.mediaType !== "string") {
+      return NextResponse.json(
+        { error: `Image ${i + 1}: malformed (missing data or mediaType)` },
+        { status: 400 },
+      );
+    }
+    if (!SUPPORTED_IMAGE_TYPES.has(img.mediaType)) {
+      return NextResponse.json(
+        {
+          error: `Image ${i + 1}: unsupported type "${img.mediaType}" (use PNG, JPEG, WebP, or GIF)`,
+        },
+        { status: 400 },
+      );
+    }
+    // Approx raw bytes = 0.75 * base64 length. Cheap check; avoids fully
+    // decoding the base64 just to measure it.
+    const approxRawBytes = Math.floor(img.data.length * 0.75);
+    if (approxRawBytes > MAX_IMAGE_BYTES) {
+      return NextResponse.json(
+        {
+          error: `Image ${i + 1}: too large (~${(approxRawBytes / 1024 / 1024).toFixed(1)}MB; max ${MAX_IMAGE_BYTES / 1024 / 1024}MB)`,
+        },
+        { status: 413 },
+      );
+    }
+    images.push(img);
   }
 
   const today =
@@ -129,26 +194,38 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // Chunk the input by lines so each LLM call has a small, bounded payload.
-  // Large pastes were truncating Claude's tool_use response and returning
-  // empty bets[]. Chunking dodges that.
-  const allLines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  const CHUNK_LINES = 15;
+  // Chunking strategy:
+  //   - Text-only paste: chunk by lines so each LLM call has a small,
+  //     bounded payload (large pastes were truncating Claude's tool_use
+  //     response and returning empty bets[]).
+  //   - Image-only OR mixed image+text paste: send ONE multimodal call
+  //     with all images + the text as a single user message. Images
+  //     can't be safely split, and the model needs the full visual
+  //     context anyway.
+  const hasImages = images.length > 0;
   const chunks: string[] = [];
-  for (let i = 0; i < allLines.length; i += CHUNK_LINES) {
-    chunks.push(allLines.slice(i, i + CHUNK_LINES).join("\n"));
-  }
-  if (chunks.length === 0) chunks.push(text);
+  if (hasImages) {
+    // Single chunk — the model sees all images plus all text in one shot.
+    chunks.push(text);
+  } else {
+    const allLines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    const CHUNK_LINES = 15;
+    for (let i = 0; i < allLines.length; i += CHUNK_LINES) {
+      chunks.push(allLines.slice(i, i + CHUNK_LINES).join("\n"));
+    }
+    if (chunks.length === 0) chunks.push(text);
 
-  // Hard ceiling on chunks even if MAX_TEXT_BYTES would allow more — belt
-  // and braces against pathological inputs (e.g. one character per line).
-  if (chunks.length > MAX_CHUNKS) {
-    return NextResponse.json(
-      {
-        error: `Too many lines (${allLines.length}). Maximum is ~${MAX_CHUNKS * CHUNK_LINES} per parse — split into smaller batches.`,
-      },
-      { status: 413 },
-    );
+    // Hard ceiling on chunks — belt-and-braces against pathological inputs
+    // (e.g. one character per line). Image mode bypasses this since it's
+    // always exactly one chunk.
+    if (chunks.length > MAX_CHUNKS) {
+      return NextResponse.json(
+        {
+          error: `Too many lines (${allLines.length}). Maximum is ~${MAX_CHUNKS * CHUNK_LINES} per parse — split into smaller batches.`,
+        },
+        { status: 413 },
+      );
+    }
   }
 
   const client = new Anthropic({ apiKey });
@@ -199,7 +276,38 @@ export async function POST(req: Request): Promise<Response> {
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
-    const userPrompt = `TODAY is ${today}.\n\nParse the following bets (chunk ${i + 1} of ${chunks.length}):\n\n${chunk}`;
+
+    // Build the user message content. For text-only mode it's a single
+    // string. For image mode it's an array: every image as an image_block,
+    // followed by a text block with the instruction + any text the user
+    // pasted alongside the image.
+    let userContent: Anthropic.Messages.MessageParam["content"];
+    if (hasImages) {
+      const imageBlocks: Anthropic.Messages.ImageBlockParam[] = images.map(
+        (img) => ({
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: img.mediaType as
+              | "image/png"
+              | "image/jpeg"
+              | "image/webp"
+              | "image/gif",
+            data: img.data,
+          },
+        }),
+      );
+      const textInstruction = chunk
+        ? `TODAY is ${today}.\n\nExtract every bet visible in the attached image(s). The user has also provided this context text — treat it as supplementary information about the image(s):\n\n${chunk}`
+        : `TODAY is ${today}.\n\nExtract every bet visible in the attached image(s).`;
+      userContent = [
+        ...imageBlocks,
+        { type: "text", text: textInstruction },
+      ];
+    } else {
+      userContent = `TODAY is ${today}.\n\nParse the following bets (chunk ${i + 1} of ${chunks.length}):\n\n${chunk}`;
+    }
+
     try {
       const resp = await client.messages.create({
         model: "claude-haiku-4-5",
@@ -213,7 +321,7 @@ export async function POST(req: Request): Promise<Response> {
         ],
         tools: [TOOL_DEF],
         tool_choice: { type: "tool", name: "submit_bets" },
-        messages: [{ role: "user", content: userPrompt }],
+        messages: [{ role: "user", content: userContent }],
       });
       const toolBlock = resp.content.find((c) => c.type === "tool_use");
       if (!toolBlock || toolBlock.type !== "tool_use") {
