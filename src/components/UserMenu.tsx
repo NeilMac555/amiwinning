@@ -13,9 +13,14 @@
 // books, data export) — the menu links over there at the bottom.
 //
 // Implementation notes:
-// - The popover is `position: fixed` and anchored to the trigger's
-//   bounding rect on open. That avoids any clipping from the sidebar's
-//   sticky/fixed positioning context.
+// - The popover is `position: fixed` and rendered into `document.body`
+//   via React.createPortal so it escapes the sidebar's stacking context.
+//   The sidebar has `position: sticky` which creates a stacking context
+//   of its own — without the portal, the popover's z-index is scoped
+//   inside that context and gets painted UNDER sibling content like the
+//   dashboard's paste-hero card. Portal-to-body fixes it.
+// - Anchored to the trigger's bounding rect on open (computed in JS at
+//   open-time, not on every render).
 // - Bio + display name save inline via updateMyProfile. Theme writes
 //   through saveSettings (instant re-skin, no save button).
 // - Profile is loaded once on first open and cached for the session.
@@ -24,6 +29,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/lib/auth";
 import {
   DARK_SCHEME_THEMES,
@@ -272,7 +278,7 @@ export function UserMenu() {
         </svg>
       </button>
 
-      {open && anchor && (
+      {open && anchor && typeof document !== "undefined" && createPortal(
         <div
           ref={popoverRef}
           className="user-menu"
@@ -448,7 +454,8 @@ export function UserMenu() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
