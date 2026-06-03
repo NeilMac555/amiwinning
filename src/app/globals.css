@@ -3387,6 +3387,25 @@ a.sb-item { cursor: pointer; }
   display: block;
 }
 
+/* First-time discovery pulse — a small green dot that draws the eye to
+   the account row until the user opens the menu once. Reuses the same
+   `pulse` keyframes as the live badges elsewhere in the app, so it
+   matches the existing visual language. Dropped from the DOM by the
+   component once aiw_user_menu_seen_v1 is set in localStorage. */
+.sb-account-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+/* While the menu is open, calm the pulse so the open state reads cleanly. */
+.sb-account--button[data-open="true"] .sb-account-pulse {
+  animation: none;
+  opacity: 0.6;
+}
+
 /* The popover itself — position: fixed so it floats over everything and
    ignores the sidebar's sticky positioning context. Anchor coords come
    from JS (getBoundingClientRect) at open-time. */

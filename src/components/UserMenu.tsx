@@ -93,6 +93,33 @@ export function UserMenu() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // First-time discovery nudge — a subtle green pulse dot on the account
+  // row until the user opens the menu once. Persisted in localStorage so
+  // it doesn't come back on the next session. SSR-safe: starts as `true`
+  // (hide the pulse) on both server and client, then an effect post-mount
+  // checks localStorage and flips to `false` if the user is new. That
+  // avoids the hydration mismatch that lazy-localStorage init would cause.
+  const SEEN_KEY = "aiw_user_menu_seen_v1";
+  const [hasSeenMenu, setHasSeenMenu] = useState(true);
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(SEEN_KEY) !== "true") {
+        queueMicrotask(() => setHasSeenMenu(false));
+      }
+    } catch {
+      // localStorage blocked (privacy mode, etc) — leave pulse hidden.
+    }
+  }, []);
+  const markSeen = useCallback(() => {
+    if (hasSeenMenu) return;
+    setHasSeenMenu(true);
+    try {
+      window.localStorage.setItem(SEEN_KEY, "true");
+    } catch {
+      // ignore — UI still updates for the session.
+    }
+  }, [hasSeenMenu]);
+
   // ─ Open / close handling ─────────────────────────────────────────────────
 
   const openMenu = useCallback(() => {
@@ -107,7 +134,8 @@ export function UserMenu() {
       });
     }
     setOpen(true);
-  }, []);
+    markSeen();
+  }, [markSeen]);
 
   // Close on click-outside.
   useEffect(() => {
@@ -261,6 +289,17 @@ export function UserMenu() {
             @{handle}
           </span>
         </div>
+        {/* First-time discovery pulse — same green-dot animation as the
+            "live" badge elsewhere in the app. Drops out forever once the
+            user opens the menu (see markSeen). aria-hidden because it's
+            decorative; the button itself is the affordance. */}
+        {!hasSeenMenu && (
+          <span
+            className="sb-account-pulse"
+            aria-hidden="true"
+            title="Open profile menu"
+          />
+        )}
         <svg
           className="chev"
           width="10"
