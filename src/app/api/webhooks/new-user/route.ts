@@ -65,8 +65,29 @@ export async function POST(req: Request) {
     console.error("[new-user] SIGNUP_WEBHOOK_SECRET env var is not set");
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
-  const providedSecret = req.headers.get("x-signup-webhook-secret");
+  // Defensive trim — webhook providers sometimes append \n or whitespace when
+  // headers round-trip through their UI. Without this we'd 401 on what is
+  // otherwise the right secret.
+  const providedSecret = req.headers.get("x-signup-webhook-secret")?.trim();
   if (providedSecret !== expectedSecret) {
+    // Diagnostic — fingerprint both sides so we can compare in Railway logs
+    // without ever revealing the actual secret. Remove this block once the
+    // webhook is confirmed working end-to-end.
+    const fp = (s: string | undefined | null) =>
+      !s
+        ? "null"
+        : `len=${s.length} first=${s.slice(0, 4)} last=${s.slice(-4)}`;
+    const headerKeys: string[] = [];
+    req.headers.forEach((_v, k) => headerKeys.push(k));
+    console.error(
+      "[new-user] 401 secret mismatch.",
+      "provided:",
+      fp(providedSecret),
+      "expected:",
+      fp(expectedSecret),
+      "headers:",
+      headerKeys.join(","),
+    );
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
