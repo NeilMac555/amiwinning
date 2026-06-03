@@ -3718,3 +3718,297 @@ a.sb-item { cursor: pointer; }
     max-width: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   /import page — redesigned empty state
+   Stepper across the top, drop zone + sample CTA side-by-side, refined
+   auto-detected sources card below. See src/app/import/page.tsx (IdleView).
+   ───────────────────────────────────────────────────────────────────── */
+
+/* 4-step visual stepper. Horizontal at desktop, stacks on mobile via
+   the @media block at the bottom of this section. */
+.import-stepper {
+  margin-top: 18px;
+  padding: 18px 24px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.import-step {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.import-step-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--green);
+}
+.import-step-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.import-step-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--sans);
+  letter-spacing: 0;
+}
+.import-step-arrow {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+/* Drop zone (left) + sample CTA (right). 7fr/5fr ratio so the drop
+   zone visually dominates — it's the primary action. */
+.import-drop-row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 14px;
+  align-items: stretch;
+}
+.import-dropzone {
+  padding: 36px 24px;
+  text-align: center;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.import-dropzone:hover {
+  border-color: var(--text-muted);
+  background: var(--surface-2);
+}
+.import-dropzone[data-over="true"] {
+  border-color: var(--blue);
+  background: var(--blue-tint);
+  transform: scale(1.005);
+}
+.import-dropzone-icon {
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.import-dropzone-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.import-dropzone-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  letter-spacing: 0.01em;
+}
+
+/* Sample CTA card — gentle green tint to feel like an "alternative path"
+   without competing with the primary drop zone. */
+.import-sample-card {
+  padding: 22px 22px 18px;
+  border: var(--border-w) solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.import-sample-card::after {
+  /* Soft green wash at the top — subtle visual cue. */
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: radial-gradient(
+    ellipse at top left,
+    var(--green-tint) 0%,
+    transparent 60%
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+.import-sample-card > * {
+  position: relative;
+  z-index: 1;
+}
+.import-sample-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.import-sample-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px var(--green-tint);
+}
+.import-sample-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.15;
+}
+.import-sample-title em {
+  font-style: italic;
+  color: var(--green);
+}
+.import-sample-body {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+.import-sample-btn {
+  align-self: flex-start;
+  padding: 9px 18px;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.import-sample-fine {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-family: var(--sans);
+  margin-top: 2px;
+}
+.import-mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  color: var(--text-muted);
+}
+
+/* Refined auto-detected sources card. */
+.import-sources {
+  margin-top: 14px;
+  padding: 18px 20px;
+}
+.import-sources-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.import-sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 13px;
+}
+.import-source-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.import-source-badge {
+  flex-shrink: 0;
+}
+.import-source-badge--known {
+  color: var(--green);
+  border-color: var(--green-tint);
+  background: var(--green-bg);
+}
+.import-source-desc {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Sample-tour banner shown on the review screen when the user got here
+   via "Try with sample data". Makes the mode unambiguous. */
+.import-sample-banner {
+  margin-top: 14px;
+  padding: 14px 18px;
+  border: var(--border-w) solid var(--green-tint);
+  background: var(--green-bg);
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.import-sample-banner-icon {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.import-sample-banner-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.import-sample-banner-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: -0.005em;
+}
+.import-sample-banner-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Mobile — stack the drop row, stepper goes vertical, banner stays. */
+@media (max-width: 720px) {
+  .import-drop-row {
+    grid-template-columns: 1fr;
+  }
+  .import-stepper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px 18px;
+  }
+  .import-step {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+    flex: none;
+  }
+  .import-step-num {
+    flex-shrink: 0;
+    width: 28px;
+  }
+  .import-step-title {
+    font-size: 13.5px;
+  }
+  .import-step-sub {
+    margin-left: auto;
+    text-align: right;
+    font-size: 11px;
+  }
+  .import-step-arrow {
+    display: none;
+  }
+}

@@ -10,6 +10,7 @@ import { appendBets, summarise } from "@/lib/import/store";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
 import { Sidebar } from "@/components/Sidebar";
+import { generateSampleImport } from "@/lib/sample-import";
 import {
   FIELD_LABELS,
   type ColumnMap,
@@ -54,6 +55,10 @@ export default function ImportPage() {
   const [bets, setBets] = useState<ImportedBet[]>([]);
   const [issues, setIssues] = useState<NormalisationIssue[]>([]);
   const [committedCount, setCommittedCount] = useState(0);
+  // Tour mode — true when the user clicked "Try with sample data". The
+  // review screen shows a banner and the commit copy changes to make
+  // clear these are demo bets, not from a real file.
+  const [isSample, setIsSample] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -118,6 +123,20 @@ export default function ImportPage() {
     setPhase("committed");
   };
 
+  // "Try with sample data" — jumps the user straight to the review screen
+  // with ~25 in-memory bets so they see the whole flow without dropping a
+  // real file. They can commit (bets land in their active book, taggable
+  // as sample-import) or cancel back to idle.
+  const loadSample = () => {
+    const sample = generateSampleImport();
+    setFile(sample.file);
+    setPreset(null);
+    setBets(sample.bets);
+    setIssues(sample.issues);
+    setIsSample(true);
+    setPhase("review");
+  };
+
   const reset = () => {
     setPhase("idle");
     setFile(null);
@@ -127,6 +146,7 @@ export default function ImportPage() {
     setIssues([]);
     setCommittedCount(0);
     setError(null);
+    setIsSample(false);
   };
 
   return (
@@ -147,9 +167,10 @@ export default function ImportPage() {
           </div>
 
           {phase === "idle" && (
-            <DropZone
+            <IdleView
               onDrop={onDrop}
               onClick={() => inputRef.current?.click()}
+              onTrySample={loadSample}
               presets={ALL_PRESETS}
             />
           )}
@@ -202,8 +223,14 @@ export default function ImportPage() {
               file={file}
               bets={bets}
               issues={issues}
-              presetName={preset?.name ?? "Manual mapping"}
-              onBack={() => setPhase("ready")}
+              presetName={
+                isSample
+                  ? "Sample data tour"
+                  : preset?.name ?? "Manual mapping"
+              }
+              isSample={isSample}
+              onBack={isSample ? reset : () => setPhase("ready")}
+              onCancelSample={reset}
               onCommit={commit}
             />
           )}
@@ -292,67 +319,151 @@ const HEADER_HEURISTICS: Record<string, FieldKey> = {
 
 // ---------------------------------------------------------------------------
 
-function DropZone({
+// IdleView — the redesigned empty state. Editorial hero + 4-step visual
+// stepper + drop-zone-and-sample-CTA side-by-side + refined auto-detected
+// sources card. The "Try with sample data" path jumps the user straight
+// to the review screen so they see the flow end-to-end without dropping
+// a real file.
+function IdleView({
   onDrop,
   onClick,
+  onTrySample,
   presets,
 }: {
   onDrop: (e: React.DragEvent) => void;
   onClick: () => void;
+  onTrySample: () => void;
   presets: SourcePreset[];
 }) {
   const [over, setOver] = useState(false);
+
+  // Each step: short title + one-line description. Kept short so they
+  // fit on one row at desktop widths. Stepper stacks on mobile via CSS.
+  const STEPS: Array<{ num: string; title: string; sub: string }> = [
+    { num: "01", title: "Upload", sub: "CSV or XLSX from any source" },
+    { num: "02", title: "Map", sub: "Known formats auto-fill" },
+    { num: "03", title: "Review", sub: "Every row, before you commit" },
+    { num: "04", title: "Done", sub: "Bets in your log, stats live" },
+  ];
+
   return (
     <>
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          setOver(false);
-          onDrop(e);
-        }}
-        onClick={onClick}
-        style={{
-          marginTop: 14,
-          padding: 64,
-          textAlign: "center",
-          border: `1.5px dashed ${over ? "var(--blue)" : "var(--border-strong)"}`,
-          borderRadius: 12,
-          background: over ? "var(--blue-tint)" : "var(--surface)",
-          cursor: "pointer",
-          transition: "all 0.15s",
-        }}
-      >
-        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-          Drop a file here, or click to choose
+      {/* Stepper — visual reassurance that this is a fast, structured flow.
+          Decorative, not interactive. */}
+      <div className="import-stepper" aria-hidden="true">
+        {STEPS.map((s, i) => (
+          <Fragment key={s.num}>
+            <div className="import-step">
+              <div className="import-step-num">{s.num}</div>
+              <div className="import-step-title">{s.title}</div>
+              <div className="import-step-sub">{s.sub}</div>
+            </div>
+            {i < STEPS.length - 1 && (
+              <svg
+                className="import-step-arrow"
+                width="18"
+                height="14"
+                viewBox="0 0 18 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              >
+                <path d="M2 7h13M11 3l4 4-4 4" />
+              </svg>
+            )}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Drop zone (left) + sample CTA (right). Stack on mobile. */}
+      <div className="import-drop-row">
+        <div
+          className="import-dropzone"
+          data-over={over ? "true" : undefined}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOver(true);
+          }}
+          onDragLeave={() => setOver(false)}
+          onDrop={(e) => {
+            setOver(false);
+            onDrop(e);
+          }}
+          onClick={onClick}
+        >
+          <svg
+            className="import-dropzone-icon"
+            width="36"
+            height="36"
+            viewBox="0 0 36 36"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M18 4v18M11 11l7-7 7 7" />
+            <path d="M5 24v4a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2v-4" />
+          </svg>
+          <div className="import-dropzone-title">
+            Drop a file here, or click to choose
+          </div>
+          <div className="import-dropzone-sub">
+            Accepted: .csv, .tsv, .xlsx, .xls — up to ~50k rows.
+          </div>
         </div>
-        <div style={{ fontSize: 12.5, color: "var(--text-muted)" }}>
-          Accepted: .csv, .tsv, .xlsx, .xls — up to ~50k rows.
+
+        <div className="import-sample-card">
+          <div className="import-sample-eyebrow">
+            <span className="import-sample-dot" aria-hidden="true" />
+            <span>No file yet?</span>
+          </div>
+          <div className="import-sample-title">
+            Try a <em>sample import</em>
+          </div>
+          <div className="import-sample-body">
+            Walk through a complete import in seconds with ~25 realistic
+            bets across soccer and tennis. See the mapping, the review
+            screen, the committed bet log — without dropping your own
+            file first.
+          </div>
+          <button
+            type="button"
+            className="btn-primary import-sample-btn"
+            onClick={onTrySample}
+          >
+            Try with sample data →
+          </button>
+          <div className="import-sample-fine">
+            Sample bets are tagged <span className="import-mono">sample-import</span>.
+            Delete them any time from the bet log.
+          </div>
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14, padding: 20 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-          Auto-detected sources
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
+      {/* Auto-detected sources — same content, restyled to match the
+          new aesthetic. The two-tone badge layout reads as a small
+          legend rather than a bullet list. */}
+      <div className="card import-sources">
+        <div className="import-sources-eyebrow">Auto-detected sources</div>
+        <div className="import-sources-list">
           {presets.map((p) => (
-            <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span className="badge" style={{ color: "var(--green)", borderColor: "var(--green-tint)", background: "var(--green-bg)" }}>
+            <div key={p.id} className="import-source-row">
+              <span className="badge import-source-badge import-source-badge--known">
                 {p.name}
               </span>
-              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
+              <span className="import-source-desc">
                 One-click mapping — header signature is fingerprinted.
               </span>
             </div>
           ))}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-            <span className="badge">Anything else</span>
-            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
-              Map columns manually. Common headers (date / event / odds / stake / etc.) are pre-guessed.
+          <div className="import-source-row">
+            <span className="badge import-source-badge">Anything else</span>
+            <span className="import-source-desc">
+              Map columns manually. Common headers (date / event / odds /
+              stake / etc.) are pre-guessed.
             </span>
           </div>
         </div>
@@ -645,14 +756,18 @@ function ReviewView({
   bets,
   issues,
   presetName,
+  isSample,
   onBack,
+  onCancelSample,
   onCommit,
 }: {
   file: ParsedFile;
   bets: ImportedBet[];
   issues: NormalisationIssue[];
   presetName: string;
+  isSample?: boolean;
   onBack: () => void;
+  onCancelSample?: () => void;
   onCommit: () => void;
 }) {
   const summary = useMemo(() => summarise(bets), [bets]);
@@ -662,6 +777,29 @@ function ReviewView({
 
   return (
     <>
+      {/* Sample-mode banner — makes it unambiguous that these aren't from
+          a real file. The user can commit them as practice or cancel. */}
+      {isSample && (
+        <div className="import-sample-banner" role="status">
+          <div className="import-sample-banner-icon" aria-hidden="true">
+            ✦
+          </div>
+          <div className="import-sample-banner-body">
+            <div className="import-sample-banner-title">
+              You&rsquo;re in sample-data tour mode
+            </div>
+            <div className="import-sample-banner-sub">
+              These {bets.length} bets were generated in your browser, not
+              from a real file. Click <strong>Import as practice</strong>{" "}
+              to add them to your active book (tagged{" "}
+              <span className="import-mono">sample-import</span>, easy to
+              delete from the bet log), or <strong>Cancel</strong> to back
+              out without saving anything.
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="kpi-strip" style={{ marginTop: 14 }}>
         <div className="kpi">
           <div className="kpi-label">Source</div>
@@ -802,8 +940,11 @@ function ReviewView({
           alignItems: "center",
         }}
       >
-        <button className="btn-ghost" onClick={onBack}>
-          ← Back to mapping
+        <button
+          className="btn-ghost"
+          onClick={isSample ? onCancelSample : onBack}
+        >
+          {isSample ? "Cancel — just looking" : "← Back to mapping"}
         </button>
         <button
           className="btn-ghost"
@@ -811,7 +952,9 @@ function ReviewView({
           onClick={onCommit}
           style={{ padding: "8px 16px", fontSize: 13 }}
         >
-          Import {bets.length.toLocaleString()} bets →
+          {isSample
+            ? `Import ${bets.length.toLocaleString()} as practice →`
+            : `Import ${bets.length.toLocaleString()} bets →`}
         </button>
       </div>
     </>
