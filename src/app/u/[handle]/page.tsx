@@ -17,6 +17,7 @@ import { GeneratedAvatar } from "@/components/GeneratedAvatar";
 import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
 import { ProfileEquity } from "./ProfileEquity";
+import { ProfileGate } from "./ProfileGate";
 import type { ImportedBet } from "@/lib/import/types";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
@@ -175,6 +176,12 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* Everything below the equity curve is GATED for signed-out
+            viewers. ProfileGate is a client component that short-circuits
+            to a sign-up CTA if there's no logged-in user. /u/sample is
+            exempted inside the gate (always full view). */}
+        <ProfileGate handle={profile.handle}>
+
         {/* KPI grid */}
         {settledCount > 0 && (
           <section className="profile-kpis">
@@ -297,6 +304,8 @@ export default async function ProfilePage({ params }: PageProps) {
             </p>
           </section>
         )}
+
+        </ProfileGate>
 
         {/* Footer CTA */}
         <footer className="profile-cta">

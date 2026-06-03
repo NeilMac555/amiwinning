@@ -4193,3 +4193,187 @@ a.sb-item { cursor: pointer; }
     margin-top: 6px;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ProfileGate — sign-up conversion gate on public profiles
+   Shown to signed-out viewers in place of the deep-analysis sections
+   (KPI grid, breakdowns, monthly P/L, CLV dist, recent settled). Two
+   visual layers: a blurred KPI "teaser" that hints at the depth behind
+   the gate, then a conversion card with bullet points + a primary CTA.
+   /u/sample bypasses this entirely.
+   ───────────────────────────────────────────────────────────────────── */
+
+.profile-gate {
+  position: relative;
+  margin-top: 28px;
+}
+
+/* The blurred teaser. Same 3-col grid as the real KPI grid would
+   render, but with placeholder numbers and a heavy blur so the
+   shapes are visible but the values aren't readable. Suggests
+   "there's a full report here, you just can't see it yet." */
+.profile-gate-teaser {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  /* The blur is the headline effect. 6px is just enough to render
+     the numbers unreadable while keeping shapes/colors visible. */
+  filter: blur(6px);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  margin-bottom: -120px;  /* let the card overlap into the teaser */
+}
+.profile-gate-teaser-kpi {
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-gate-teaser-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.profile-gate-teaser-value {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The conversion card. Overlaps the bottom edge of the teaser so the
+   viewer's eye is led from blurred-curiosity → readable-CTA in one
+   continuous motion. */
+.profile-gate-card {
+  position: relative;
+  z-index: 2;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: 14px;
+  padding: 32px 36px 30px;
+  /* Soft drop shadow so the card visually lifts off the blurred
+     teaser behind it. */
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.profile-gate-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.profile-gate-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px var(--green-tint);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.profile-gate-title {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+.profile-gate-handle {
+  font-family: var(--mono);
+  font-size: 0.7em;
+  color: var(--text-muted);
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+/* Bullet list of what's behind the gate. Each item leads with a
+   strong-tagged phrase (the metric name) so the value comes through
+   at a glance. Left-aligned despite the centred card so the items
+   read naturally. */
+.profile-gate-list {
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-gate-list li {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  padding-left: 22px;
+  position: relative;
+}
+.profile-gate-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--green);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.profile-gate-list li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.profile-gate-cta {
+  display: inline-block;
+  padding: 12px 26px;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.profile-gate-fine {
+  margin: 16px 0 0;
+  font-size: 11.5px;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+/* On mobile the teaser overflow gets cramped — tighten the grid and
+   reduce the negative margin so the card doesn't overlap awkwardly. */
+@media (max-width: 720px) {
+  .profile-gate-teaser {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: -80px;
+  }
+  .profile-gate-teaser-kpi {
+    padding: 14px 16px;
+  }
+  .profile-gate-teaser-value {
+    font-size: 20px;
+  }
+  .profile-gate-card {
+    padding: 24px 22px;
+  }
+  .profile-gate-title {
+    font-size: 24px;
+  }
+  .profile-gate-list li {
+    font-size: 13px;
+  }
+}
