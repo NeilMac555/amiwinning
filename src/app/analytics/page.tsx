@@ -13,6 +13,7 @@ import { consumeSeed, loadBets } from "@/lib/import/store";
 import type { ImportedBet } from "@/lib/import/types";
 import { applyTheme, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
+import { SAMPLE_BETS } from "@/lib/sample-profile";
 import {
   byDayOfWeek,
   byMarket,
@@ -53,14 +54,28 @@ export default function AnalyticsPage() {
     queueMicrotask(() => setBets(scoped));
   }, [betsVersion, user, activeBook]);
 
-  const monthly = useMemo(() => monthlyPL(bets), [bets]);
-  const seasonal = useMemo(() => bySeasonalMonth(bets), [bets]);
-  const market = useMemo(() => byMarket(bets), [bets]);
-  const dow = useMemo(() => byDayOfWeek(bets), [bets]);
-  const stakeRows = useMemo(() => byStakeSize(bets), [bets]);
-  const streak = useMemo(() => streaks(bets), [bets]);
-
+  // When the user has zero bets we still render every analytics panel,
+  // but seeded with SAMPLE_BETS (the 150-bet deterministic dataset that
+  // also drives /u/sample). That gives a brand-new account a tour of
+  // what Analytics looks like once they actually have data — instead of
+  // a blank page with a single "no bets yet" line, which we know from
+  // user feedback feels like a dead end. A green banner makes it clear
+  // these aren't their numbers.
   const empty = bets.length === 0;
+  const displayBets = empty ? SAMPLE_BETS : bets;
+
+  const monthly = useMemo(() => monthlyPL(displayBets), [displayBets]);
+  const seasonal = useMemo(
+    () => bySeasonalMonth(displayBets),
+    [displayBets],
+  );
+  const market = useMemo(() => byMarket(displayBets), [displayBets]);
+  const dow = useMemo(() => byDayOfWeek(displayBets), [displayBets]);
+  const stakeRows = useMemo(
+    () => byStakeSize(displayBets),
+    [displayBets],
+  );
+  const streak = useMemo(() => streaks(displayBets), [displayBets]);
 
   return (
     <UnitProvider unit={unit}>
@@ -74,17 +89,7 @@ export default function AnalyticsPage() {
                 <h1 className="page-title">Analytics</h1>
                 <div className="page-subtitle">
                   {empty ? (
-                    <>
-                      No bets yet —{" "}
-                      <Link href="/import" style={{ color: "var(--blue)" }}>
-                        import a file
-                      </Link>{" "}
-                      or{" "}
-                      <Link href="/bets/new" style={{ color: "var(--blue)" }}>
-                        log one
-                      </Link>{" "}
-                      to populate.
-                    </>
+                    <>Sample report — based on demo data.</>
                   ) : (
                     <>
                       Where the edge actually lives. Slice by time, day, and stake size.
@@ -94,32 +99,34 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {!empty && (
-              <>
-                <StreaksPanel streak={streak} />
+            {/* Sample-mode banner: shown only when the user has zero bets
+                in the active book. The panels below render the demo data
+                so users see what Analytics actually does, instead of a
+                blank page. */}
+            {empty && <SampleAnalyticsBanner count={SAMPLE_BETS.length} />}
 
-                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-                  <CalendarPanel bets={bets} unit={unit} />
-                </div>
+            <StreaksPanel streak={streak} />
 
-                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-                  <MonthlyPanel rows={monthly} unit={unit} />
-                </div>
+            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+              <CalendarPanel bets={displayBets} unit={unit} />
+            </div>
 
-                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-                  <SeasonalPanel rows={seasonal} unit={unit} />
-                </div>
+            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+              <MonthlyPanel rows={monthly} unit={unit} />
+            </div>
 
-                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-                  <MarketPanel rows={market} unit={unit} />
-                </div>
+            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+              <SeasonalPanel rows={seasonal} unit={unit} />
+            </div>
 
-                <div className="dense-grid row-2">
-                  <DowPanel rows={dow} unit={unit} />
-                  <StakePanel rows={stakeRows} unit={unit} />
-                </div>
-              </>
-            )}
+            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+              <MarketPanel rows={market} unit={unit} />
+            </div>
+
+            <div className="dense-grid row-2">
+              <DowPanel rows={dow} unit={unit} />
+              <StakePanel rows={stakeRows} unit={unit} />
+            </div>
           </div>
         </div>
       </div>
@@ -128,6 +135,42 @@ export default function AnalyticsPage() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+
+// Shown only when the active book has zero real bets. Makes it
+// unambiguous that the analytics below are seeded from demo data, and
+// gives two clear paths to make the page actually theirs.
+function SampleAnalyticsBanner({ count }: { count: number }) {
+  return (
+    <div className="sample-banner" role="status">
+      <div className="sample-banner-icon" aria-hidden="true">
+        ✦
+      </div>
+      <div className="sample-banner-body">
+        <div className="sample-banner-title">
+          Sample analytics — {count.toLocaleString()} demo bets
+        </div>
+        <div className="sample-banner-sub">
+          You don&rsquo;t have any bets in this book yet, so we&rsquo;re
+          showing a tour of what Analytics looks like once you do.
+          Soccer-and-tennis sample data across the last seven months, ~53%
+          win rate. The moment you log or import a bet of your own, this
+          page switches to your real numbers.
+        </div>
+        <div className="sample-banner-actions">
+          <Link href="/import" className="btn-primary sample-banner-cta">
+            Import a file →
+          </Link>
+          <Link href="/bets/new" className="btn-ghost sample-banner-cta">
+            Log a bet →
+          </Link>
+          <Link href="/u/sample" className="sample-banner-link">
+            or see a real public profile →
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function StreaksPanel({ streak }: { streak: StreakSummary }) {
   const currentColor =
