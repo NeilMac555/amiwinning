@@ -319,18 +319,44 @@ export default function NewBetPage() {
                     : "Dump bets in free-form English — AI parses them into rows you can review before committing."}
                 </div>
               </div>
-              <button
-                type="button"
-                className="btn-ghost"
-                onClick={() => {
-                  setMode(mode === "single" ? "paste" : "single");
-                  setPasteError(null);
-                  setParsedBets(null);
-                }}
-                style={{ padding: "5px 12px", fontSize: 12 }}
-              >
-                {mode === "single" ? "Paste multiple →" : "← Single bet"}
-              </button>
+              {mode === "single" ? (
+                // Headline CTA. Pulse + "AI" badge make it unmistakable
+                // that this is the magic feature — not just a "paste
+                // multiple at once" utility. User feedback during
+                // launch (Fanteam Journey on X) was that "Paste
+                // multiple →" felt like a power-user utility, hiding
+                // the actual AI-powered wedge.
+                <button
+                  type="button"
+                  className="btn-paste-ai"
+                  onClick={() => {
+                    setMode("paste");
+                    setPasteError(null);
+                    setParsedBets(null);
+                  }}
+                  title="Paste any source — AI extracts every bet"
+                >
+                  <span className="btn-paste-ai-pulse" aria-hidden="true" />
+                  <span className="btn-paste-ai-text">Paste anything</span>
+                  <span className="btn-paste-ai-badge">AI</span>
+                  <span className="btn-paste-ai-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  onClick={() => {
+                    setMode("single");
+                    setPasteError(null);
+                    setParsedBets(null);
+                  }}
+                  style={{ padding: "5px 12px", fontSize: 12 }}
+                >
+                  ← Single bet
+                </button>
+              )}
             </div>
 
             {mode === "paste" ? (

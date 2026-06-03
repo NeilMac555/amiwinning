@@ -4085,3 +4085,111 @@ a.sb-item { cursor: pointer; }
     padding: 16px 18px;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   "Paste anything" CTA — the headline mode-toggle on /bets/new that flips
+   the form from the manual single-bet entry to the AI paste view.
+   Originally a small text link ("Paste multiple →") which made the AI
+   wedge feel like a power-user utility. Launch-day user feedback was
+   that the AI feature wasn't discoverable from this page. So this is
+   now an eye-catching button: dark background, green pulse dot left,
+   "AI" pill on the right, with a soft pulse glow that announces it.
+   ───────────────────────────────────────────────────────────────────── */
+.btn-paste-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px 9px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--bg);
+  background: var(--text);
+  border: var(--border-w) solid var(--text);
+  border-radius: 7px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform 0.12s,
+    box-shadow 0.12s,
+    background 0.12s;
+  /* The persistent pulse glow. Same green-tint expanding ring we use on
+     the live badges, scaled up because this is a button not a 5px dot. */
+  animation: btn-paste-ai-glow 2.2s ease-out infinite;
+}
+.btn-paste-ai:hover {
+  transform: translateY(-1px);
+  background: var(--text-muted);
+  border-color: var(--text-muted);
+  animation-play-state: paused;
+  box-shadow: 0 6px 18px var(--green-tint);
+}
+.btn-paste-ai:active {
+  transform: translateY(0);
+}
+.btn-paste-ai-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: pulse 1.6s ease-in-out infinite;
+  /* Force this dot to stay visible on the dark button background. */
+  box-shadow: 0 0 0 2px var(--green-tint);
+}
+.btn-paste-ai-text {
+  white-space: nowrap;
+}
+.btn-paste-ai-badge {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 2px 6px 3px;
+  background: var(--green);
+  color: var(--bg);
+  border-radius: 3px;
+  line-height: 1;
+}
+.btn-paste-ai-arrow {
+  font-family: var(--mono);
+  font-size: 14px;
+  opacity: 0.75;
+  transition: transform 0.12s, opacity 0.12s;
+  margin-left: 1px;
+}
+.btn-paste-ai:hover .btn-paste-ai-arrow {
+  transform: translateX(2px);
+  opacity: 1;
+}
+
+@keyframes btn-paste-ai-glow {
+  0% {
+    box-shadow: 0 0 0 0 var(--green-tint);
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-paste-ai,
+  .btn-paste-ai-pulse {
+    animation: none;
+  }
+}
+
+/* On mobile the page header stacks (page-title above the button), but
+   the button should remain prominent — slightly larger so it reads as
+   the primary action. */
+@media (max-width: 720px) {
+  .page-header .btn-paste-ai {
+    padding: 11px 16px;
+    font-size: 14px;
+    margin-top: 6px;
+  }
+}
