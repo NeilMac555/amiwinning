@@ -63,5 +63,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      // Glossary day 3 — Expected Value. Highest combined search
+      // volume of the cluster (~2k/mo "what is EV in sports betting"
+      // alone) so priority is bumped to 0.75.
+      url: `${BASE}/learn/expected-value`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
   ];
 }

@@ -234,10 +234,12 @@ export default function ClvPage() {
             <h2 className="learn-h2">Related terms</h2>
             <ul className="learn-list learn-list--related">
               <li>
-                <strong>Expected Value (EV):</strong> the average win you
-                should make per bet if the same situation happened
-                infinite times. Closely related to CLV; positive CLV
-                implies positive EV against the closing line.
+                <strong>
+                  <Link href="/learn/expected-value">Expected Value (EV):</Link>
+                </strong>{" "}
+                the average win you should make per bet if the same
+                situation happened infinite times. Closely related to CLV;
+                positive CLV implies positive EV against the closing line.
               </li>
               <li>
                 <strong>

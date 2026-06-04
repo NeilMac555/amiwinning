@@ -338,6 +338,7 @@ export function LandingPage() {
           <Link href="/compare/pikkit">vs Pikkit</Link>
           <Link href="/learn/clv">What is CLV?</Link>
           <Link href="/learn/yield">What is Yield?</Link>
+          <Link href="/learn/expected-value">What is EV?</Link>
         </div>
       </footer>
     </div>
