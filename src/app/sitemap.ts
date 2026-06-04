@@ -38,5 +38,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      // Pikkit comparison — second SEO target in the /compare/* series,
+      // catching "Pikkit alternative" / "Pikkit vs Am I Up" searches.
+      url: `${BASE}/compare/pikkit`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
   ];
 }
