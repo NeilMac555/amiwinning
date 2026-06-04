@@ -46,5 +46,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      // Glossary page — first in the /learn/* series. Targets
+      // "what is CLV in betting" + "closing line value" long-tail
+      // searches. More pages in this series shipping daily.
+      url: `${BASE}/learn/clv`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
   ];
 }

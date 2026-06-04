@@ -336,6 +336,7 @@ export function LandingPage() {
           <Link href={`/u/${SAMPLE_HANDLE}`}>Sample profile</Link>
           <Link href="/compare/bettin-gs">vs bettin.gs</Link>
           <Link href="/compare/pikkit">vs Pikkit</Link>
+          <Link href="/learn/clv">What is CLV?</Link>
         </div>
       </footer>
     </div>

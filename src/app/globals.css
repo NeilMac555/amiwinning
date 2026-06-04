@@ -4504,6 +4504,231 @@ a.sb-item { cursor: pointer; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   /learn/* glossary pages. Each one defines a single betting analytics
+   term (CLV, yield, ROC, etc.) for SEO + AI retrieval. Shares most
+   editorial styling with the /compare/* pages — these helpers fill in
+   the few specific bits (breadcrumb, formula box, abbreviation chip).
+   ───────────────────────────────────────────────────────────────────── */
+.learn-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.learn-main {
+  flex: 1;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 28px 80px;
+  font-family: var(--sans);
+}
+
+.learn-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 18px;
+}
+.learn-crumbs a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.1s;
+}
+.learn-crumbs a:hover {
+  color: var(--text);
+}
+.learn-crumbs > span:not(:last-child) {
+  opacity: 0.5;
+}
+
+.learn-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+.learn-title {
+  font-family: var(--serif);
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  line-height: 1.1;
+  color: var(--text);
+  margin: 0 0 18px;
+}
+.learn-abbr {
+  font-style: italic;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.learn-deck {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+}
+
+.learn-section {
+  margin-top: 32px;
+}
+.learn-h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+.learn-section p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+/* The formula chip — monospace, slight inset, looks like a math
+   display rather than running text. */
+.learn-formula {
+  margin: 14px 0;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 14.5px;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  overflow-x: auto;
+}
+.learn-formula code {
+  font-family: inherit;
+  background: none;
+  padding: 0;
+}
+
+.learn-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.learn-list li {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text);
+  padding-left: 22px;
+  position: relative;
+}
+.learn-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--green);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.learn-list li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+/* Related-terms list gets slightly different bullet styling so it
+   doesn't blend into the caveats list above. */
+.learn-list--related li::before {
+  content: "·";
+  font-size: 22px;
+  line-height: 0.7;
+  top: 0;
+}
+
+/* CTA banner — same pattern as compare-cta, slightly tighter */
+.learn-cta {
+  margin-top: 44px;
+  padding: 26px 28px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.learn-cta-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.learn-cta-sub {
+  font-size: 13.5px;
+  color: var(--bg);
+  opacity: 0.72;
+  margin-top: 6px;
+  max-width: 440px;
+  line-height: 1.45;
+}
+.learn-cta .btn-primary {
+  background: var(--green);
+  color: var(--bg);
+  border-color: var(--green);
+}
+
+.learn-foot {
+  margin-top: 44px;
+  padding-top: 22px;
+  border-top: var(--border-w) solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+.learn-foot a {
+  color: var(--text-faint);
+  text-decoration: none;
+  transition: color 0.1s;
+}
+.learn-foot a:hover {
+  color: var(--text);
+}
+
+@media (max-width: 720px) {
+  .learn-main {
+    padding: 24px 18px 60px;
+  }
+  .learn-title {
+    font-size: 32px;
+  }
+  .learn-deck {
+    font-size: 15.5px;
+  }
+  .learn-h2 {
+    font-size: 18px;
+  }
+  .learn-cta {
+    padding: 22px 22px;
+  }
+  .learn-cta-title {
+    font-size: 18px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    "Paste anything" CTA — the headline mode-toggle on /bets/new that flips
    the form from the manual single-bet entry to the AI paste view.
    Originally a small text link ("Paste multiple →") which made the AI
