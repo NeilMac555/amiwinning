@@ -2809,6 +2809,13 @@ a.sb-item { cursor: pointer; }
 .legal-topbar {
   display: flex;
   align-items: center;
+  /* space-between pushes the right-side CTA to the right edge on
+     /compare and /learn pages. On the legal pages (Terms, Privacy)
+     there's only one child so this is a no-op. gap is belt-and-
+     braces against any future layout with multiple right-side
+     children that would otherwise touch each other. */
+  justify-content: space-between;
+  gap: 16px;
   padding: 18px 32px;
   border-bottom: var(--border-w) solid var(--border);
 }
