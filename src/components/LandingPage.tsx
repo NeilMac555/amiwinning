@@ -337,6 +337,7 @@ export function LandingPage() {
           <Link href="/compare/bettin-gs">vs bettin.gs</Link>
           <Link href="/compare/pikkit">vs Pikkit</Link>
           <Link href="/learn/clv">What is CLV?</Link>
+          <Link href="/learn/yield">What is Yield?</Link>
         </div>
       </footer>
     </div>

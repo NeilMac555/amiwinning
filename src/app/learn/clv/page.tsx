@@ -240,9 +240,12 @@ export default function ClvPage() {
                 implies positive EV against the closing line.
               </li>
               <li>
-                <strong>Yield:</strong> total profit divided by total
-                stake, expressed as a percentage. Win-rate-and-odds based,
-                noisier than CLV in small samples.
+                <strong>
+                  <Link href="/learn/yield">Yield:</Link>
+                </strong>{" "}
+                total profit divided by total stake, expressed as a
+                percentage. Win-rate-and-odds based, noisier than CLV in
+                small samples.
               </li>
               <li>
                 <strong>Devig:</strong> the process of stripping the

@@ -55,5 +55,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      // Glossary day 2 — Yield. Targets "what is yield in betting" +
+      // "what is a good yield betting" + "yield vs ROI betting".
+      url: `${BASE}/learn/yield`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
   ];
 }
