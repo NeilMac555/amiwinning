@@ -334,6 +334,7 @@ export function LandingPage() {
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href={`/u/${SAMPLE_HANDLE}`}>Sample profile</Link>
+          <Link href="/compare/bettin-gs">vs bettin.gs</Link>
         </div>
       </footer>
     </div>

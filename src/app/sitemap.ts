@@ -29,5 +29,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    {
+      // SEO comparison page. High priority (0.8) because this is one
+      // of our deliberate long-tail keyword targets ("bettin.gs
+      // alternative", "bet tracker comparison").
+      url: `${BASE}/compare/bettin-gs`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
   ];
 }

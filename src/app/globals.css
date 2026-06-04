@@ -4195,6 +4195,315 @@ a.sb-item { cursor: pointer; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   /compare/* SEO comparison pages. Same editorial spine as the legal
+   pages but wider to accommodate side-by-side tables and decision
+   cards. Designed to look like an honest magazine comparison, not a
+   marketing landing page — the credibility is the conversion lever.
+   ───────────────────────────────────────────────────────────────────── */
+.compare-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.compare-main {
+  flex: 1;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 36px 28px 80px;
+  font-family: var(--sans);
+}
+
+.compare-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+.compare-title {
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--text);
+  margin: 0 0 18px;
+}
+.compare-vs {
+  font-style: italic;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.compare-deck {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0 0 36px;
+  max-width: 680px;
+}
+
+.compare-section {
+  margin-top: 38px;
+}
+.compare-h2 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin: 0 0 16px;
+}
+.compare-section p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+.compare-fine {
+  font-size: 12.5px;
+  color: var(--text-faint);
+  font-style: italic;
+  margin-top: 12px;
+}
+
+/* TL;DR table — at-a-glance comparison */
+.compare-table-wrap {
+  overflow-x: auto;
+  margin: 18px 0 8px;
+  border: var(--border-w) solid var(--border);
+  border-radius: 10px;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: var(--surface);
+}
+.compare-table thead th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-bottom: var(--border-w) solid var(--border);
+}
+.compare-table thead th:nth-child(2),
+.compare-table thead th:nth-child(3) {
+  width: 33%;
+  color: var(--text);
+}
+.compare-table tbody td {
+  padding: 14px 16px;
+  border-bottom: var(--border-w) solid var(--border);
+  vertical-align: top;
+  line-height: 1.45;
+}
+.compare-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.compare-table tbody td:first-child {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+}
+/* Highlight cells where one product has the advantage on a row.
+   Subtle, not loud — readers should still draw their own conclusion. */
+.compare-win {
+  background: var(--green-bg);
+  color: var(--text);
+  font-weight: 500;
+  position: relative;
+}
+
+/* Where-each-wins bullet lists */
+.compare-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.compare-list li {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text);
+  padding-left: 22px;
+  position: relative;
+}
+.compare-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--green);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.compare-list li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.compare-list code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text-muted);
+}
+
+/* Decision tree cards — two side-by-side panels */
+.compare-decision {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 18px 0 12px;
+}
+.compare-decision-card {
+  padding: 22px 24px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: 10px;
+}
+.compare-decision-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+.compare-decision-card ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.compare-decision-card ul li {
+  padding-left: 4px;
+}
+
+/* FAQ section */
+.compare-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 18px;
+}
+.compare-faq-item {
+  border-top: var(--border-w) solid var(--border);
+  padding-top: 18px;
+}
+.compare-faq-q {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.compare-faq-a {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* CTA banner */
+.compare-cta {
+  margin-top: 48px;
+  padding: 28px 32px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.compare-cta-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.compare-cta-sub {
+  font-size: 13.5px;
+  color: var(--bg);
+  opacity: 0.7;
+  margin-top: 6px;
+  max-width: 480px;
+  line-height: 1.45;
+}
+.compare-cta .btn-primary {
+  background: var(--green);
+  color: var(--bg);
+  border-color: var(--green);
+}
+
+/* Footer links — small, monospace, navigation only */
+.compare-foot {
+  margin-top: 48px;
+  padding-top: 22px;
+  border-top: var(--border-w) solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+.compare-foot a {
+  color: var(--text-faint);
+  text-decoration: none;
+  transition: color 0.1s;
+}
+.compare-foot a:hover {
+  color: var(--text);
+}
+
+/* Mobile — collapse the decision grid + tighten paddings */
+@media (max-width: 720px) {
+  .compare-main {
+    padding: 28px 18px 60px;
+  }
+  .compare-title {
+    font-size: 36px;
+  }
+  .compare-deck {
+    font-size: 15.5px;
+  }
+  .compare-h2 {
+    font-size: 22px;
+  }
+  .compare-decision {
+    grid-template-columns: 1fr;
+  }
+  .compare-cta {
+    padding: 22px 22px;
+  }
+  .compare-cta-title {
+    font-size: 18px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    "Paste anything" CTA — the headline mode-toggle on /bets/new that flips
    the form from the manual single-bet entry to the AI paste view.
    Originally a small text link ("Paste multiple →") which made the AI
