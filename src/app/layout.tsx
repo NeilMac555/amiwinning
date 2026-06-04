@@ -55,6 +55,13 @@ export const metadata: Metadata = {
     description:
       "Track your bets, prove your edge, share results.",
   },
+  // Search-console / webmaster verification. Next emits this as
+  // <meta name="google-site-verification" content="..."> inside <head>.
+  // Adding this means Google Search Console can confirm we own
+  // amiup.io and start indexing performance/queries data for us.
+  verification: {
+    google: "ztVlj-Dm3m2YdPKf2dnRt18hnP1mF7I3VqabKF3Hp3M",
+  },
 };
 
 export const viewport: Viewport = {
