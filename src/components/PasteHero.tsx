@@ -382,9 +382,8 @@ export function PasteHero({ onCommitted }: Props) {
           <div className="paste-hero-review-actions">
             <button
               type="button"
-              className="btn-ghost"
+              className="paste-hero-cancel-link"
               onClick={reset}
-              style={{ padding: "7px 14px", fontSize: 12.5 }}
             >
               Cancel
             </button>
@@ -393,7 +392,28 @@ export function PasteHero({ onCommitted }: Props) {
               className="btn-primary paste-hero-commit-cta"
               onClick={commit}
             >
-              Add {bets.length} to {bookName} →
+              {/* Check-circle SVG — universal "confirm" affordance.
+                  Stronger semantic signal than the arrow alone that
+                  this is the commit step, not a navigation step. */}
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                style={{ flexShrink: 0 }}
+              >
+                <circle cx="9" cy="9" r="7.5" />
+                <path d="M5.5 9.2l2.5 2.3 4.5-5" />
+              </svg>
+              <span>
+                Confirm &amp; log {bets.length} bet
+                {bets.length === 1 ? "" : "s"}
+              </span>
             </button>
           </div>
         </div>
