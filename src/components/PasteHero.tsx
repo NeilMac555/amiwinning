@@ -357,9 +357,14 @@ export function PasteHero({ onCommitted }: Props) {
             <h2 className="paste-hero-review-title">
               <em>{bets.length}</em> bet{bets.length === 1 ? "" : "s"} ready
               to log
+              {/* "Not saved" tag — explicit pre-commit state indicator
+                  because user feedback showed people thought parsing
+                  WAS saving. Plain monospace pill, calm not loud, but
+                  unmissable next to the headline. */}
+              <span className="paste-hero-review-pending">Not saved yet</span>
             </h2>
             <div className="paste-hero-review-meta">
-              <span>Review then commit.</span>
+              <span>Tap the green button to log them to {bookName}.</span>
               <span style={{ color: "var(--text-faint)" }}>·</span>
               <span className="mono">
                 {fmtUnit(totalStake, unit, { dp: 0 })} staked
@@ -385,7 +390,7 @@ export function PasteHero({ onCommitted }: Props) {
             </button>
             <button
               type="button"
-              className="btn-primary"
+              className="btn-primary paste-hero-commit-cta"
               onClick={commit}
             >
               Add {bets.length} to {bookName} →
