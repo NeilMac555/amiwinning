@@ -153,6 +153,51 @@ const NBA_TEAMS: string[] = [
   "clippers",
 ];
 
+// NBA player surnames — current stars + role players with prop-bet
+// volume + recent legends. Player-prop bets often skip the team
+// ("LeBron over 25.5 points") so name detection drives classification.
+//
+// Deliberately omitted: bare ambiguous surnames that collide with
+// common English ("ball", "green", "white", "brown", "young", "smart",
+// "george", "thomas", "fox", "miller", "powell", "turner", "porter").
+// Those are matched only via "<first> <last>" full-name forms below.
+const NBA_PLAYERS: string[] = [
+  // Top stars (high prop volume)
+  "lebron", "lebron james", "stephen curry", "steph curry", "durant",
+  "kevin durant", "giannis", "antetokounmpo", "doncic", "luka doncic",
+  "dončić", "tatum", "jayson tatum", "jokic", "nikola jokic", "jokić",
+  "embiid", "joel embiid", "shai", "sga", "gilgeous-alexander",
+  "anthony edwards", "wembanyama", "wemby", "victor wembanyama",
+  // Established stars
+  "harden", "james harden", "lillard", "damian lillard", "kyrie irving",
+  "russell westbrook", "jimmy butler", "kawhi", "kawhi leonard",
+  "paul george", "anthony davis", "ja morant", "devin booker",
+  "donovan mitchell", "darius garland", "haliburton", "tyrese haliburton",
+  "siakam", "pascal siakam", "demar derozan",
+  // Other current rotation players
+  "lavine", "zach lavine", "kuminga", "andrew wiggins", "draymond green",
+  "klay thompson", "jordan poole", "scottie barnes", "fred vanvleet",
+  "porzingis", "kristaps porzingis", "jaylen brown", "derrick white",
+  "jrue holiday", "michael porter jr", "mpj", "kcp", "caldwell-pope",
+  "aaron gordon", "jamal murray", "brunson", "jalen brunson",
+  "julius randle", "hartenstein", "og anunoby", "rj barrett",
+  "brandon ingram", "zion", "zion williamson", "cj mccollum",
+  "valanciunas", "lamelo ball", "lonzo ball", "brandon miller",
+  "mikal bridges", "miles bridges", "nic claxton", "cam thomas",
+  "dennis schroder", "dennis schröder", "trae young", "dejounte murray",
+  "capela", "okongwu", "franz wagner", "banchero", "paolo banchero",
+  "fultz", "markelle fultz", "jonathan isaac", "norman powell",
+  "ivica zubac", "alperen sengun", "jabari smith", "amen thompson",
+  "ausar thompson", "mathurin", "bennedict mathurin", "myles turner",
+  "aaron nesmith", "nembhard", "marcus smart", "coby white",
+  "nikola vucevic", "patrick williams", "buzelis", "cade cunningham",
+  "jaden ivey", "jalen duren", "james wiseman", "malik monk",
+  "deaaron fox", "de'aaron fox", "domantas sabonis", "kevin huerter",
+  "harrison barnes", "kispert",
+  // Big legends still bet on history props
+  "kobe bryant", "shaq", "shaquille", "michael jordan",
+];
+
 const NFL_TEAMS: string[] = [
   "patriots", "bills", "dolphins", "jets", "ravens", "bengals", "browns",
   "steelers", "texans", "colts", "jaguars", "titans", "broncos", "chiefs",
@@ -221,13 +266,37 @@ const SOCCER_MARKETS = [
   /\bfirst\s*goal\b/i,
 ];
 
-// Basketball signatures: "points", "+X.5 spread" with NBA names, quarter handicaps
+// Basketball market signatures — tightly scoped to patterns that don't
+// collide with NFL / NHL / MLB markets. Cross-sport language like "1st
+// quarter", "spread X.5", or "playoffs" is intentionally NOT here — we
+// rely on NBA team and player name matchers for those cases.
+//
+// What's in this list is exclusively basketball:
+//   - Three-digit point totals (NBA games total 200-240; NFL totals
+//     are 40-60, so a three-digit total can only be basketball)
+//   - Player-prop stat words (rebounds, assists, threes, steals,
+//     blocks-as-an-NBA-stat, PRA, double-double, triple-double)
+//   - "NBA" explicitly
 const BASKETBALL_MARKETS = [
-  /\bover\s+\d+(?:\.\d+)?\s*points?\b/i,
-  /\bunder\s+\d+(?:\.\d+)?\s*points?\b/i,
-  /\b(?:1st|2nd|3rd|4th)\s*quarter\b/i,
+  // Three-digit point totals — uniquely NBA
+  /\bover\s+\d{3}(?:\.\d+)?\s*points?\b/i,
+  /\bunder\s+\d{3}(?:\.\d+)?\s*points?\b/i,
+  /\bo\s*\d{3}(?:\.\d+)?\b/i, // "o 224.5"
+  /\bu\s*\d{3}(?:\.\d+)?\b/i,
+  // Player props — NBA-specific stat words
   /\b\d+(?:\.\d+)?\s*rebounds?\b/i,
   /\b\d+(?:\.\d+)?\s*assists?\b/i,
+  /\b\d+(?:\.\d+)?\s*(?:3-?pointers?|threes?|3pm|3ptm)\b/i,
+  /\b\d+(?:\.\d+)?\s*steals?\b/i,
+  /\bover\s+\d+(?:\.\d+)?\s*(?:rebounds?|assists?|threes?|3-?pointers?|steals?)\b/i,
+  /\bunder\s+\d+(?:\.\d+)?\s*(?:rebounds?|assists?|threes?|3-?pointers?|steals?)\b/i,
+  // Combined-stat props (pra = points+rebounds+assists)
+  /\b(?:pra|p\+r\+a|points\s*\+?\s*rebounds\s*\+?\s*assists)\b/i,
+  /\b\d+(?:\.\d+)?\s*(?:pra|p\+r\+a)\b/i,
+  // Double-double / triple-double — uniquely NBA
+  /\b(?:double|triple)\s*-?\s*double\b/i,
+  // Explicit NBA mention
+  /\bnba\b/i,
 ];
 
 const NHL_MARKETS = [
@@ -297,6 +366,7 @@ const SOCCER_CLUB_RE = nameMatcher(SOCCER_CLUBS);
 const SOCCER_LEAGUE_RE = nameMatcher(SOCCER_LEAGUES);
 const TENNIS_TOURNAMENT_RE = nameMatcher(TENNIS_TOURNAMENTS);
 const NBA_RE = nameMatcher(NBA_TEAMS);
+const NBA_PLAYER_RE = nameMatcher(NBA_PLAYERS);
 const NFL_RE = nameMatcher(NFL_TEAMS);
 const MLB_RE = nameMatcher(MLB_TEAMS);
 const NHL_RE = nameMatcher(NHL_TEAMS);
@@ -371,11 +441,16 @@ function detectSignal(input: ClassifyInput): Signal | null {
     return { label: "Soccer", confidence: "high" };
   }
 
-  // ── Basketball
+  // ── Basketball: market signatures, NBA teams, NBA player names.
+  // Player names are important here because player-prop bets ("LeBron
+  // over 25.5 points") often don't mention the team at all.
   if (BASKETBALL_MARKETS.some((re) => re.test(haystack))) {
     return { label: "Basketball", confidence: "high" };
   }
   if (NBA_RE.test(haystack)) {
+    return { label: "Basketball", confidence: "high" };
+  }
+  if (NBA_PLAYER_RE.test(haystack)) {
     return { label: "Basketball", confidence: "high" };
   }
 

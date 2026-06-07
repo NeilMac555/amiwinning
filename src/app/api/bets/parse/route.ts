@@ -74,7 +74,21 @@ CRITICAL:
 - For multi-leg bets (Double / Treble / Parlay / Accumulator / "leg 1 + leg 2"), output ONE bet with market="parlay" and selection summarising the legs ("Double: <leg 1> + <leg 2>"). The odds apply to the combined parlay.
 - Ignore bookmaker mentions ("Pinnacle", "Bet365", "with Pinnacle") — we don't track them.
 - Be aggressive about extraction even from messy tabular data. Each line/row that has odds + a pick is probably a bet.
-- Sport defaults to "Tennis" if the text mentions ATP / WTA / sets / games / known tennis players (Zverev, Sinner, Alcaraz, Djokovic, Sabalenka, Swiatek, Medvedev, Tsitsipas, Rublev, Auger-Aliassime, Monfils, Tien, Michelsen, etc.). Defaults to "Soccer" otherwise.`;
+
+Sport classification (read in order, first match wins):
+- "Tennis" if the text mentions ATP / WTA / sets / games / known tennis players (Zverev, Sinner, Alcaraz, Djokovic, Sabalenka, Swiatek, Medvedev, Tsitsipas, Rublev, Auger-Aliassime, Monfils, Tien, Michelsen, etc.).
+- "Basketball" if the text mentions NBA, basketball-specific player props (points / rebounds / assists / 3-pointers / blocks / steals / double-double / triple-double / PRA), NBA team names (Lakers, Celtics, Warriors, Bucks, Heat, Knicks, Nets, 76ers, Mavericks, Nuggets, Thunder, Suns, Clippers, Pacers, Cavaliers, Magic, etc.), or NBA player names (LeBron, Curry, Durant, Giannis, Dončić, Tatum, Jokić, Embiid, Shai / Gilgeous-Alexander, Wembanyama, Brunson, Anthony Davis, Jaylen Brown, Booker, Edwards, Ant, etc.). Three-digit point totals (e.g. "over 224.5") are strong basketball signals.
+- "American Football" if NFL team names (Chiefs, Cowboys, Eagles, 49ers, Bills, Ravens, etc.) or NFL-specific markets (first touchdown, anytime touchdown scorer).
+- "Baseball" if MLB team names (Yankees, Red Sox, Dodgers, Astros, etc.) or MLB markets (run line, NRFI, YRFI, home runs).
+- "Ice Hockey" if NHL team names (Rangers, Bruins, Maple Leafs, Oilers, etc.) or NHL markets (puck line).
+- "Soccer" otherwise (default).
+
+For basketball markets specifically:
+- Point spread (e.g. "Lakers -5.5") → market="ah"
+- Point total (e.g. "Over 224.5") → market="ou"
+- Money line (e.g. "Lakers ML") → market="1X2"
+- Player props (e.g. "LeBron over 25.5 points") → market="other" with selection preserving the player name and stat
+- Quarter/half markets → market="other"`;
 
 interface ParsedBet {
   kickoff: string;

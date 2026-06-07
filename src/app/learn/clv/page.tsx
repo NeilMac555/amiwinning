@@ -272,8 +272,9 @@ export default function ClvPage() {
               <div className="learn-cta-sub">
                 Log your bets on {BRAND.name} and CLV appears on your
                 dashboard automatically once you&rsquo;ve captured the
-                Pinnacle close. Free, no credit card. Soccer and tennis
-                are first-class today; other sports work too.
+                Pinnacle close. Free, no credit card. Soccer, tennis,
+                and basketball are first-class today; other sports
+                work too.
               </div>
             </div>
             <Link
