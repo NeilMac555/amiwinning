@@ -78,9 +78,9 @@ CRITICAL:
 Sport classification (read in order, first match wins):
 - "Tennis" if the text mentions ATP / WTA / sets / games / known tennis players (Zverev, Sinner, Alcaraz, Djokovic, Sabalenka, Swiatek, Medvedev, Tsitsipas, Rublev, Auger-Aliassime, Monfils, Tien, Michelsen, etc.).
 - "Basketball" if the text mentions NBA, basketball-specific player props (points / rebounds / assists / 3-pointers / blocks / steals / double-double / triple-double / PRA), NBA team names (Lakers, Celtics, Warriors, Bucks, Heat, Knicks, Nets, 76ers, Mavericks, Nuggets, Thunder, Suns, Clippers, Pacers, Cavaliers, Magic, etc.), or NBA player names (LeBron, Curry, Durant, Giannis, Dončić, Tatum, Jokić, Embiid, Shai / Gilgeous-Alexander, Wembanyama, Brunson, Anthony Davis, Jaylen Brown, Booker, Edwards, Ant, etc.). Three-digit point totals (e.g. "over 224.5") are strong basketball signals.
-- "American Football" if NFL team names (Chiefs, Cowboys, Eagles, 49ers, Bills, Ravens, etc.) or NFL-specific markets (first touchdown, anytime touchdown scorer).
-- "Baseball" if MLB team names (Yankees, Red Sox, Dodgers, Astros, etc.) or MLB markets (run line, NRFI, YRFI, home runs).
-- "Ice Hockey" if NHL team names (Rangers, Bruins, Maple Leafs, Oilers, etc.) or NHL markets (puck line).
+- "Baseball" if the text mentions MLB, baseball-specific markets (run line, NRFI, YRFI, F5 / first 5 innings, anytime home run, total bases, strikeouts / Ks, RBIs, earned runs, innings pitched, walk-off, extra innings, World Series, ALDS / NLDS / ALCS / NLCS), MLB team names (Yankees, Red Sox, Dodgers, Astros, Braves, Phillies, Mets, Padres, San Francisco Giants, St Louis Cardinals, Texas Rangers, Blue Jays, etc. — note: bare "Giants" / "Cardinals" / "Rangers" need the city to be MLB), or MLB player names (Aaron Judge, Ohtani, Mookie Betts, Soto, Acuña, Bryce Harper, Tatis, Guerrero, Yordan Alvarez, José Ramírez, Bobby Witt, Henderson, Carroll, Julio Rodríguez, Kyle Tucker, Freeman, Alonso, Machado, Trea Turner, Seager, Lindor, Trout, Altuve, Bregman, Devers, Schwarber, Stanton, Gerrit Cole, Skubal, Skenes, Strider, Wheeler, Burnes, Yamamoto, Snell, Verlander, Scherzer, Kershaw, etc.).
+- "American Football" if NFL team names (Chiefs, Cowboys, Eagles, 49ers, Bills, Ravens, Steelers, Patriots, etc. — note: bare "Giants" / "Cardinals" / "Jets" / "Panthers" need the city to disambiguate) or NFL-specific markets (first touchdown, anytime touchdown scorer, passing yards, rushing yards).
+- "Ice Hockey" if NHL team names (Bruins, Maple Leafs, Oilers, New York Rangers, Florida Panthers, Winnipeg Jets, etc.) or NHL markets (puck line, period-specific goals).
 - "Soccer" otherwise (default).
 
 For basketball markets specifically:
@@ -88,7 +88,15 @@ For basketball markets specifically:
 - Point total (e.g. "Over 224.5") → market="ou"
 - Money line (e.g. "Lakers ML") → market="1X2"
 - Player props (e.g. "LeBron over 25.5 points") → market="other" with selection preserving the player name and stat
-- Quarter/half markets → market="other"`;
+- Quarter/half markets → market="other"
+
+For baseball markets specifically:
+- Run line (e.g. "Dodgers -1.5") → market="ah"
+- Total runs / over-under (e.g. "Over 8.5 runs") → market="ou"
+- Money line (e.g. "Yankees ML") → market="1X2"
+- Pitcher strikeouts / hitter total bases / RBIs / hits (e.g. "Skubal over 7.5 Ks", "Judge 1+ TB") → market="other" with selection preserving the player + stat
+- Anytime / 2+ home runs (e.g. "Ohtani anytime HR") → market="other"
+- NRFI / YRFI / F5 markets → market="other"`;
 
 interface ParsedBet {
   kickoff: string;

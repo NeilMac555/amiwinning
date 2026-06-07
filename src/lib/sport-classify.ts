@@ -198,28 +198,95 @@ const NBA_PLAYERS: string[] = [
   "kobe bryant", "shaq", "shaquille", "michael jordan",
 ];
 
+// NFL teams. "Giants", "Cardinals", "Jets", "Panthers" all collide
+// with MLB / NHL nicknames, so those four are matched only via
+// disambiguated forms (city + nickname). Bare nicknames stay out.
 const NFL_TEAMS: string[] = [
-  "patriots", "bills", "dolphins", "jets", "ravens", "bengals", "browns",
+  "patriots", "bills", "dolphins", "ravens", "bengals", "browns",
   "steelers", "texans", "colts", "jaguars", "titans", "broncos", "chiefs",
-  "raiders", "chargers", "cowboys", "giants", "eagles", "commanders",
-  "bears", "lions", "packers", "vikings", "falcons", "panthers", "saints",
-  "buccaneers", "cardinals", "rams", "49ers", "seahawks",
+  "raiders", "chargers", "cowboys", "eagles", "commanders",
+  "bears", "lions", "packers", "vikings", "falcons", "saints",
+  "buccaneers", "rams", "49ers", "seahawks",
+  // Disambiguated nicknames
+  "new york giants", "ny giants", "n.y. giants",
+  "arizona cardinals", "az cardinals",
+  "new york jets", "ny jets", "n.y. jets",
+  "carolina panthers",
 ];
 
+// MLB teams. Same disambiguation for "Giants", "Cardinals", "Rangers"
+// (all collide with NFL or NHL). Bare nicknames stay out; we match the
+// city-qualified forms instead.
 const MLB_TEAMS: string[] = [
-  "yankees", "red sox", "blue jays", "rays", "orioles", "white sox", "guardians",
-  "tigers", "twins", "royals", "astros", "mariners", "rangers", "angels",
-  "athletics", "braves", "phillies", "mets", "marlins", "nationals", "cubs",
-  "brewers", "cardinals", "reds", "pirates", "dodgers", "giants", "padres",
-  "diamondbacks", "rockies",
+  "yankees", "red sox", "blue jays", "rays", "orioles", "white sox",
+  "guardians", "tigers", "twins", "royals", "astros", "mariners",
+  "angels", "athletics", "braves", "phillies", "mets", "marlins",
+  "nationals", "cubs", "brewers", "reds", "pirates", "dodgers",
+  "padres", "diamondbacks", "d-backs", "dbacks", "rockies",
+  // Disambiguated nicknames
+  "san francisco giants", "sf giants",
+  "st louis cardinals", "st. louis cardinals", "stl cardinals",
+  "texas rangers", "tx rangers",
 ];
 
+// MLB player names — current stars (hitters + starting pitchers) with
+// the most prop-bet volume. Bare surnames are dropped where they
+// collide with common English ("judge", "trout", "cole", "sale") or
+// other sports rosters; those are matched via full "first last" form
+// only. Lowercase, word-boundary matched.
+const MLB_PLAYERS: string[] = [
+  // Top hitters (high prop volume)
+  "aaron judge", "ohtani", "shohei ohtani", "mookie betts", "betts",
+  "juan soto", "soto", "ronald acuna", "ronald acuña", "acuna", "acuña",
+  "bryce harper", "vlad guerrero", "guerrero jr", "vladimir guerrero",
+  "fernando tatis", "tatis jr", "yordan alvarez", "yordan",
+  "jose ramirez", "josé ramírez", "rafael devers", "devers",
+  "bobby witt", "witt jr", "gunnar henderson", "corbin carroll",
+  "adley rutschman", "rutschman", "julio rodriguez", "julio rodríguez",
+  "kyle tucker", "freddie freeman", "pete alonso", "alonso",
+  "manny machado", "machado", "trea turner", "marcus semien", "semien",
+  "corey seager", "seager", "francisco lindor", "lindor",
+  "paul goldschmidt", "goldschmidt", "cody bellinger", "bellinger",
+  "mike trout", "jose altuve", "altuve", "alex bregman", "bregman",
+  "matt olson", "austin riley", "ozzie albies", "albies",
+  "kyle schwarber", "schwarber", "max kepler",
+  "mccutchen", "andrew mccutchen", "j.t. realmuto", "realmuto",
+  "ketel marte", "starling marte", "giancarlo stanton", "stanton",
+  "jake cronenworth", "alec bohm", "nick castellanos", "castellanos",
+  "willy adames", "matt chapman", "luis arraez", "arraez",
+  "jarren duran", "anthony santander", "adolis garcia", "adolis garcía",
+  // Top starting pitchers
+  "gerrit cole", "spencer strider", "strider", "zack wheeler", "wheeler",
+  "corbin burnes", "burnes", "yoshinobu yamamoto", "yamamoto",
+  "logan webb", "tarik skubal", "skubal", "paul skenes", "skenes",
+  "blake snell", "snell", "justin verlander", "verlander",
+  "max scherzer", "scherzer", "clayton kershaw", "kershaw",
+  "sandy alcantara", "alcantara", "tyler glasnow", "glasnow",
+  "garrett crochet", "crochet", "cole ragans", "ragans",
+  "pablo lopez", "pablo lópez", "hunter greene", "george kirby",
+  "logan gilbert", "bobby miller", "bryan woo",
+  "grayson rodriguez", "chris sale", "kevin gausman", "gausman",
+  "zach eflin", "eflin", "luis castillo", "framber valdez", "framber",
+  "kodai senga", "senga", "shota imanaga", "imanaga",
+  "freddy peralta", "michael king",
+  "ranger suarez", "ranger suárez", "aaron nola", "nola",
+  // Recently retired / legends still bet on history props
+  "albert pujols", "pujols", "miguel cabrera",
+];
+
+// NHL teams. "Rangers", "Jets", and "Panthers" collide with MLB / NFL —
+// match only via city-qualified forms. Bare nicknames stay out.
 const NHL_TEAMS: string[] = [
-  "bruins", "rangers", "islanders", "devils", "flyers", "penguins", "capitals",
-  "panthers", "lightning", "maple leafs", "canadiens", "senators", "red wings",
-  "sabres", "blue jackets", "hurricanes", "blackhawks", "blues", "stars",
-  "predators", "wild", "avalanche", "jets", "oilers", "flames", "canucks",
-  "kraken", "ducks", "kings", "sharks", "golden knights", "coyotes", "utah hc",
+  "bruins", "islanders", "devils", "flyers", "penguins", "capitals",
+  "lightning", "maple leafs", "canadiens", "senators", "red wings",
+  "sabres", "blue jackets", "hurricanes", "blackhawks", "blues",
+  "stars", "predators", "wild", "avalanche", "oilers", "flames",
+  "canucks", "kraken", "ducks", "kings", "sharks", "golden knights",
+  "coyotes", "utah hc",
+  // Disambiguated nicknames
+  "new york rangers", "ny rangers", "n.y. rangers",
+  "winnipeg jets",
+  "florida panthers",
 ];
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -304,11 +371,54 @@ const NHL_MARKETS = [
   /\bover\s+\d+(?:\.\d+)?\s*goals?\s*-\s*hockey\b/i,
 ];
 
+// MLB markets — scoped to baseball-exclusive language. Includes the
+// big-volume player-prop terminology (Ks, total bases, hits, RBIs)
+// plus inning-specific markets (NRFI/YRFI, F5) and the run line.
+//
+// Deliberately omitted: "runs" alone (too ambiguous — could be cricket
+// or generic), "hits" alone (rely on "hits X.5" form), and "RBIs" alone
+// (covered by the numeric form).
 const MLB_MARKETS = [
+  // Spread / total / line markers
   /\brun\s*line\b/i,
-  /\bnrfi\b/i,
-  /\byrfi\b/i,
-  /\b(?:home\s*runs?|hr)\s*\d+(?:\.\d+)?\b/i,
+  /\brl\s*[+\-−]\d+(?:\.\d+)?\b/i,
+  // Inning-window markets — extremely common
+  /\bnrfi\b/i, // no runs first inning
+  /\byrfi\b/i, // yes runs first inning
+  /\bf5\s*(?:spread|total|ml|moneyline|line)?\b/i, // first 5 innings
+  /\b(?:1st|first|3rd|third|5th|fifth|7th|seventh|9th|ninth)\s*inning\b/i,
+  /\b(?:first|1st)\s*5\s*innings?\b/i,
+  // Anytime home run / multi-HR
+  /\banytime\s*(?:home\s*run|hr)\b/i,
+  /\bto\s*hit\s*(?:a\s*)?(?:home\s*run|hr)\b/i,
+  /\b(?:2\+|two\s*\+?|multi)\s*(?:home\s*runs?|hrs?)\b/i,
+  /\b(?:home\s*runs?|hr)\s*o(?:ver)?\s*\d+(?:\.\d+)?\b/i,
+  // Pitcher props
+  /\b\d+(?:\.\d+)?\s*(?:strikeouts?|ks|k's|punch\s*outs?)\b/i,
+  /\bover\s+\d+(?:\.\d+)?\s*(?:strikeouts?|ks|k's)\b/i,
+  /\bunder\s+\d+(?:\.\d+)?\s*(?:strikeouts?|ks|k's)\b/i,
+  /\bpitcher\s*(?:strikeouts?|ks|outs?|walks?)\b/i,
+  /\b\d+(?:\.\d+)?\s*earned\s*runs?\b/i,
+  /\b\d+(?:\.\d+)?\s*innings\s*pitched\b/i,
+  // Hitter props
+  /\b\d+(?:\.\d+)?\s*total\s*bases\b/i,
+  /\b\d+(?:\.\d+)?\s*hits?\s*\+?\s*runs?\s*\+?\s*rbis?\b/i,
+  /\bover\s+\d+(?:\.\d+)?\s*hits?\b/i,
+  /\bunder\s+\d+(?:\.\d+)?\s*hits?\b/i,
+  /\b\d+(?:\.\d+)?\s*rbis?\b/i,
+  /\b\d+(?:\.\d+)?\s*doubles?\b/i,
+  /\b\d+(?:\.\d+)?\s*triples?\b/i,
+  /\bgrand\s*slam\b/i,
+  // Game-state / structure markers
+  /\bextra\s*innings?\b/i,
+  /\bwalk[\s-]?off\b/i,
+  // Explicit league mention
+  /\bmlb\b/i,
+  /\bworld\s*series\b/i,
+  /\balds?\b/i, // ALDS / NLDS
+  /\bnlds\b/i,
+  /\balcs\b/i,
+  /\bnlcs\b/i,
 ];
 
 const NFL_MARKETS = [
@@ -369,6 +479,7 @@ const NBA_RE = nameMatcher(NBA_TEAMS);
 const NBA_PLAYER_RE = nameMatcher(NBA_PLAYERS);
 const NFL_RE = nameMatcher(NFL_TEAMS);
 const MLB_RE = nameMatcher(MLB_TEAMS);
+const MLB_PLAYER_RE = nameMatcher(MLB_PLAYERS);
 const NHL_RE = nameMatcher(NHL_TEAMS);
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -462,11 +573,15 @@ function detectSignal(input: ClassifyInput): Signal | null {
     return { label: "Ice Hockey", confidence: "high" };
   }
 
-  // ── MLB
+  // ── MLB. Player names matter a lot here — strikeout / total-base
+  // props often skip the team name ("Skubal over 7.5 Ks").
   if (MLB_MARKETS.some((re) => re.test(haystack))) {
     return { label: "Baseball", confidence: "high" };
   }
   if (MLB_RE.test(haystack)) {
+    return { label: "Baseball", confidence: "high" };
+  }
+  if (MLB_PLAYER_RE.test(haystack)) {
     return { label: "Baseball", confidence: "high" };
   }
 
