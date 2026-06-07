@@ -274,6 +274,151 @@ const MLB_PLAYERS: string[] = [
   "albert pujols", "pujols", "miguel cabrera",
 ];
 
+// ─── Horse racing dictionaries ──────────────────────────────────────────
+
+// Famous race names — uniquely horse racing. Multi-word forms only;
+// no bare "Derby" or "Cup" because they collide with everything.
+const HORSE_RACES: string[] = [
+  // UK + IRE flat
+  "epsom derby", "the derby", "epsom oaks", "the oaks", "2000 guineas",
+  "1000 guineas", "st leger", "st. leger", "king george vi", "king george",
+  "diamond jubilee stakes", "queen anne stakes", "king's stand",
+  "prince of wales's stakes", "prince of wales stakes", "ascot gold cup",
+  "gold cup", "queen elizabeth ii stakes", "champion stakes", "july cup",
+  "nunthorpe stakes", "international stakes", "yorkshire oaks", "ebor",
+  "ebor handicap", "sussex stakes", "goodwood cup", "stewards' cup",
+  "irish derby", "irish oaks", "irish 2000 guineas", "irish 1000 guineas",
+  "irish champion stakes",
+  // UK + IRE jumps
+  "cheltenham gold cup", "champion hurdle", "queen mother champion chase",
+  "stayers' hurdle", "stayers hurdle", "ryanair chase", "supreme novices' hurdle",
+  "supreme novices hurdle", "arkle challenge trophy", "arkle chase",
+  "albert bartlett", "triumph hurdle", "mares' hurdle", "mares hurdle",
+  "grand national", "aintree grand national", "topham chase", "foxhunters' chase",
+  "betfair chase", "king george chase", "tingle creek", "betway bowl",
+  "irish gold cup", "leopardstown chase",
+  // US triple crown + majors
+  "kentucky derby", "preakness stakes", "belmont stakes", "the preakness",
+  "the belmont", "breeders' cup", "breeders cup", "breeders' cup classic",
+  "breeders cup classic", "breeders' cup turf", "breeders' cup mile",
+  "breeders' cup sprint", "travers stakes", "pegasus world cup",
+  "santa anita derby", "wood memorial", "florida derby", "arkansas derby",
+  "dubai world cup", "saudi cup",
+  // France / Europe
+  "prix de l'arc de triomphe", "arc de triomphe", "qatar prix de l'arc",
+  "prix du jockey club", "french derby", "prix de diane", "french oaks",
+  "grand prix de paris",
+  // Australia
+  "melbourne cup", "cox plate", "caulfield cup", "the everest",
+  "golden slipper", "australian derby",
+  // Japan / HK
+  "japan cup", "tenno sho", "hong kong cup", "hong kong vase",
+  "dubai sheema classic",
+];
+
+// Famous racecourses / tracks. Bare "Cheltenham" is intentionally
+// omitted — collides with Cheltenham Town FC in soccer. Cheltenham
+// Festival bets are caught via the race names (Gold Cup, Champion
+// Hurdle, Queen Mother, Stayers' Hurdle, Mares' Hurdle) instead.
+const HORSE_TRACKS: string[] = [
+  // UK
+  "ascot", "newmarket", "aintree", "epsom", "goodwood",
+  "york racecourse", "doncaster racecourse", "haydock park", "haydock",
+  "kempton park", "kempton", "sandown park", "sandown", "newbury",
+  "lingfield", "wolverhampton", "chepstow", "chester racecourse",
+  "ffos las", "ludlow", "uttoxeter", "warwick racecourse",
+  "wetherby", "carlisle racecourse", "catterick", "ayr racecourse",
+  "kelso racecourse", "musselburgh", "hexham", "perth racecourse",
+  "fakenham", "fontwell", "huntingdon racecourse", "leicester racecourse",
+  "lingfield park", "market rasen", "newton abbot", "plumpton",
+  "redcar racecourse", "ripon racecourse", "salisbury racecourse",
+  "southwell", "stratford racecourse", "taunton racecourse",
+  "thirsk racecourse", "towcester", "yarmouth racecourse",
+  // IRE
+  "the curragh", "leopardstown", "fairyhouse", "punchestown",
+  "naas racecourse", "navan", "galway races", "killarney",
+  "tipperary racecourse", "tramore", "ballinrobe", "bellewstown",
+  "clonmel racecourse", "cork racecourse", "downpatrick",
+  "down royal", "dundalk", "gowran park", "kilbeggan", "limerick racecourse",
+  "listowel", "roscommon racecourse", "sligo racecourse", "thurles",
+  "wexford racecourse",
+  // US
+  "churchill downs", "saratoga race course", "saratoga", "belmont park",
+  "santa anita", "del mar racetrack", "del mar", "keeneland",
+  "pimlico race course", "pimlico", "gulfstream park", "aqueduct",
+  "oaklawn park", "fair grounds", "tampa bay downs",
+  // World
+  "longchamp", "chantilly", "deauville", "meydan", "sha tin", "happy valley",
+  "tokyo racecourse", "kyoto racecourse", "flemington", "randwick",
+  "rosehill", "moonee valley", "caulfield", "ellerslie",
+];
+
+// Recent star horses (flat + jumps, 2022-2026). Names tend to be
+// distinctive multi-word constructs — low collision risk.
+const HORSE_NAMES: string[] = [
+  // Flat (UK / IRE / FR)
+  "city of troy", "auguste rodin", "paddington", "baaeed", "frankel",
+  "stradivarius", "enable", "kyprios", "luxembourg", "westover",
+  "vadeni", "alpinista", "tuesday", "savethelastdance",
+  "inspiral", "nashwa", "soul sister", "tahiyra", "shaquille",
+  "rebel's romance", "rebels romance", "mostahdaf", "hukum",
+  "warm heart", "porta fortuna", "lake forest", "fallen angel",
+  // Jumps
+  "constitution hill", "state man", "energumene", "galopin des champs",
+  "honeysuckle", "shishkin", "el fabiolo", "allaho", "marine nationale",
+  "mighty potter", "facile vega", "ballyburn", "fact to file",
+  "il etait temps", "willmount", "monkfish", "appreciate it",
+  "captain guinness", "envoi allen", "klassical dream", "rachael blackmore",
+  // US triple-crown era
+  "mystik dan", "mage", "rich strike", "country house", "authentic",
+  "medina spirit", "justify", "american pharoah", "country grammer",
+  // Australia
+  "winx", "verry elleegant", "anamoe", "nature strip", "without a fight",
+];
+
+// Top jockeys (flat + jumps + US).
+const JOCKEYS: string[] = [
+  // UK flat
+  "frankie dettori", "dettori", "ryan moore", "william buick", "buick",
+  "oisin murphy", "oisín murphy", "rossa ryan", "tom marquand", "marquand",
+  "hollie doyle", "jim crowley", "kieran shoemark", "shoemark",
+  "james doyle", "danny tudhope", "tudhope", "robert havlin",
+  "silvestre de sousa", "andrea atzeni", "atzeni", "rab havlin",
+  // UK / IRE jumps
+  "rachael blackmore", "blackmore", "paul townend", "townend",
+  "jack kennedy", "davy russell", "sean bowen", "harry skelton",
+  "nico de boinville", "de boinville", "harry cobden", "cobden",
+  "brian hughes", "danny mcmenamin", "sam twiston-davies",
+  "twiston-davies", "freddie gingell",
+  // US
+  "irad ortiz", "irad ortiz jr", "joel rosario", "rosario", "flavien prat",
+  "prat", "tyler gaffalione", "gaffalione", "john velazquez", "velazquez",
+  "javier castellano", "castellano", "luis saez", "luis sáez",
+  "florent geroux", "geroux", "manny franco", "manny franco",
+];
+
+// Top trainers.
+const TRAINERS: string[] = [
+  // UK flat
+  "john gosden", "gosden", "charlie appleby", "appleby", "william haggas",
+  "haggas", "saeed bin suroor", "andrew balding", "balding", "roger varian",
+  "varian", "richard hannon", "ralph beckett", "beckett", "mark johnston",
+  // IRE flat
+  "aidan o'brien", "joseph o'brien", "donnacha o'brien", "ger lyons",
+  "jessica harrington", "harrington", "dermot weld", "weld",
+  // UK jumps
+  "nicky henderson", "paul nicholls", "dan skelton", "venetia williams",
+  "jonjo o'neill", "alan king", "fergal o'brien", "kim bailey",
+  "harry fry", "olly murphy", "lucinda russell",
+  // IRE jumps
+  "willie mullins", "gordon elliott", "henry de bromhead", "de bromhead",
+  "joseph o'brien", "noel meade", "mouse morris",
+  // US
+  "bob baffert", "baffert", "todd pletcher", "pletcher", "steve asmussen",
+  "asmussen", "brad cox", "chad brown", "william mott", "shug mcgaughey",
+  "kenny mcpeek", "mcpeek",
+];
+
 // NHL teams. "Rangers", "Jets", and "Panthers" collide with MLB / NFL —
 // match only via city-qualified forms. Bare nicknames stay out.
 const NHL_TEAMS: string[] = [
@@ -426,13 +571,61 @@ const NFL_MARKETS = [
   /\bspread\s*[+\-−]\d+(?:\.\d+)?\b/i,
 ];
 
+// Horse racing markets — the vocabulary is highly distinctive once you
+// strip out the generic "place" / "win" words that collide with every
+// other sport. We rely on horse-racing-exclusive language: each-way,
+// non-runner, Rule 4, BOG, starting price, forecast/tricast, ante post,
+// going state (good/soft/heavy/firm), distance markers (furlongs),
+// race-class language (handicap mark, maiden, novice, group/grade).
 const HORSE_RACING_MARKETS = [
-  /\bto\s*win\s*race\b/i,
-  /\beach\s*way\b/i,
-  /\b\d+\s*to\s*\d+\b/i, // simple fractional, weak signal
-  /\bplaced?\b/i,
+  // Stake structures unique to horse racing
+  /\beach[\s-]?way\b/i,
+  /\bew\s*(?:only|return)?\b/i, // "EW" as standalone — limited risk because it's word-boundary matched
+  /\bplace\s*only\b/i,
+  /\bto\s*place\b/i,
+  /\bwin\s*\+?\s*place\b/i,
   /\bforecast\b/i,
   /\btricast\b/i,
+  /\breverse\s*forecast\b/i,
+  /\bstraight\s*forecast\b/i,
+  /\bexacta\b/i,
+  /\bquinella\b/i,
+  /\btrifecta\b/i,
+  /\bsuperfecta\b/i,
+  /\bpick\s*\d\b/i, // Pick 3 / Pick 4 / Pick 6 — US tote
+  // Pricing language unique to horse racing
+  /\bnon[\s-]?runner\b/i,
+  /\bnr\s+(?:rule|deduction|refund|applied)\b/i,
+  /\brule\s*4\b/i,
+  /\br4\s*(?:deduction)?\b/i,
+  /\bbog\b/i,
+  /\bbest\s*odds\s*guaranteed\b/i,
+  /\bstarting\s*price\b/i,
+  /\bsp\s*(?:only|favourite)\b/i,
+  /\bante[\s-]?post\b/i,
+  // Race-state / track conditions
+  /\bgoing\s*[:=]?\s*(?:good|soft|heavy|firm|fast|slow|yielding|standard)\b/i,
+  /\b(?:soft|heavy|good\s*to\s*soft|good\s*to\s*firm|firm)\s*going\b/i,
+  // Race class / structure (UK + IRE NH and Flat)
+  /\bmaiden\s*(?:race|hurdle|chase|stakes?)\b/i,
+  /\bnovice\s*(?:hurdle|chase|stakes?)\b/i,
+  /\bnovices?'?\s*(?:hurdle|chase)\b/i,
+  /\bhandicap\s*(?:hurdle|chase|stakes?|mark|race)\b/i,
+  /\bclaiming\s*race\b/i,
+  /\bclaimer\b/i,
+  /\bgroup\s*[1-3]\b/i,
+  /\bgrade\s*[1-3]\b/i,
+  /\blisted\s*race\b/i,
+  /\bnational\s*hunt\b/i,
+  /\bflat\s*race\b/i,
+  /\b(?:hurdle|chase|bumper)\s*race\b/i,
+  /\bnh\s*flat\b/i,
+  // Distance (furlongs notation — uniquely horse racing in betting text)
+  /\b\d+f\s*(?:\d+y)?\b/i, // "5f", "1m4f", "1m4f 207y"
+  /\b\d+m\d+f\b/i, // "1m4f"
+  /\b\d+\s*furlongs?\b/i,
+  // Pool-betting language
+  /\btote\s*(?:win|place|exacta|trifecta)\b/i,
 ];
 
 const BOXING_MMA_MARKETS = [
@@ -481,6 +674,11 @@ const NFL_RE = nameMatcher(NFL_TEAMS);
 const MLB_RE = nameMatcher(MLB_TEAMS);
 const MLB_PLAYER_RE = nameMatcher(MLB_PLAYERS);
 const NHL_RE = nameMatcher(NHL_TEAMS);
+const HORSE_RACES_RE = nameMatcher(HORSE_RACES);
+const HORSE_TRACKS_RE = nameMatcher(HORSE_TRACKS);
+const HORSE_NAMES_RE = nameMatcher(HORSE_NAMES);
+const JOCKEYS_RE = nameMatcher(JOCKEYS);
+const TRAINERS_RE = nameMatcher(TRAINERS);
 
 // ─────────────────────────────────────────────────────────────────────────
 // Public API
@@ -593,7 +791,31 @@ function detectSignal(input: ClassifyInput): Signal | null {
     return { label: "American Football", confidence: "high" };
   }
 
-  // ── Combat sports / golf / cricket / horse racing — weaker signals
+  // ── Horse Racing. High-confidence when ANY of the following hit:
+  // a famous race name, a famous track, a recent star horse, a top
+  // jockey or trainer, or the horse-racing-specific market vocabulary
+  // (each-way, NR, Rule 4, BOG, forecast, tricast, distance in
+  // furlongs, going state, race-class language).
+  if (HORSE_RACES_RE.test(haystack)) {
+    return { label: "Horse Racing", confidence: "high" };
+  }
+  if (HORSE_TRACKS_RE.test(haystack)) {
+    return { label: "Horse Racing", confidence: "high" };
+  }
+  if (HORSE_NAMES_RE.test(haystack)) {
+    return { label: "Horse Racing", confidence: "high" };
+  }
+  if (JOCKEYS_RE.test(haystack)) {
+    return { label: "Horse Racing", confidence: "high" };
+  }
+  if (TRAINERS_RE.test(haystack)) {
+    return { label: "Horse Racing", confidence: "high" };
+  }
+  if (HORSE_RACING_MARKETS.some((re) => re.test(haystack))) {
+    return { label: "Horse Racing", confidence: "high" };
+  }
+
+  // ── Combat sports / golf / cricket — weaker signals
   if (BOXING_MMA_MARKETS.some((re) => re.test(haystack))) {
     return { label: "MMA", confidence: "medium" };
   }
@@ -602,9 +824,6 @@ function detectSignal(input: ClassifyInput): Signal | null {
   }
   if (CRICKET_MARKETS.some((re) => re.test(haystack))) {
     return { label: "Cricket", confidence: "medium" };
-  }
-  if (HORSE_RACING_MARKETS.some((re) => re.test(haystack))) {
-    return { label: "Horse Racing", confidence: "low" };
   }
 
   return null;

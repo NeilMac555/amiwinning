@@ -48,7 +48,7 @@ const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Which sports does Am I Up support?",
-    a: "Soccer, tennis, basketball, and baseball are first-class right now (deepest market parsing, sport classification including NBA player props and MLB strikeout / total-base props, CLV against Pinnacle close). Other sports work but the AI parsing is less precise. NFL is next on the rollout, then NHL, MMA, horse racing, cricket, and golf in turn.",
+    a: "Soccer, tennis, basketball, baseball, and horse racing are first-class right now (deepest market parsing, sport classification including NBA player props, MLB strikeout / total-base props, and horse racing markets like each-way / NR / Rule 4 / forecast / tricast plus famous race + jockey + trainer recognition, CLV against Pinnacle close). Other sports work but the AI parsing is less precise. NFL is next on the rollout, then NHL, MMA, cricket, golf, boxing, and esports.",
   },
   {
     q: "Is my data private?",
@@ -258,9 +258,9 @@ export default function ComparePage() {
                 <strong>Coverage breadth.</strong> bettin.gs handles every
                 major sport (horse racing, golf, NFL, NBA, cricket, darts,
                 snooker) with mature parsing. Am I Up&rsquo;s deepest
-                parsing is in soccer, tennis, basketball, and baseball
-                right now, with NFL up next. Other sports work but with
-                less precision today.
+                parsing is in soccer, tennis, basketball, baseball, and
+                horse racing right now, with NFL up next. Other sports
+                work but with less precision today.
               </li>
               <li>
                 <strong>Decade of polish.</strong> A platform that&rsquo;s

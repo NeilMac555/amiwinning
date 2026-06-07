@@ -81,6 +81,7 @@ Sport classification (read in order, first match wins):
 - "Baseball" if the text mentions MLB, baseball-specific markets (run line, NRFI, YRFI, F5 / first 5 innings, anytime home run, total bases, strikeouts / Ks, RBIs, earned runs, innings pitched, walk-off, extra innings, World Series, ALDS / NLDS / ALCS / NLCS), MLB team names (Yankees, Red Sox, Dodgers, Astros, Braves, Phillies, Mets, Padres, San Francisco Giants, St Louis Cardinals, Texas Rangers, Blue Jays, etc. — note: bare "Giants" / "Cardinals" / "Rangers" need the city to be MLB), or MLB player names (Aaron Judge, Ohtani, Mookie Betts, Soto, Acuña, Bryce Harper, Tatis, Guerrero, Yordan Alvarez, José Ramírez, Bobby Witt, Henderson, Carroll, Julio Rodríguez, Kyle Tucker, Freeman, Alonso, Machado, Trea Turner, Seager, Lindor, Trout, Altuve, Bregman, Devers, Schwarber, Stanton, Gerrit Cole, Skubal, Skenes, Strider, Wheeler, Burnes, Yamamoto, Snell, Verlander, Scherzer, Kershaw, etc.).
 - "American Football" if NFL team names (Chiefs, Cowboys, Eagles, 49ers, Bills, Ravens, Steelers, Patriots, etc. — note: bare "Giants" / "Cardinals" / "Jets" / "Panthers" need the city to disambiguate) or NFL-specific markets (first touchdown, anytime touchdown scorer, passing yards, rushing yards).
 - "Ice Hockey" if NHL team names (Bruins, Maple Leafs, Oilers, New York Rangers, Florida Panthers, Winnipeg Jets, etc.) or NHL markets (puck line, period-specific goals).
+- "Horse Racing" if the text mentions: horse-racing-specific markets (each-way / EW, non-runner / NR, Rule 4, BOG, starting price / SP, forecast / tricast / exacta / trifecta / superfecta, ante post, going state — good / soft / heavy / firm, race class — maiden / novice / handicap / Group 1 / Grade 1, distance in furlongs — e.g. "5f", "1m4f"); famous race names (Cheltenham Gold Cup, Champion Hurdle, Queen Mother Champion Chase, Stayers' Hurdle, Grand National, Kentucky Derby, Preakness, Belmont, Breeders' Cup, Royal Ascot, Epsom Derby, 2000 Guineas, St Leger, Melbourne Cup, Cox Plate, Prix de l'Arc de Triomphe, Dubai World Cup, etc.); famous racecourses (Ascot, Newmarket, Aintree, Epsom, Goodwood, York Racecourse, Doncaster Racecourse, Kempton Park, Sandown, Newbury, the Curragh, Leopardstown, Churchill Downs, Saratoga, Belmont Park, Santa Anita, Longchamp, Meydan, Sha Tin, Flemington, etc.); famous recent horses (Constitution Hill, State Man, Galopin Des Champs, Energumene, Honeysuckle, Shishkin, City of Troy, Auguste Rodin, Baaeed, Frankel, Stradivarius, Enable, Equinox, Justify, etc.); famous jockeys (Frankie Dettori, Ryan Moore, William Buick, Oisin Murphy, Rachael Blackmore, Paul Townend, Jack Kennedy, Irad Ortiz, Joel Rosario, Flavien Prat, John Velazquez, etc.); or famous trainers (Aidan O'Brien, John Gosden, Charlie Appleby, William Haggas, Willie Mullins, Gordon Elliott, Henry de Bromhead, Nicky Henderson, Paul Nicholls, Bob Baffert, Todd Pletcher, etc.).
 - "Soccer" otherwise (default).
 
 For basketball markets specifically:
@@ -96,7 +97,16 @@ For baseball markets specifically:
 - Money line (e.g. "Yankees ML") → market="1X2"
 - Pitcher strikeouts / hitter total bases / RBIs / hits (e.g. "Skubal over 7.5 Ks", "Judge 1+ TB") → market="other" with selection preserving the player + stat
 - Anytime / 2+ home runs (e.g. "Ohtani anytime HR") → market="other"
-- NRFI / YRFI / F5 markets → market="other"`;
+- NRFI / YRFI / F5 markets → market="other"
+
+For horse racing markets specifically:
+- Win bet (e.g. "Constitution Hill to win", "City of Troy WIN") → market="1X2"
+- Each-way / EW (win + place combined) → market="other" with selection noting "EW" so the user keeps that information
+- Place only / to place → market="other"
+- Forecast / Reverse Forecast / Straight Forecast / Tricast / Exacta / Quinella / Trifecta / Superfecta → market="other"
+- Ante-post (futures market on a race months away) → market="other" with selection noting "Ante-post"
+- Selection should be the horse name (e.g. selection="Constitution Hill", event="Champion Hurdle, Cheltenham Day 1"). If the horse is unnamed but a jockey or trainer is, fall back to that, then to the race + time.
+- Kickoff for horse racing is the race-off time (the post time of that specific race). If only a date is given, use 00:00 on that date.`;
 
 interface ParsedBet {
   kickoff: string;
