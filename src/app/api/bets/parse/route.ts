@@ -283,7 +283,7 @@ export async function POST(req: Request): Promise<Response> {
               sport: {
                 type: "string",
                 description:
-                  "Best-guess sport label: 'Tennis', 'Soccer', 'Basketball', 'NFL', 'MLB', 'NHL', 'Cricket', 'Golf', 'Boxing', 'MMA', 'Horse Racing', or 'Other'. Infer from event text and player/team names.",
+                  "Best-guess sport label. MUST be one of: 'Tennis', 'Soccer', 'Basketball', 'Baseball', 'American Football', 'Ice Hockey', 'Cricket', 'Golf', 'Boxing', 'MMA', 'Horse Racing', 'Rugby', 'Darts', 'Snooker', 'Esports', or 'Other'. Use the FULL NAME — not 'NFL'/'MLB'/'NHL'. Infer from event text and player/team names per the sport classification rules in the system prompt.",
               },
             },
             required: [
