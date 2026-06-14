@@ -3,6 +3,7 @@
 
 import type { ImportedBet } from "./import/types";
 import { guessMarket } from "./import/normalise";
+import { classifyCompetition } from "./competition-classify";
 
 function isSettled(b: ImportedBet): boolean {
   return (
@@ -551,6 +552,57 @@ export function byMarket(bets: ImportedBet[]): MarketRow[] {
     });
   }
   // Sort by total P/L descending — "most profitable markets" intent.
+  rows.sort((a, b) => b.pl - a.pl);
+  return rows;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// By soccer competition (Premier League, Champions League, La Liga, etc.).
+// Pure-derived via classifyCompetition — no schema change. Rows with fewer
+// than 20 settled bets are suppressed to avoid spurious leaderboards.
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface CompetitionRow {
+  label: string; // human label, e.g. "Premier League"
+  pl: number;
+  stake: number;
+  bets: number;
+  yieldPct: number;
+  winRate: number;
+  avgOdds: number;
+}
+
+export function byCompetition(bets: ImportedBet[]): CompetitionRow[] {
+  const groups = new Map<
+    string,
+    { pl: number; stake: number; bets: number; wins: number; oddsSum: number }
+  >();
+  for (const b of bets) {
+    if (!isSettled(b)) continue;
+    const k = classifyCompetition(b);
+    if (!k) continue;
+    const cur =
+      groups.get(k) ?? { pl: 0, stake: 0, bets: 0, wins: 0, oddsSum: 0 };
+    cur.pl += b.pl;
+    cur.stake += b.stake;
+    cur.bets++;
+    cur.oddsSum += b.odds;
+    if (isWin(b)) cur.wins++;
+    groups.set(k, cur);
+  }
+  const rows: CompetitionRow[] = [];
+  for (const [k, v] of groups.entries()) {
+    if (v.bets < 20) continue; // suppress small samples
+    rows.push({
+      label: k,
+      pl: round(v.pl, 2),
+      stake: round(v.stake, 2),
+      bets: v.bets,
+      yieldPct: v.stake > 0 ? round((v.pl / v.stake) * 100, 2) : 0,
+      winRate: round((v.wins / v.bets) * 100, 1),
+      avgOdds: round(v.oddsSum / v.bets, 2),
+    });
+  }
   rows.sort((a, b) => b.pl - a.pl);
   return rows;
 }

@@ -258,7 +258,7 @@ export default async function ProfilePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* Breakdowns: sport / market / odds bucket */}
+        {/* Breakdowns: sport / market / odds bucket / competition */}
         {settledCount > 0 && (
           <section className="profile-breakdown-row">
             {data.sportBd && data.sportBd.length > 0 && (
@@ -269,6 +269,12 @@ export default async function ProfilePage({ params }: PageProps) {
             )}
             {data.oddsBd.length > 0 && (
               <Breakdown title="By odds range" rows={data.oddsBd} />
+            )}
+            {data.competitionBd && data.competitionBd.length > 0 && (
+              <Breakdown
+                title="By competition (soccer)"
+                rows={data.competitionBd.slice(0, 8)}
+              />
             )}
           </section>
         )}

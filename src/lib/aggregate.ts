@@ -25,6 +25,7 @@ import type { ImportedBet } from "./import/types";
 import { guessMarket } from "./import/normalise";
 import { betClv, meanClvPct } from "./clv";
 import { classifySport } from "./sport-classify";
+import { classifyCompetition } from "./competition-classify";
 
 const DAY_MS = 86400000;
 
@@ -560,6 +561,13 @@ export function aggregateFromBets(bets: ImportedBet[]): DashboardData {
     sportBd: computeBreakdown(
       bets,
       (b) => classifySport(b) || "Other",
+    ),
+    // Competition breakdown — soccer-only for v1. Pure-derived from
+    // league/event/selection text; bet schema is unchanged. Rows with
+    // fewer than 20 settled bets are suppressed by computeBreakdown.
+    competitionBd: computeBreakdown(
+      bets,
+      (b) => classifyCompetition(b) ?? undefined,
     ),
     weekly: computeWeekly(bets),
   };

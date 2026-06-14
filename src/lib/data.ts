@@ -144,6 +144,10 @@ export interface DashboardData {
   /** Yield breakdown by sport. Optional for back-compat with the mock
    *  data path which doesn't compute it. */
   sportBd?: BreakdownRow[];
+  /** Yield breakdown by soccer competition (Premier League, Champions
+   *  League, La Liga, etc.). Optional — only populated by the real
+   *  aggregator, not the mock data path. Soccer-only for v1. */
+  competitionBd?: BreakdownRow[];
   weekly: number[];
 }
 
