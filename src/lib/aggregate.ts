@@ -266,7 +266,7 @@ function computeOpenPositions(bets: ImportedBet[]): OpenPosition[] {
     oddsOpen: b.odds,
     oddsHist: Array(24).fill(b.odds),
     stake: b.stake,
-    toWin: Math.round(b.stake * (b.odds - 1)),
+    toWin: Math.round(b.stake * (b.odds - 1) * 100) / 100,
     clvBp: 0,
     kickoff: new Date(b.kickoff),
     isLive: false,

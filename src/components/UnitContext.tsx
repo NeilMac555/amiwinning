@@ -55,3 +55,37 @@ export function fmtUnit(v: number, unit: DisplayUnit, opts: FmtOpts = {}): strin
   }
   return unit === "u" ? `${sign}${num}u` : `${sign}${unit}${num}`;
 }
+
+/**
+ * Format a stake (or any quantity that should preserve user-entered
+ * precision up to 2 decimal places, without trailing zero noise).
+ *
+ *   fmtStake(1, "u")     → "1u"
+ *   fmtStake(1.5, "u")   → "1.5u"
+ *   fmtStake(1.25, "u")  → "1.25u"
+ *   fmtStake(1.50, "$")  → "$1.5"
+ *   fmtStake(1000, "u")  → "1,000u"
+ *
+ * The default fmtUnit truncates fractional stakes at the dp:0 callsites
+ * (bet log, PasteHero review, open positions), turning 1.5u into "2u".
+ * Use this helper instead anywhere a stake or to-win amount is shown.
+ */
+export function fmtStake(v: number, unit: DisplayUnit, opts: { signed?: boolean } = {}): string {
+  const abs = Math.abs(v);
+  const sign = opts.signed ? (v > 0 ? "+" : v < 0 ? "−" : "") : v < 0 ? "−" : "";
+  // Normalise to 2 decimal places first to dodge floating-point noise.
+  const rounded = Math.round(abs * 100) / 100;
+  // Pick the minimum dp that represents the value exactly:
+  //   integer       → 0dp
+  //   one-decimal   → 1dp
+  //   two-decimal   → 2dp
+  let dp: number;
+  if (Number.isInteger(rounded)) dp = 0;
+  else if (Math.abs(rounded * 10 - Math.round(rounded * 10)) < 1e-9) dp = 1;
+  else dp = 2;
+  const num = rounded.toLocaleString("en-US", {
+    minimumFractionDigits: dp,
+    maximumFractionDigits: dp,
+  });
+  return unit === "u" ? `${sign}${num}u` : `${sign}${unit}${num}`;
+}

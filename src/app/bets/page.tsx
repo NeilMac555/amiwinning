@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, fmtUnit } from "@/components/UnitContext";
+import { UnitProvider, fmtStake, fmtUnit } from "@/components/UnitContext";
 import { consumeSeed, deleteBet, loadBets } from "@/lib/import/store";
 import type { ImportedBet, Status } from "@/lib/import/types";
 import { applyTheme, useSettings } from "@/lib/settings";
@@ -369,7 +369,7 @@ export default function BetsPage() {
                           <td className="num">
                             {formatOdds(b.odds, activeBook?.oddsFormat ?? "decimal")}
                           </td>
-                          <td className="num">{fmtUnit(b.stake, unit, { dp: 0 })}</td>
+                          <td className="num">{fmtStake(b.stake, unit)}</td>
                           <td
                             className={`num ${
                               clv == null

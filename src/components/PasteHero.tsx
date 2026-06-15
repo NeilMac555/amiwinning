@@ -17,7 +17,7 @@ import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
 import { classifySport } from "@/lib/sport-classify";
-import { fmtUnit, useUnit } from "./UnitContext";
+import { fmtStake, useUnit } from "./UnitContext";
 
 interface ParsedBet {
   kickoff: string;
@@ -367,7 +367,7 @@ export function PasteHero({ onCommitted }: Props) {
               <span>Tap the green button to log them to {bookName}.</span>
               <span style={{ color: "var(--text-faint)" }}>·</span>
               <span className="mono">
-                {fmtUnit(totalStake, unit, { dp: 0 })} staked
+                {fmtStake(totalStake, unit)} staked
               </span>
               {issues.length > 0 && (
                 <>
@@ -441,7 +441,7 @@ export function PasteHero({ onCommitted }: Props) {
                     <span className="sel-main">{b.selection}</span>
                   </td>
                   <td className="num">{b.odds.toFixed(2)}</td>
-                  <td className="num">{fmtUnit(b.stake, unit, { dp: 0 })}</td>
+                  <td className="num">{fmtStake(b.stake, unit)}</td>
                   <td>
                     <span
                       className={`badge ${

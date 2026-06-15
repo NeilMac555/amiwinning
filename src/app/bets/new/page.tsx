@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, fmtUnit, type DisplayUnit } from "@/components/UnitContext";
+import { UnitProvider, fmtStake, fmtUnit, type DisplayUnit } from "@/components/UnitContext";
 // useSettings replaces the local unit useState/useEffect pattern.
 import { appendBets } from "@/lib/import/store";
 import { guessMarket } from "@/lib/import/normalise";
@@ -732,7 +732,7 @@ function PasteMode({
                     {b.market}
                   </td>
                   <td className="num">{b.odds.toFixed(2)}</td>
-                  <td className="num">{fmtUnit(b.stake, unit, { dp: 0 })}</td>
+                  <td className="num">{fmtStake(b.stake, unit)}</td>
                   <td>
                     <span
                       className={`badge ${

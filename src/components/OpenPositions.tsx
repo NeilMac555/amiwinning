@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { OpenPosition } from "@/lib/data";
 import { fmtCountdown } from "@/lib/format";
 import { Sparkline } from "./Sparkline";
-import { fmtUnit, useUnit } from "./UnitContext";
+import { fmtStake, useUnit } from "./UnitContext";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 
@@ -92,10 +92,10 @@ export function OpenPositions({ positions, density, now }: Props) {
             </em>
           </div>
           <div className="card-meta" style={{ marginTop: 4 }}>
-            <span className="mono">{fmtUnit(totalStake, unit, { dp: 0 })} staked</span>
+            <span className="mono">{fmtStake(totalStake, unit)} staked</span>
             <span style={{ color: "var(--text-faint)" }}>·</span>
             <span className="mono" style={{ color: "var(--green)" }}>
-              {fmtUnit(totalToWin, unit, { dp: 0 })} to win
+              {fmtStake(totalToWin, unit)} to win
             </span>
           </div>
         </div>
@@ -197,9 +197,9 @@ export function OpenPositions({ positions, density, now }: Props) {
                     height={20}
                   />
                 </td>
-                <td className="num">{fmtUnit(p.stake, unit, { dp: 0 })}</td>
+                <td className="num">{fmtStake(p.stake, unit)}</td>
                 <td className="num" style={{ color: "var(--green)" }}>
-                  {fmtUnit(p.toWin, unit, { dp: 0 })}
+                  {fmtStake(p.toWin, unit)}
                 </td>
                 <td className={`num ${clvSign}`}>
                   {p.clvBp >= 0 ? "+" : "−"}
