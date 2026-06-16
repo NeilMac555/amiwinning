@@ -1,7 +1,7 @@
 "use client";
 
 import type { SecondaryStats as SecondaryStatsT } from "@/lib/data";
-import { fmtUnit, useUnit } from "./UnitContext";
+import { fmtPL, fmtStake, useUnit } from "./UnitContext";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 
@@ -13,7 +13,6 @@ export function SecondaryStats({ s }: Props) {
   const unit = useUnit();
   const { activeBook } = useAuth();
   const oddsFormat = activeBook?.oddsFormat ?? "decimal";
-  const fmtMoney = (v: number) => fmtUnit(v, unit, { dp: 0 });
   const americanFromAvgOdds = (avgOdds: number) =>
     avgOdds >= 2
       ? "+" + Math.round((avgOdds - 1) * 100)
@@ -38,7 +37,7 @@ export function SecondaryStats({ s }: Props) {
       </div>
       <div className="stat-cell">
         <div className="stat-label">Avg stake</div>
-        <div className="stat-value">{fmtMoney(s.avgStake)}</div>
+        <div className="stat-value">{fmtStake(s.avgStake, unit)}</div>
         <div className="stat-sub">
           {s.stakeRoll > 0
             ? `${s.stakeRoll.toFixed(2)}% bankroll`
@@ -48,7 +47,7 @@ export function SecondaryStats({ s }: Props) {
       <div className="stat-cell">
         <div className="stat-label">Turnover</div>
         <div className="stat-value">
-          {fmtUnit(s.turnover, unit, { dp: 0, compact: true })}
+          {fmtPL(s.turnover, unit, { signed: false, compact: true })}
         </div>
         <div className="stat-sub">In range, gross</div>
       </div>
