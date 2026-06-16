@@ -126,6 +126,17 @@ export function Sidebar() {
           )}
         />
         <Item
+          label="Pending futures"
+          href="/pending"
+          active={is("/pending")}
+          icon={ic(
+            <>
+              <circle cx="7" cy="7" r="5.5" />
+              <path d="M7 4v3l2 2" />
+            </>,
+          )}
+        />
+        <Item
           label="Import data"
           href="/import"
           active={is("/import")}
