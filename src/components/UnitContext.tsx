@@ -57,6 +57,18 @@ export function fmtUnit(v: number, unit: DisplayUnit, opts: FmtOpts = {}): strin
 }
 
 /**
+ * Compute the minimum dp (0/1/2) that represents `v` exactly after
+ * rounding to 2dp. Used by fmtStake and fmtPL to drop trailing-zero
+ * noise (1.50 → "1.5", not "1.50") while keeping real precision.
+ */
+function autoDp(v: number): number {
+  const rounded = Math.round(v * 100) / 100;
+  if (Number.isInteger(rounded)) return 0;
+  if (Math.abs(rounded * 10 - Math.round(rounded * 10)) < 1e-9) return 1;
+  return 2;
+}
+
+/**
  * Format a stake (or any quantity that should preserve user-entered
  * precision up to 2 decimal places, without trailing zero noise).
  *
@@ -73,19 +85,52 @@ export function fmtUnit(v: number, unit: DisplayUnit, opts: FmtOpts = {}): strin
 export function fmtStake(v: number, unit: DisplayUnit, opts: { signed?: boolean } = {}): string {
   const abs = Math.abs(v);
   const sign = opts.signed ? (v > 0 ? "+" : v < 0 ? "−" : "") : v < 0 ? "−" : "";
-  // Normalise to 2 decimal places first to dodge floating-point noise.
   const rounded = Math.round(abs * 100) / 100;
-  // Pick the minimum dp that represents the value exactly:
-  //   integer       → 0dp
-  //   one-decimal   → 1dp
-  //   two-decimal   → 2dp
-  let dp: number;
-  if (Number.isInteger(rounded)) dp = 0;
-  else if (Math.abs(rounded * 10 - Math.round(rounded * 10)) < 1e-9) dp = 1;
-  else dp = 2;
+  const dp = autoDp(rounded);
   const num = rounded.toLocaleString("en-US", {
     minimumFractionDigits: dp,
     maximumFractionDigits: dp,
   });
+  return unit === "u" ? `${sign}${num}u` : `${sign}${unit}${num}`;
+}
+
+/**
+ * Format a P/L (profit-or-loss) value with auto-precision. Mirrors
+ * fmtStake but defaults to signed display and supports compact-thousands
+ * mode for analytics calendar cells and equity bars.
+ *
+ *   fmtPL(1.5, "u")                       → "+1.5u"
+ *   fmtPL(-2.25, "u")                     → "−2.25u"
+ *   fmtPL(100, "u")                       → "+100u"
+ *   fmtPL(12500, "u", { compact: true })  → "+13Ku"  (rounded to 0dp ≥10K)
+ *   fmtPL(1500, "u", { compact: true })   → "+1.5Ku"
+ *   fmtPL(0, "u")                         → "0u"
+ *
+ * Replaces the old `fmtUnit(x, unit, { signed: true, dp: 0, ... })`
+ * idiom used throughout the analytics page. Old behavior truncated
+ * fractional P/Ls (a +1.5u winning day showed as "+2u"), which became
+ * visible noise now that stakes can be fractional.
+ */
+export function fmtPL(
+  v: number,
+  unit: DisplayUnit,
+  opts: { signed?: boolean; compact?: boolean } = {},
+): string {
+  const signed = opts.signed !== false; // P/L is always signed unless explicitly opted out
+  const compact = opts.compact ?? false;
+  const abs = Math.abs(v);
+  const sign = signed ? (v > 0 ? "+" : v < 0 ? "−" : "") : v < 0 ? "−" : "";
+  let num: string;
+  if (compact && abs >= 1000) {
+    // Same compact rule as fmtUnit: ≥10K → 0dp, else 1dp.
+    num = (abs / 1000).toFixed(abs >= 10_000 ? 0 : 1) + "K";
+  } else {
+    const rounded = Math.round(abs * 100) / 100;
+    const dp = autoDp(rounded);
+    num = rounded.toLocaleString("en-US", {
+      minimumFractionDigits: dp,
+      maximumFractionDigits: dp,
+    });
+  }
   return unit === "u" ? `${sign}${num}u` : `${sign}${unit}${num}`;
 }

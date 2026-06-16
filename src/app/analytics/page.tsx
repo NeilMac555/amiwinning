@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import {
   UnitProvider,
-  fmtUnit,
+  fmtPL,
   type DisplayUnit,
 } from "@/components/UnitContext";
 import { consumeSeed, loadBets } from "@/lib/import/store";
@@ -272,7 +272,7 @@ function MonthlyPanel({ rows, unit }: { rows: MonthlyRow[]; unit: DisplayUnit })
               className="mono"
               style={{ color: totalPl >= 0 ? "var(--green)" : "var(--red)" }}
             >
-              {fmtUnit(totalPl, unit, { signed: true, dp: 0 })}
+              {fmtPL(totalPl, unit)}
             </span>
             <span style={{ color: "var(--text-faint)" }}>·</span>
             <span className="mono">
@@ -334,7 +334,7 @@ function MonthlyPanel({ rows, unit }: { rows: MonthlyRow[]; unit: DisplayUnit })
                   rx="1"
                 >
                   <title>
-                    {r.label} · {r.bets} bets · {fmtUnit(r.pl, unit, { signed: true })}
+                    {r.label} · {r.bets} bets · {fmtPL(r.pl, unit)}
                     {r.stake > 0 ? ` · ${r.yieldPct >= 0 ? "+" : "−"}${Math.abs(r.yieldPct).toFixed(1)}% yield` : ""}
                   </title>
                 </rect>
@@ -376,7 +376,7 @@ function MonthlyPanel({ rows, unit }: { rows: MonthlyRow[]; unit: DisplayUnit })
           })}
           {/* y axis labels */}
           <text x={padL - 6} y={padT + 4} textAnchor="end" fontFamily="var(--mono)" fontSize="10" fill="var(--text-faint)">
-            {fmtUnit(maxAbs, unit, { signed: true, dp: 0 })}
+            {fmtPL(maxAbs, unit)}
           </text>
           <text x={padL - 6} y={zeroY + 3} textAnchor="end" fontFamily="var(--mono)" fontSize="10" fill="var(--text-faint)">
             0
@@ -603,7 +603,7 @@ function CalendarPanel({
                     : "var(--text-muted)",
             }}
           >
-            {fmtUnit(totalPl, unit, { signed: true, dp: totalPl === 0 ? 0 : 2 })}
+            {fmtPL(totalPl, unit)}
           </span>
         </div>
       </div>
@@ -686,7 +686,7 @@ function WeekView({
                 <div className="cal-week-cell-pl">
                   {c.pl === 0
                     ? "flat"
-                    : fmtUnit(c.pl, unit, { signed: true, dp: 0, compact: true })}
+                    : fmtPL(c.pl, unit, { compact: true })}
                 </div>
                 <div className="cal-week-cell-meta">
                   {c.bets} bet{c.bets === 1 ? "" : "s"} · {c.wins}W/{c.losses}L
@@ -768,7 +768,7 @@ function YearMonth({
         >
           {m.totalBets === 0
             ? "—"
-            : fmtUnit(m.totalPl, unit, { signed: true, dp: 0, compact: true })}
+            : fmtPL(m.totalPl, unit, { compact: true })}
         </span>
       </div>
       <div className="cal-year-month-grid">
@@ -809,7 +809,7 @@ function YearMonth({
               title={
                 c.bets === 0
                   ? c.dateIso
-                  : `${c.dateIso} · ${c.bets} bet${c.bets === 1 ? "" : "s"} · ${fmtUnit(c.pl, unit, { signed: true, dp: 0 })}`
+                  : `${c.dateIso} · ${c.bets} bet${c.bets === 1 ? "" : "s"} · ${fmtPL(c.pl, unit)}`
               }
             >
               {label && (
@@ -875,7 +875,7 @@ function CalCell({
         <div className="cal-cell-pl">
           {c.pl === 0
             ? "flat"
-            : fmtUnit(c.pl, unit, { signed: true, dp: 0, compact: true })}
+            : fmtPL(c.pl, unit, { compact: true })}
         </div>
       )}
     </div>
@@ -964,14 +964,14 @@ function MarketPanel({
                 <span>
                   Best:{" "}
                   <span className="mono" style={{ color: "var(--green)" }}>
-                    {best.label} {fmtUnit(best.pl, unit, { signed: true, dp: 0 })}
+                    {best.label} {fmtPL(best.pl, unit)}
                   </span>
                 </span>
                 <span style={{ color: "var(--text-faint)" }}>·</span>
                 <span>
                   Worst:{" "}
                   <span className="mono" style={{ color: "var(--red)" }}>
-                    {worst.label} {fmtUnit(worst.pl, unit, { signed: true, dp: 0 })}
+                    {worst.label} {fmtPL(worst.pl, unit)}
                   </span>
                 </span>
               </>
@@ -1014,7 +1014,7 @@ function MarketPanel({
               <tr key={r.key}>
                 <td>{r.label}</td>
                 <td className={`num ${plColor}`}>
-                  {fmtUnit(r.pl, unit, { signed: true, dp: 0 })}
+                  {fmtPL(r.pl, unit)}
                 </td>
                 <td className={`num ${yieldColor}`}>
                   {r.yieldPct >= 0 ? "+" : "−"}
@@ -1114,14 +1114,14 @@ function CompetitionPanel({
                 <span>
                   Best:{" "}
                   <span className="mono" style={{ color: "var(--green)" }}>
-                    {best.label} {fmtUnit(best.pl, unit, { signed: true, dp: 0 })}
+                    {best.label} {fmtPL(best.pl, unit)}
                   </span>
                 </span>
                 <span style={{ color: "var(--text-faint)" }}>·</span>
                 <span>
                   Worst:{" "}
                   <span className="mono" style={{ color: "var(--red)" }}>
-                    {worst.label} {fmtUnit(worst.pl, unit, { signed: true, dp: 0 })}
+                    {worst.label} {fmtPL(worst.pl, unit)}
                   </span>
                 </span>
               </>
@@ -1164,7 +1164,7 @@ function CompetitionPanel({
               <tr key={r.label}>
                 <td>{r.label}</td>
                 <td className={`num ${plColor}`}>
-                  {fmtUnit(r.pl, unit, { signed: true, dp: 0 })}
+                  {fmtPL(r.pl, unit)}
                 </td>
                 <td className={`num ${yieldColor}`}>
                   {r.yieldPct >= 0 ? "+" : "−"}
@@ -1217,14 +1217,14 @@ function SeasonalPanel({
                 <span>
                   Best:{" "}
                   <span className="mono" style={{ color: "var(--green)" }}>
-                    {best.label} {fmtUnit(best.pl, unit, { signed: true, dp: 0 })}
+                    {best.label} {fmtPL(best.pl, unit)}
                   </span>
                 </span>
                 <span style={{ color: "var(--text-faint)" }}>·</span>
                 <span>
                   Worst:{" "}
                   <span className="mono" style={{ color: "var(--red)" }}>
-                    {worst.label} {fmtUnit(worst.pl, unit, { signed: true, dp: 0 })}
+                    {worst.label} {fmtPL(worst.pl, unit)}
                   </span>
                 </span>
               </>
@@ -1256,7 +1256,7 @@ function SeasonalPanel({
               title={
                 hide
                   ? `${r.label}: ${r.bets} bets — sample too small`
-                  : `${r.label} · ${r.bets} bets across ${r.years} years · ${yieldText} · total ${fmtUnit(r.pl, unit, { signed: true, dp: 0 })}`
+                  : `${r.label} · ${r.bets} bets across ${r.years} years · ${yieldText} · total ${fmtPL(r.pl, unit)}`
               }
             >
               <div className="bk-label">{r.label}</div>
@@ -1279,12 +1279,12 @@ function SeasonalPanel({
                   className="bk-val"
                   style={{ color: hide ? "var(--text-faint)" : color }}
                 >
-                  {hide ? "—" : fmtUnit(r.pl, unit, { signed: true, dp: 0 })}
+                  {hide ? "—" : fmtPL(r.pl, unit)}
                 </div>
                 <div className="bk-sample" style={{ whiteSpace: "nowrap" }}>
                   {hide
                     ? `n=${r.bets}`
-                    : `${fmtUnit(r.avgPlPerYear, unit, { signed: true, dp: 0 })}/yr · ${r.years}y`}
+                    : `${fmtPL(r.avgPlPerYear, unit)}/yr · ${r.years}y`}
                 </div>
               </div>
             </div>
@@ -1343,7 +1343,7 @@ function DowPanel({ rows, unit }: { rows: DowRow[]; unit: DisplayUnit }) {
                 </div>
                 <div className="bk-sample">
                   n={r.bets}
-                  {!hide ? ` · ${fmtUnit(r.pl, unit, { signed: true, dp: 0 })}` : ""}
+                  {!hide ? ` · ${fmtPL(r.pl, unit)}` : ""}
                 </div>
               </div>
             </div>
@@ -1399,7 +1399,7 @@ function StakePanel({ rows, unit }: { rows: StakeBucketRow[]; unit: DisplayUnit 
                     {Math.abs(r.yieldPct).toFixed(2)}%
                   </div>
                   <div className="bk-sample">
-                    n={r.bets} · {fmtUnit(r.pl, unit, { signed: true, dp: 0 })}
+                    n={r.bets} · {fmtPL(r.pl, unit)}
                   </div>
                 </div>
               </div>

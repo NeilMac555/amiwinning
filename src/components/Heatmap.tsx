@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { HeatmapCell } from "@/lib/data";
-import { fmtUnit, useUnit } from "./UnitContext";
+import { fmtPL, useUnit } from "./UnitContext";
 
 interface Props {
   data: HeatmapCell[];
@@ -125,7 +125,7 @@ export function Heatmap({ data }: Props) {
                   className="mono"
                   style={{ color: totalPL >= 0 ? "var(--green)" : "var(--red)" }}
                 >
-                  {fmtUnit(totalPL, unit, { signed: true, dp: 0 })}
+                  {fmtPL(totalPL, unit)}
                 </span>
                 <span style={{ color: "var(--text-faint)" }}>net · 365d</span>
               </>
@@ -277,7 +277,7 @@ export function Heatmap({ data }: Props) {
             <span
               style={{ color: tip.d.pl >= 0 ? "var(--green)" : "var(--red)" }}
             >
-              {fmtUnit(tip.d.pl, unit, { signed: true })}
+              {fmtPL(tip.d.pl, unit)}
             </span>
           </div>
           <div className="row">

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, fmtStake, fmtUnit } from "@/components/UnitContext";
+import { UnitProvider, fmtPL, fmtStake } from "@/components/UnitContext";
 import { consumeSeed, deleteBet, loadBets } from "@/lib/import/store";
 import type { ImportedBet, Status } from "@/lib/import/types";
 import { applyTheme, useSettings } from "@/lib/settings";
@@ -201,7 +201,7 @@ export default function BetsPage() {
                     <>
                       {summary.count.toLocaleString()} of {bets.length.toLocaleString()} bets shown ·{" "}
                       <span className={summary.pl >= 0 ? "num-pos" : "num-neg"}>
-                        {fmtUnit(summary.pl, unit, { signed: true, dp: 0 })}
+                        {fmtPL(summary.pl, unit)}
                       </span>{" "}
                       · {summary.yield.toFixed(2)}% yield · {summary.winRate.toFixed(1)}% win rate ·{" "}
                       <span
@@ -432,7 +432,7 @@ export default function BetsPage() {
                           <td
                             className={`num ${b.pl > 0 ? "num-pos" : b.pl < 0 ? "num-neg" : "num-flat"}`}
                           >
-                            {fmtUnit(b.pl, unit, { signed: true })}
+                            {fmtPL(b.pl, unit)}
                           </td>
                           <td className="actions" onClick={(e) => e.stopPropagation()}>
                             <span

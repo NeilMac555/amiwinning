@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { EquityData } from "@/lib/data";
 import { fmtPct } from "@/lib/format";
-import { fmtUnit, useUnit } from "./UnitContext";
+import { fmtPL, fmtUnit, useUnit } from "./UnitContext";
 import { WeeklyBars } from "./WeeklyBars";
 
 import type { Range } from "@/lib/range";
@@ -139,12 +139,12 @@ export function EquityCurve({
           style={{ color: isCumulative ? colorPL : undefined }}
         >
           {isCumulative
-            ? fmtUnit(end, unit, { signed: true, dp: 0 })
-            : fmtUnit(end, unit, { dp: 0 })}
+            ? fmtPL(end, unit)
+            : fmtPL(end, unit, { signed: false })}
         </div>
         {!isCumulative && (
           <div className="equity-sub" style={{ color: colorPL }}>
-            {fmtUnit(totalPL, unit, { signed: true, dp: 0 })}{" "}
+            {fmtPL(totalPL, unit)}{" "}
             <span style={{ color: "var(--text-faint)", marginLeft: 4 }}>
               {fmtPct(totalPct, 2)}
             </span>
@@ -279,13 +279,13 @@ export function EquityCurve({
                 </div>
                 <div className="row">
                   <span className="lbl">{isCumulative ? "Cum P/L" : "Equity"}</span>
-                  <span>{fmtUnit(Math.round(hovered.equity), unit, { signed: isCumulative, dp: 0 })}</span>
+                  <span>{fmtPL(hovered.equity, unit, { signed: isCumulative })}</span>
                 </div>
                 {!isCumulative && (
                   <div className="row">
                     <span className="lbl">P/L</span>
                     <span style={{ color: plColor }}>
-                      {fmtUnit(Math.round(plFromStart), unit, { signed: true, dp: 0 })}
+                      {fmtPL(plFromStart, unit)}
                     </span>
                   </div>
                 )}
