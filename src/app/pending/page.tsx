@@ -219,7 +219,14 @@ export default function PendingPage() {
             ) : (
               <div
                 className="card"
-                style={{ padding: 0, overflow: "hidden" }}
+                style={{
+                  // overflowX: auto so the 8-column table can scroll horizontally
+                  // on narrow viewports instead of clipping the Stake / Max win
+                  // columns. overflowY: hidden keeps the card's rounded corners.
+                  padding: 0,
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                }}
               >
                 <table className="tbl" data-density="dense">
                   <thead>
