@@ -800,11 +800,25 @@ a.sb-item { cursor: pointer; }
 .tbl td.selection {
   color: var(--text-muted);
   font-size: 11.5px;
+  /* Cap the selection cell so long parlay strings ("Parlay: leg 1 + leg 2 +
+     leg 3 + leg 4") wrap inside the cell instead of pushing the whole
+     table past the viewport edge and clipping the rightmost P/L column. */
+  max-width: 360px;
 }
 .tbl td.selection .sel-main {
   color: var(--text);
   font-family: var(--mono);
   font-size: 11.5px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.tbl td.event {
+  /* Same defense for very long event strings ("Scotland vs Egypt vs Canada
+     vs Senegal - World Cup Qualification Four"). */
+  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .badge {
