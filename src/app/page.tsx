@@ -233,8 +233,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="dense-grid row-2">
-            <Breakdown title="By market" rows={data.marketBd} />
+          <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
             <Breakdown title="By odds range" rows={data.oddsBd} />
           </div>
 
