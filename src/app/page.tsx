@@ -38,7 +38,10 @@ export default function Dashboard() {
   const [source, setSource] = useState<Source>("mock");
   const [allBets, setAllBets] = useState<ImportedBet[]>([]);
   const [now, setNow] = useState<number>(NOW);
-  const [range, setRange] = useState<Range>("12M");
+  // Default to All time so the dashboard stats reflect a user's full
+  // history out of the box. They can still scope to 7D/1M/3M/6M/YTD/12M
+  // via the RangeTabs control below.
+  const [range, setRange] = useState<Range>("All");
   const settingsUnit = useSettings().unit;
   const [localBump, setLocalBump] = useState(0);
   const [cleanupDismissed, setCleanupDismissed] = useState(false);
