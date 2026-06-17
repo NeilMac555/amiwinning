@@ -10,9 +10,10 @@ import { TopBar } from "@/components/TopBar";
 import { Ticker } from "@/components/Ticker";
 import { KpiStripCompact } from "@/components/Kpis";
 import { SecondaryStats } from "@/components/SecondaryStats";
+// Note: RecentSettled and ClvDistribution were removed from the dashboard
+// for visual simplification — they're still available in /bets and in the
+// analytics page where users can drill in if they want that detail.
 import { EquityCurve } from "@/components/EquityCurve";
-import { RecentSettled } from "@/components/RecentSettled";
-import { ClvDistribution } from "@/components/ClvDistribution";
 import { Breakdown } from "@/components/Breakdown";
 import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
@@ -218,7 +219,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="grid curve-row">
+          <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
             <EquityCurve
               data={data.equity}
               weekly={data.weekly}
@@ -227,11 +228,9 @@ export default function Dashboard() {
               range={range}
               onRangeChange={source === "imported" ? setRange : undefined}
             />
-            <RecentSettled bets={data.settled} now={now} />
           </div>
 
-          <div className="dense-grid row-3">
-            <ClvDistribution dist={data.clvDist} mean={data.kpis.clvPct} />
+          <div className="dense-grid row-2">
             <Breakdown title="By market" rows={data.marketBd} />
             <Breakdown title="By odds range" rows={data.oddsBd} />
           </div>

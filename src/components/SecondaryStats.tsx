@@ -1,7 +1,7 @@
 "use client";
 
 import type { SecondaryStats as SecondaryStatsT } from "@/lib/data";
-import { fmtPL, fmtStake, useUnit } from "./UnitContext";
+import { fmtStake, useUnit } from "./UnitContext";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 
@@ -45,13 +45,6 @@ export function SecondaryStats({ s }: Props) {
         </div>
       </div>
       <div className="stat-cell">
-        <div className="stat-label">Turnover</div>
-        <div className="stat-value">
-          {fmtPL(s.turnover, unit, { signed: false, compact: true })}
-        </div>
-        <div className="stat-sub">In range, gross</div>
-      </div>
-      <div className="stat-cell">
         <div className="stat-label">Avg CLV</div>
         <div
           className={`stat-value ${s.avgClv > 0 ? "num-pos" : s.avgClv < 0 ? "num-neg" : "num-flat"}`}
@@ -60,13 +53,6 @@ export function SecondaryStats({ s }: Props) {
         </div>
         <div className="stat-sub">
           {s.avgClv === 0 ? "Not yet captured" : "Pinnacle baseline"}
-        </div>
-      </div>
-      <div className="stat-cell">
-        <div className="stat-label">Last bet</div>
-        <div className="stat-value">{s.lastBet}</div>
-        <div className="stat-sub">
-          {s.avgClv === 0 ? "From import" : "Auto-captured"}
         </div>
       </div>
     </div>
