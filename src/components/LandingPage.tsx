@@ -11,6 +11,60 @@ import { BRAND } from "@/lib/brand";
 
 const SAMPLE_HANDLE = "sample";
 
+// Tiny sparkline. 40x14 viewBox — fits under a KPI value in the preview
+// tile. tone picks the stroke color from the existing palette tokens so
+// it adapts when the visitor switches themes. endDot adds a small filled
+// circle at the path's endpoint, like a live "current value" marker.
+function Spark({
+  d,
+  tone,
+  endDot,
+}: {
+  d: string;
+  tone: "pos" | "neg" | "neutral";
+  endDot?: boolean;
+}) {
+  const stroke =
+    tone === "pos"
+      ? "var(--green)"
+      : tone === "neg"
+        ? "var(--red)"
+        : "var(--text-muted)";
+  // Extract the endpoint from the path data — last absolute x,y the
+  // path string ends with. Simple regex parse; good enough for our
+  // hand-tuned paths which always end in an L or numeric coord pair.
+  let endX: number | null = null;
+  let endY: number | null = null;
+  if (endDot) {
+    const match = d.match(/([0-9.]+)\s*,\s*([0-9.]+)\s*$/);
+    if (match) {
+      endX = parseFloat(match[1]);
+      endY = parseFloat(match[2]);
+    }
+  }
+  return (
+    <svg
+      className="landing-preview-spark"
+      viewBox="0 0 40 14"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path
+        d={d}
+        stroke={stroke}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.85"
+      />
+      {endX != null && endY != null && (
+        <circle cx={endX} cy={endY} r="1.2" fill={stroke} />
+      )}
+    </svg>
+  );
+}
+
 export function LandingPage() {
   return (
     <div className="landing-page">
@@ -76,13 +130,114 @@ export function LandingPage() {
             </p>
           </div>
 
-          {/* App-mockup hero — a faithful HTML port of the desktop hero
-              slide. Shows the product as it actually looks (sidebar +
-              KPI strip + equity curve + per-league panel + recent bets)
-              so first-time visitors see what they're getting. Numbers
-              are illustrative — the "Live demo" badge in the corner
-              makes that explicit. */}
-          <DesktopHeroMockup />
+          {/* A mock "preview card" — looks like a tiny version of the
+              profile page hero. Values are illustrative; the real demo
+              numbers live at /u/sample. */}
+          <div className="landing-preview" aria-hidden="true">
+            <div className="landing-preview-head">
+              <div className="landing-preview-avatar">SA</div>
+              <div>
+                <div className="landing-preview-name">Sample Bettor</div>
+                <div className="landing-preview-handle">@sample</div>
+              </div>
+            </div>
+            <div className="landing-preview-label">Lifetime P/L</div>
+            <div className="landing-preview-pl">+42.6u</div>
+            {/* Mini equity curve — fills the dead space below the hero
+                number and signals "this is a journey, not a snapshot." */}
+            <svg
+              className="landing-preview-equity"
+              viewBox="0 0 200 36"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {/* Faint zero-baseline */}
+              <line
+                x1="0"
+                x2="200"
+                y1="30"
+                y2="30"
+                stroke="var(--border)"
+                strokeWidth="0.5"
+              />
+              {/* Sample equity path — choppy but trending up.
+                  Hand-tuned to look like real punter variance. */}
+              <path
+                d="M0,30 L8,28 L18,26 L28,29 L40,22 L52,24 L64,18 L78,21 L92,14 L106,17 L120,11 L134,15 L146,9 L160,12 L174,6 L188,8 L200,4"
+                stroke="var(--green)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+              />
+              {/* Subtle area fill under the curve */}
+              <path
+                d="M0,30 L8,28 L18,26 L28,29 L40,22 L52,24 L64,18 L78,21 L92,14 L106,17 L120,11 L134,15 L146,9 L160,12 L174,6 L188,8 L200,4 L200,36 L0,36 Z"
+                fill="var(--green)"
+                opacity="0.08"
+              />
+            </svg>
+            <div className="landing-preview-sub">
+              across ~150 settled bets
+            </div>
+            <div className="landing-preview-kpi-row">
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">Yield</div>
+                <div className="landing-preview-kpi-value num-pos">+4.1%</div>
+                {/* Yield is naturally volatile — choppy uptrend. */}
+                <Spark
+                  d="M0,11 L3,12 L6,9 L9,10 L12,8 L15,9 L18,6 L21,7 L24,5 L27,6 L30,4 L33,5 L36,3 L40,2"
+                  tone="pos"
+                  endDot
+                />
+              </div>
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">ROC</div>
+                <div className="landing-preview-kpi-value num-pos">+28%</div>
+                {/* ROC = drawdown-adjusted, so smoother by construction.
+                    Quadratic bezier with T-shorthand for a clean accelerating
+                    curve instead of polygonal lines. */}
+                <Spark
+                  d="M0,12 Q6,11.5 12,10 T24,7 T36,3 L40,2"
+                  tone="pos"
+                  endDot
+                />
+              </div>
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">Win rate</div>
+                <div className="landing-preview-kpi-value">53%</div>
+                {/* High-frequency oscillation around the mid line — every
+                    day's hit rate swings widely even when the long-run is
+                    stable. */}
+                <Spark
+                  d="M0,7 L3,4 L6,9 L9,5 L12,8 L15,4 L18,7 L21,3 L24,9 L27,5 L30,7 L33,4 L36,7 L40,5"
+                  tone="neutral"
+                />
+              </div>
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">Max DD</div>
+                <div className="landing-preview-kpi-value num-neg">−8.4%</div>
+                {/* One dominant valley = the max drawdown moment, then
+                    recovery. Smaller dips on either side give it real-
+                    chart character rather than a triangle. */}
+                <Spark
+                  d="M0,2 L4,3 L8,3 L12,5 L16,7 L20,11 L24,10 L28,8 L32,6 L36,4 L40,4"
+                  tone="neg"
+                />
+              </div>
+              <div className="landing-preview-kpi">
+                <div className="landing-preview-kpi-label">CLV</div>
+                <div className="landing-preview-kpi-value num-pos">+0.8%</div>
+                {/* Slow persistent positive crawl with mild noise — that's
+                    what real CLV looks like when you have an edge. */}
+                <Spark
+                  d="M0,9 L4,9 L8,8 L12,8 L16,7 L20,8 L24,6 L28,7 L32,5 L36,6 L40,4"
+                  tone="pos"
+                  endDot
+                />
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Features ───────────────────────────────────────────────── */}
@@ -170,9 +325,6 @@ export function LandingPage() {
         </section>
       </main>
 
-      {/* App-mockup hero rendered above. Defined at module bottom so the
-          marketing copy stays at the top of the file. */}
-
       <footer className="landing-foot">
         <div className="brand" style={{ fontSize: 13 }}>
           <div className="brand-mark" aria-hidden="true"></div>
@@ -192,226 +344,3 @@ export function LandingPage() {
     </div>
   );
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// Desktop hero mockup
-//
-// A faithful HTML port of the Am_I_Up___Desktop_Hero.pptx hero slide: an
-// in-browser product mockup showing the dashboard the user will land in
-// once they sign up. Uses the existing theme tokens so it follows the
-// visitor's selected colour scheme.
-//
-// Numbers are illustrative — the "Live demo" badge in the top-right makes
-// that explicit. Deliberately omitted from the original PPTX: "trusted
-// by 1,000+ bettors", "4.5 ★" rating, "Pro" tier badge — none of which
-// are honest claims today. Also dropped the fake top-nav routes
-// (Product / Method / Pricing) that don't exist on the live site.
-// ─────────────────────────────────────────────────────────────────────────
-
-function DesktopHeroMockup() {
-  return (
-    <div className="hero-mockup" aria-hidden="true">
-      {/* Browser chrome — sets the "in a real browser" frame. */}
-      <div className="hero-mockup-chrome">
-        <div className="hero-mockup-dots">
-          <span className="hero-mockup-dot" data-tone="red" />
-          <span className="hero-mockup-dot" data-tone="amber" />
-          <span className="hero-mockup-dot" data-tone="green" />
-        </div>
-        <div className="hero-mockup-urlbar">amiup.io</div>
-        <span className="hero-mockup-livebadge">Live demo</span>
-      </div>
-
-      <div className="hero-mockup-app">
-        {/* Sidebar — mirrors the real app sidebar. */}
-        <aside className="hero-mockup-sidebar">
-          <div className="hero-mockup-brand">
-            <div className="brand-mark" aria-hidden="true" />
-            <span>Am I Up</span>
-          </div>
-          <div className="hero-mockup-nav">
-            <div className="hero-mockup-nav-heading">Workspace</div>
-            <div className="hero-mockup-nav-item is-active">Ledger</div>
-            <div className="hero-mockup-nav-item">Paste a bet</div>
-            <div className="hero-mockup-nav-item">Performance</div>
-            <div className="hero-mockup-nav-item">CLV report</div>
-            <div className="hero-mockup-nav-item">Settings</div>
-          </div>
-        </aside>
-
-        {/* Main column. */}
-        <main className="hero-mockup-main">
-          <div className="hero-mockup-mainhead">
-            <div className="hero-mockup-h1">
-              Ledger
-              <span className="hero-mockup-season">2025–26 Season</span>
-            </div>
-            <div className="hero-mockup-tabs">
-              <span className="hero-mockup-tab is-active">All</span>
-              <span className="hero-mockup-tab">YTD</span>
-              <span className="hero-mockup-tab">1M</span>
-              <span className="hero-mockup-tab">1W</span>
-            </div>
-          </div>
-
-          {/* KPI strip — 4 cells, matching the slide. */}
-          <div className="hero-mockup-kpis">
-            <div className="hero-mockup-kpi">
-              <div className="hero-mockup-kpi-label">Units</div>
-              <div className="hero-mockup-kpi-value num-pos">+62.4u</div>
-            </div>
-            <div className="hero-mockup-kpi">
-              <div className="hero-mockup-kpi-label">Record</div>
-              <div className="hero-mockup-kpi-value">182–146–9</div>
-            </div>
-            <div className="hero-mockup-kpi">
-              <div className="hero-mockup-kpi-label">ROI</div>
-              <div className="hero-mockup-kpi-value num-pos">+11.4%</div>
-            </div>
-            <div className="hero-mockup-kpi">
-              <div className="hero-mockup-kpi-label">Win rate</div>
-              <div className="hero-mockup-kpi-value">55.5%</div>
-            </div>
-          </div>
-
-          {/* Equity curve card. */}
-          <div className="hero-mockup-card hero-mockup-equity-card">
-            <div className="hero-mockup-card-head">
-              <span className="hero-mockup-card-title">Equity curve · units</span>
-              <span className="hero-mockup-card-meta num-pos">peak +64.8u</span>
-            </div>
-            <svg
-              className="hero-mockup-equity"
-              viewBox="0 0 600 110"
-              preserveAspectRatio="none"
-            >
-              {/* baseline */}
-              <line
-                x1="0"
-                x2="600"
-                y1="95"
-                y2="95"
-                stroke="var(--border)"
-                strokeWidth="0.6"
-              />
-              {/* equity path — choppy uptrend resembling real punter variance */}
-              <path
-                d="M0,90 L20,86 L42,82 L66,84 L92,76 L122,79 L148,68 L178,73 L206,62 L234,67 L262,56 L292,60 L320,48 L350,53 L380,40 L412,46 L442,32 L472,38 L504,22 L536,28 L568,14 L600,10"
-                stroke="var(--green)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-              />
-              {/* area fill */}
-              <path
-                d="M0,90 L20,86 L42,82 L66,84 L92,76 L122,79 L148,68 L178,73 L206,62 L234,67 L262,56 L292,60 L320,48 L350,53 L380,40 L412,46 L442,32 L472,38 L504,22 L536,28 L568,14 L600,10 L600,110 L0,110 Z"
-                fill="var(--green)"
-                opacity="0.09"
-              />
-              {/* peak marker */}
-              <circle cx="600" cy="10" r="2.4" fill="var(--green)" />
-            </svg>
-          </div>
-
-          {/* Two-column bottom row: By league + Recent bets. */}
-          <div className="hero-mockup-grid">
-            {/* By league. */}
-            <div className="hero-mockup-card">
-              <div className="hero-mockup-card-head">
-                <span className="hero-mockup-card-title">By league</span>
-                <span className="hero-mockup-card-meta">CLV adjusted</span>
-              </div>
-              <div className="hero-mockup-league-row">
-                <span className="hero-mockup-league-tag">NFL</span>
-                <span className="hero-mockup-league-name">Football</span>
-                <span className="hero-mockup-league-record">48–31</span>
-                <span className="hero-mockup-league-clv">CLV +2.1%</span>
-                <span className="hero-mockup-league-pl num-pos">+18.4u</span>
-              </div>
-              <div className="hero-mockup-league-row">
-                <span className="hero-mockup-league-tag">NBA</span>
-                <span className="hero-mockup-league-name">Basketball</span>
-                <span className="hero-mockup-league-record">61–52</span>
-                <span className="hero-mockup-league-clv">CLV +1.4%</span>
-                <span className="hero-mockup-league-pl num-pos">+9.2u</span>
-              </div>
-              <div className="hero-mockup-league-row">
-                <span className="hero-mockup-league-tag">EPL</span>
-                <span className="hero-mockup-league-name">Soccer</span>
-                <span className="hero-mockup-league-record">39–28</span>
-                <span className="hero-mockup-league-clv">CLV +0.6%</span>
-                <span className="hero-mockup-league-pl num-neg">−2.1u</span>
-              </div>
-              <div className="hero-mockup-league-row">
-                <span className="hero-mockup-league-tag">NHL</span>
-                <span className="hero-mockup-league-name">Hockey</span>
-                <span className="hero-mockup-league-record">22–19</span>
-                <span className="hero-mockup-league-clv">CLV +1.9%</span>
-                <span className="hero-mockup-league-pl num-pos">+6.8u</span>
-              </div>
-            </div>
-
-            {/* Recent bets. */}
-            <div className="hero-mockup-card">
-              <div className="hero-mockup-card-head">
-                <span className="hero-mockup-card-title">Recent bets</span>
-                <span className="hero-mockup-card-meta">last settled</span>
-              </div>
-              <div className="hero-mockup-bet">
-                <div className="hero-mockup-bet-main">
-                  <span className="hero-mockup-bet-tag">NFL</span>
-                  <span className="hero-mockup-bet-sel">Chiefs ML</span>
-                </div>
-                <div className="hero-mockup-bet-meta">
-                  <span>2.0u @ −140</span>
-                  <span className="num-pos">Won +2.86u</span>
-                </div>
-              </div>
-              <div className="hero-mockup-bet">
-                <div className="hero-mockup-bet-main">
-                  <span className="hero-mockup-bet-tag">NBA</span>
-                  <span className="hero-mockup-bet-sel">Nuggets/Lakers U 228.5</span>
-                </div>
-                <div className="hero-mockup-bet-meta">
-                  <span>1.5u @ 1.91</span>
-                  <span className="num-neg">Lost −1.50u</span>
-                </div>
-              </div>
-              <div className="hero-mockup-bet">
-                <div className="hero-mockup-bet-main">
-                  <span className="hero-mockup-bet-tag">EPL</span>
-                  <span className="hero-mockup-bet-sel">Arsenal −1 AH</span>
-                </div>
-                <div className="hero-mockup-bet-meta">
-                  <span>1.0u @ 2.05</span>
-                  <span className="num-pos">Won +1.05u</span>
-                </div>
-              </div>
-              <div className="hero-mockup-bet">
-                <div className="hero-mockup-bet-main">
-                  <span className="hero-mockup-bet-tag">UFC</span>
-                  <span className="hero-mockup-bet-sel">Makhachev by decision</span>
-                </div>
-                <div className="hero-mockup-bet-meta">
-                  <span>0.5u @ +225</span>
-                  <span className="num-pos">Won +1.13u</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Honest trust strip — no fabricated "1,000+ bettors" or "4.5 ★". */}
-          <div className="hero-mockup-trust">
-            <span>NO SPREADSHEET</span>
-            <span className="hero-mockup-trust-sep">·</span>
-            <span>CSV &amp; BOOK SYNC</span>
-            <span className="hero-mockup-trust-sep">·</span>
-            <span>CLOSING-LINE VALUE</span>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
