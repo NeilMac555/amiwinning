@@ -2382,7 +2382,47 @@ a.sb-item { cursor: pointer; }
 }
 [data-theme="dark"] .paste-hero-success-check { color: #0A0A09; }
 .paste-hero-success-text strong { color: var(--green); font-weight: 600; }
-.paste-hero-success-actions { display: inline-flex; gap: 8px; }
+.paste-hero-success-actions { display: inline-flex; gap: 8px; align-items: center; }
+
+/* Undo timer pill — sits next to "Logged N bets" so users see the
+   shrinking window without confusing it with the bet count. */
+.paste-hero-undo-timer {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: color-mix(in oklab, var(--bg), transparent 30%);
+  border: var(--border-w) solid var(--border);
+  border-radius: 999px;
+}
+
+/* Undo button — visually distinct from the secondary actions so the
+   escape hatch is obvious. Amber-toned to read as "warning / take
+   action" without being a destructive red. */
+.paste-hero-undo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--sans);
+  color: var(--amber, #c08a3e);
+  background: color-mix(in oklab, var(--amber, #c08a3e), transparent 88%);
+  border: var(--border-w) solid color-mix(in oklab, var(--amber, #c08a3e), transparent 55%);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 80ms ease;
+}
+.paste-hero-undo-btn:hover {
+  background: color-mix(in oklab, var(--amber, #c08a3e), transparent 78%);
+}
+.paste-hero-undo-btn:active {
+  transform: scale(0.97);
+}
 
 /* === Dark-scheme overrides (Terminal + Slate inherit these) ============
    The dark-theme block above sets contrast colors that assume a dark

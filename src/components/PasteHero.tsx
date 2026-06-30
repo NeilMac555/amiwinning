@@ -10,14 +10,17 @@
 // (or both). Vision input goes through the same /api/bets/parse route;
 // Claude Haiku 4.5 handles multimodal natively.
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { appendBets } from "@/lib/import/store";
+import { appendBets, deleteBet } from "@/lib/import/store";
 import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
 import { classifySport } from "@/lib/sport-classify";
-import { fmtStake, useUnit } from "./UnitContext";
+// Unit display helpers were used by the old review-table render; the
+// auto-commit flow doesn't show stakes/per-bet rows so they're no longer
+// needed here. Keep the import path for if/when we add a per-bet summary
+// to the undo toast.
 
 interface ParsedBet {
   kickoff: string;
@@ -102,14 +105,23 @@ async function fileToDataUrl(file: File | Blob): Promise<string> {
 
 export function PasteHero({ onCommitted }: Props) {
   const { activeBook } = useAuth();
-  const unit = useUnit();
   const [text, setText] = useState("");
   const [images, setImages] = useState<AttachedImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [bets, setBets] = useState<ParsedBet[] | null>(null);
-  const [issues, setIssues] = useState<string[]>([]);
-  const [justAdded, setJustAdded] = useState<number | null>(null);
+  // After auto-commit, justAdded holds the IDs of the bets we just wrote
+  // so Undo can target them, plus a deadline timestamp that drives the
+  // countdown shown in the toast. Replaces the old "review then confirm"
+  // step — users were repeatedly forgetting the confirm and losing the
+  // whole batch.
+  const [justAdded, setJustAdded] = useState<{
+    ids: string[];
+    count: number;
+    expiresAt: number;
+  } | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState<number>(0);
+  // Brief "Undone" confirmation shown after the user reverses a commit.
+  const [undone, setUndone] = useState<number | null>(null);
   // Ref to the hidden file input so the "Attach screenshot" button can
   // open the picker programmatically.
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -205,8 +217,6 @@ export function PasteHero({ onCommitted }: Props) {
     if (!hasInput) return;
     setLoading(true);
     setError(null);
-    setBets(null);
-    setIssues([]);
     setJustAdded(null);
     try {
       const res = await authedFetch("/api/bets/parse", {
@@ -228,8 +238,22 @@ export function PasteHero({ onCommitted }: Props) {
         setError(body.error ?? `HTTP ${res.status}`);
         return;
       }
-      setBets(body.bets ?? []);
-      setIssues(body.issues ?? []);
+      const parsed: ParsedBet[] = body.bets ?? [];
+      if (parsed.length > 0) {
+        // Auto-commit: skip the old review/confirm step that users were
+        // forgetting to click. The Undo button in the success toast is
+        // the escape hatch for "AI got it wrong".
+        commit(parsed);
+      } else if ((body.issues ?? []).length > 0) {
+        // Parser found nothing actionable — surface the issues as an
+        // error so the input view isn't silently empty.
+        const issues: string[] = body.issues;
+        setError(
+          `Couldn't extract a bet. ${issues.length} issue${issues.length === 1 ? "" : "s"}: ${issues
+            .slice(0, 2)
+            .join("; ")}${issues.length > 2 ? "…" : ""}`,
+        );
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -237,10 +261,13 @@ export function PasteHero({ onCommitted }: Props) {
     }
   };
 
-  const commit = () => {
-    if (!bets || bets.length === 0) return;
+  // Commit takes the parsed list directly (rather than reading from
+  // bets-state) because runParse calls it immediately after a successful
+  // parse — auto-commit, no review step.
+  const commit = (parsed: ParsedBet[]) => {
+    if (parsed.length === 0) return;
     const importedAt = new Date().toISOString();
-    const out: ImportedBet[] = bets.map((p) => {
+    const out: ImportedBet[] = parsed.map((p) => {
       const { home, away } = splitTeams(p.event);
       let pl = 0;
       if (p.status === "won") pl = p.stake * (p.odds - 1);
@@ -279,19 +306,58 @@ export function PasteHero({ onCommitted }: Props) {
     });
     appendBets(out);
     const n = out.length;
-    setJustAdded(n);
-    setBets(null);
+    const ids = out.map((b) => b.id);
+    // 30-second undo window — long enough to catch "wait, that's wrong"
+    // but short enough not to feel like the bet is still pending.
+    setJustAdded({ ids, count: n, expiresAt: Date.now() + 30_000 });
     setText("");
-    setIssues([]);
+    setImages([]);
+    setUndone(null);
     onCommitted?.(n);
   };
 
-  const reset = () => {
-    setBets(null);
-    setError(null);
-    setIssues([]);
+  // Undo the most recent auto-commit. Deletes each just-added bet by ID
+  // (using the existing store helper, which tombstones + syncs the
+  // remote delete). Shows a brief "Undone" confirmation.
+  const undo = () => {
+    if (!justAdded) return;
+    const { ids, count } = justAdded;
+    for (const id of ids) {
+      deleteBet(id);
+    }
     setJustAdded(null);
+    setUndone(count);
+    // Tell the parent to re-aggregate now that the bets are gone.
+    onCommitted?.(0);
+    // Hide the "Undone" confirmation after 4s.
+    setTimeout(() => setUndone((cur) => (cur === count ? null : cur)), 4_000);
   };
+
+  const reset = () => {
+    setError(null);
+    setJustAdded(null);
+    setUndone(null);
+  };
+
+  // Drive the countdown. setInterval ticks every 500ms — enough resolution
+  // that the seconds-remaining number never feels stuck, light enough not
+  // to thrash. Once expiresAt is reached, clear justAdded so the undo
+  // toast hides and the paste input returns.
+  useEffect(() => {
+    if (!justAdded) return;
+    const tick = () => {
+      const remainingMs = justAdded.expiresAt - Date.now();
+      if (remainingMs <= 0) {
+        setSecondsLeft(0);
+        setJustAdded(null);
+        return;
+      }
+      setSecondsLeft(Math.ceil(remainingMs / 1000));
+    };
+    tick();
+    const id = setInterval(tick, 500);
+    return () => clearInterval(id);
+  }, [justAdded]);
 
   const bookName = activeBook?.name ?? "your book";
 
@@ -309,7 +375,7 @@ export function PasteHero({ onCommitted }: Props) {
   );
 
   // -------------------------------------------------------------------------
-  // Success state — bets just added.
+  // Success state — bets auto-committed, 30s undo window active.
 
   if (justAdded != null) {
     return (
@@ -318,12 +384,25 @@ export function PasteHero({ onCommitted }: Props) {
           <span className="paste-hero-success-check">✓</span>
           <span>
             <strong>
-              {justAdded} bet{justAdded === 1 ? "" : "s"} added
+              Logged {justAdded.count} bet{justAdded.count === 1 ? "" : "s"}
             </strong>{" "}
             to {bookName}.
+            {/* Countdown timer in the toast — sets the expectation that the
+                undo window is short, not the whole session. */}
+            <span className="paste-hero-undo-timer">
+              Undo available for {secondsLeft}s
+            </span>
           </span>
         </span>
         <span className="paste-hero-success-actions">
+          <button
+            type="button"
+            className="paste-hero-undo-btn"
+            onClick={undo}
+            title="Delete the bets I just logged"
+          >
+            ↺ Undo
+          </button>
           <Link
             href="/bets"
             className="btn-ghost"
@@ -345,140 +424,38 @@ export function PasteHero({ onCommitted }: Props) {
   }
 
   // -------------------------------------------------------------------------
-  // Review state — bets parsed, awaiting commit.
+  // Brief "Undone" confirmation after the user reverses a commit.
 
-  if (bets && bets.length > 0) {
-    const totalStake = bets.reduce((a, b) => a + b.stake, 0);
+  if (undone != null) {
     return (
-      <div className="paste-hero paste-hero--review">
-        <div className="paste-hero-review-head">
-          <div style={{ minWidth: 0 }}>
-            {eyebrow}
-            <h2 className="paste-hero-review-title">
-              <em>{bets.length}</em> bet{bets.length === 1 ? "" : "s"} ready
-              to log
-              {/* "Not saved" tag — explicit pre-commit state indicator
-                  because user feedback showed people thought parsing
-                  WAS saving. Plain monospace pill, calm not loud, but
-                  unmissable next to the headline. */}
-              <span className="paste-hero-review-pending">Not saved yet</span>
-            </h2>
-            <div className="paste-hero-review-meta">
-              <span>Tap the green button to log them to {bookName}.</span>
-              <span style={{ color: "var(--text-faint)" }}>·</span>
-              <span className="mono">
-                {fmtStake(totalStake, unit)} staked
-              </span>
-              {issues.length > 0 && (
-                <>
-                  <span style={{ color: "var(--text-faint)" }}>·</span>
-                  <span style={{ color: "var(--red)" }}>
-                    {issues.length} skipped
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="paste-hero-review-actions">
-            <button
-              type="button"
-              className="paste-hero-cancel-link"
-              onClick={reset}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="btn-primary paste-hero-commit-cta"
-              onClick={commit}
-            >
-              {/* Check-circle SVG — universal "confirm" affordance.
-                  Stronger semantic signal than the arrow alone that
-                  this is the commit step, not a navigation step. */}
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                style={{ flexShrink: 0 }}
-              >
-                <circle cx="9" cy="9" r="7.5" />
-                <path d="M5.5 9.2l2.5 2.3 4.5-5" />
-              </svg>
-              <span>
-                Confirm &amp; log {bets.length} bet
-                {bets.length === 1 ? "" : "s"}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="paste-hero-review-table">
-          <table className="tbl" data-density="dense">
-            <thead>
-              <tr>
-                <th>Kickoff</th>
-                <th>Event</th>
-                <th>Selection</th>
-                <th className="num">Odds</th>
-                <th className="num">Stake</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bets.map((b, i) => (
-                <tr key={i}>
-                  <td className="mono" style={{ fontSize: 11 }}>
-                    {b.kickoff}
-                  </td>
-                  <td className="event">{b.event}</td>
-                  <td className="selection">
-                    <span className="sel-main">{b.selection}</span>
-                  </td>
-                  <td className="num">{b.odds.toFixed(2)}</td>
-                  <td className="num">{fmtStake(b.stake, unit)}</td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        b.status === "won" || b.status === "half_won"
-                          ? "win"
-                          : b.status === "lost" || b.status === "half_lost"
-                            ? "loss"
-                            : "void"
-                      }`}
-                    >
-                      {b.status.replace("_", "-")}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {issues.length > 0 && (
-          <div className="paste-hero-issues">
-            <div className="paste-hero-issues-title">Skipped</div>
-            <div className="paste-hero-issues-list">
-              {issues.slice(0, 4).map((iss, i) => (
-                <div key={i}>{iss}</div>
-              ))}
-              {issues.length > 4 && (
-                <div className="paste-hero-issues-more">
-                  …and {issues.length - 4} more
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+      <div className="paste-hero paste-hero--success">
+        <span className="paste-hero-success-text">
+          <span className="paste-hero-success-check">↺</span>
+          <span>
+            <strong>
+              Removed {undone} bet{undone === 1 ? "" : "s"}
+            </strong>{" "}
+            from {bookName}.
+          </span>
+        </span>
+        <span className="paste-hero-success-actions">
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={reset}
+            style={{ padding: "6px 14px", fontSize: 12.5 }}
+          >
+            Paste again
+          </button>
+        </span>
       </div>
     );
   }
+
+  // -------------------------------------------------------------------------
+  // (Review state removed — bets now auto-commit on parse, with the undo
+  // toast above acting as the safety net. The old "Confirm & log" step
+  // was being missed too often, leaving parsed bets unsaved.)
 
   // -------------------------------------------------------------------------
   // Default state — empty textarea ready for paste.
