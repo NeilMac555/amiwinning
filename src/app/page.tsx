@@ -18,7 +18,6 @@ import { Breakdown } from "@/components/Breakdown";
 import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
-import { EmptyDashboard } from "@/components/EmptyDashboard";
 import { SampleBetsBanner } from "@/components/SampleBetsBanner";
 import { SAMPLE_SOURCE_TAG } from "@/lib/sample-tip";
 import { ProfitPerStake } from "@/components/ProfitPerStake";
@@ -211,16 +210,15 @@ export default function Dashboard() {
           {/* Signed-in but no bets yet: show the welcome / get-started
               cards instead of mock charts. Bail out of the full layout. */}
           {user && allBets.length === 0 ? (
-            // Zero bets — no aggregate rendering (all-KPI-zero looks broken).
-            // First-run PasteHero drops in here with the sample tip
-            // pre-filled and the pulse nudge on the Parse button.
-            <>
-              <EmptyDashboard displayName={user.email?.split("@")[0]} />
-              <PasteHero
-                onCommitted={() => setLocalBump((n) => n + 1)}
-                firstRun
-              />
-            </>
+            // Zero bets — the first-run PasteHero IS the CTA now. The
+            // old three-card EmptyDashboard grid is skipped in this
+            // branch because it competes with the pre-filled sample
+            // tip for attention (users were seeing the grid and
+            // missing the pulsing Parse button below it).
+            <PasteHero
+              onCommitted={() => setLocalBump((n) => n + 1)}
+              firstRun
+            />
           ) : (
             <>
 
