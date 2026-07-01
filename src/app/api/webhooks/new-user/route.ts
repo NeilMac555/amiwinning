@@ -27,12 +27,28 @@
 //   - SIGNUP_NOTIFY_FROM        — verified sender, e.g. signups@amiup.io
 //   - SIGNUP_NOTIFY_TO          — destination inbox, e.g. filthyjabba@gmail.com
 //
+// Optional env vars for the 24h nudge email to the new user:
+//   - NEXT_PUBLIC_SUPABASE_URL       — same URL used by the frontend
+//   - SUPABASE_SERVICE_ROLE_KEY      — read auth.users to fetch the
+//                                      new user's email address
+//   - USER_NUDGE_FROM               — verified sender for user-facing
+//                                      mail, e.g. hi@amiup.io. Falls
+//                                      back to SIGNUP_NOTIFY_FROM.
+//   - USER_NUDGE_REPLY_TO           — optional Reply-To for the nudge.
+//   - AMIUP_URL                     — public site URL, defaults to
+//                                      https://amiup.io.
+// If any of the two required nudge vars are missing the nudge is
+// skipped silently — the founder-notification email still sends.
+//
 // On any failure (missing env, bad secret, Resend error) we log to
 // stderr (Railway captures these) and return a 4xx/5xx so Supabase
-// retries — Supabase webhooks retry up to 3 times with backoff.
+// retries — Supabase webhooks retry up to 3 times with backoff. The
+// 24h nudge scheduling is wrapped in its own try/catch so a Resend
+// failure on that leg does NOT fail the webhook (log and continue).
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 
 // Force this route to the Node runtime — the Resend SDK uses Node fetch
 // internals. Edge runtime would be marginally faster but isn't needed
@@ -181,7 +197,21 @@ export async function POST(req: Request) {
         { status: 502 },
       );
     }
-    return NextResponse.json({ ok: true, emailId: result.data?.id });
+
+    // ── 4. Schedule the 24h nudge email to the new user ────────────────
+    // Best-effort. Wrapped so no failure here can break the founder-
+    // notification response above (which is what Supabase retries on).
+    const nudgeInfo = await scheduleUserNudge({
+      resend,
+      userId: user_id,
+      handle,
+    });
+
+    return NextResponse.json({
+      ok: true,
+      emailId: result.data?.id,
+      nudge: nudgeInfo,
+    });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[new-user] Unexpected exception:", msg);
@@ -199,4 +229,111 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// 24-hour nudge email to the new user.
+//
+// Goal: cut activation churn by reminding users who signed up but haven't
+// logged their first bet. The webhook only carries the profile row (which
+// lacks the email address), so we look up auth.users via the service-role
+// client. Any failure at any step here is caught and logged — the founder
+// notification above must not depend on this succeeding.
+// ────────────────────────────────────────────────────────────────────────
+
+type NudgeInfo =
+  | { scheduled: true; scheduledAt: string; emailId: string | undefined }
+  | { scheduled: false; reason: string };
+
+async function scheduleUserNudge({
+  resend,
+  userId,
+  handle,
+}: {
+  resend: Resend;
+  userId: string | undefined;
+  handle: string;
+}): Promise<NudgeInfo> {
+  try {
+    if (!userId) {
+      return { scheduled: false, reason: "missing user_id" };
+    }
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) {
+      return {
+        scheduled: false,
+        reason:
+          "NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — nudge skipped",
+      };
+    }
+    const from = process.env.USER_NUDGE_FROM ?? process.env.SIGNUP_NOTIFY_FROM;
+    if (!from) {
+      return { scheduled: false, reason: "no from address configured" };
+    }
+    const replyTo = process.env.USER_NUDGE_REPLY_TO;
+    const siteUrl = process.env.AMIUP_URL ?? "https://amiup.io";
+
+    // Look up the new user's email via the admin API. Service-role only —
+    // we can't read auth.users from an RLS-restricted client.
+    const admin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await admin.auth.admin.getUserById(userId);
+    if (error) {
+      console.error("[new-user] nudge: admin.getUserById error:", error.message);
+      return { scheduled: false, reason: `getUserById: ${error.message}` };
+    }
+    const email = data?.user?.email;
+    if (!email) {
+      return { scheduled: false, reason: "user has no email on record" };
+    }
+
+    // 24 hours from now. Resend accepts an ISO string in UTC.
+    const scheduledAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    // Plain-text body, no emojis, no em dashes, under 100 words. Single
+    // link to the app, single line at the end for reply-to-opt-out.
+    const text = [
+      `Hi @${handle},`,
+      ``,
+      `Quick nudge: your first bet takes about 10 seconds.`,
+      ``,
+      `Paste any tip, screenshot, or bookmaker copy into Am I Up and the AI`,
+      `logs it for you. Odds, stake, market, sport — all extracted, ready`,
+      `to track.`,
+      ``,
+      `Open your dashboard: ${siteUrl}`,
+      ``,
+      `If you have already logged your first bet, ignore this — check your`,
+      `dashboard anytime.`,
+      ``,
+      `Reply to this email with the word "stop" and you will not hear from`,
+      `us again.`,
+    ].join("\n");
+
+    const send = await resend.emails.send({
+      from,
+      to: email,
+      subject: "Your first bet takes 10 seconds",
+      text,
+      scheduledAt,
+      // Only include reply-to when it's configured; passing undefined
+      // trips Resend's runtime validation on some SDK versions.
+      ...(replyTo ? { replyTo } : {}),
+    });
+    if (send.error) {
+      console.error("[new-user] nudge: resend error:", send.error);
+      return { scheduled: false, reason: `resend: ${send.error.message}` };
+    }
+    return {
+      scheduled: true,
+      scheduledAt,
+      emailId: send.data?.id,
+    };
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[new-user] nudge: unexpected exception:", msg);
+    return { scheduled: false, reason: `exception: ${msg}` };
+  }
 }
