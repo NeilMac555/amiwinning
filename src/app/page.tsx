@@ -19,6 +19,7 @@ import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
 import { SampleBetsBanner } from "@/components/SampleBetsBanner";
+import { GhostPreview } from "@/components/GhostPreview";
 import { SAMPLE_SOURCE_TAG } from "@/lib/sample-tip";
 import { ProfitPerStake } from "@/components/ProfitPerStake";
 import { RangeTabs } from "@/components/RangeTabs";
@@ -126,6 +127,11 @@ export default function Dashboard() {
       ).length,
     [allBets],
   );
+  // Total committed bets across all sources (sample + real) for the
+  // active book — undo-reactive because loadBets() strips tombstoned
+  // rows before returning, so the 30s undo path decrements allBets
+  // (and therefore this count) as soon as it fires.
+  const totalCommittedBets = allBets.length;
   // First-run mode: signed-in user with no real bets yet. Persists across
   // sample-bet commits, only clears once a real (non-sample) bet exists.
   //
@@ -138,6 +144,7 @@ export default function Dashboard() {
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("firstrun") === "1";
   const isFirstRun = forceFirstRun || (!!user && realBetCount === 0);
+  const showGhost = forceFirstRun || totalCommittedBets === 0;
   const inRangeCount = useMemo(
     () => (source === "imported" ? data.kpis.sampleSize : 0),
     [source, data.kpis.sampleSize],
@@ -214,18 +221,28 @@ export default function Dashboard() {
 
           {!user && allBets.length > 0 && <SampleDataBanner />}
 
-          {/* Signed-in but no bets yet: show the welcome / get-started
-              cards instead of mock charts. Bail out of the full layout. */}
-          {user && allBets.length === 0 ? (
-            // Zero bets — the first-run PasteHero IS the CTA now. The
-            // old three-card EmptyDashboard grid is skipped in this
-            // branch because it competes with the pre-filled sample
-            // tip for attention (users were seeing the grid and
-            // missing the pulsing Parse button below it).
-            <PasteHero
-              onCommitted={() => setLocalBump((n) => n + 1)}
-              firstRun
-            />
+          {/* PasteHero always renders — it's the primary action for both
+              zero-bet and populated dashboards. `firstRun` controls the
+              sample-tip pre-fill + pulse (Task A behaviour, preserved). */}
+          <PasteHero
+            onCommitted={() => setLocalBump((n) => n + 1)}
+            firstRun={isFirstRun}
+          />
+
+          {/* Top-level conditional per spec:
+              - totalCommittedBets === 0 → GhostPreview (presentational
+                only, opacity + pointer-events wrapper is inside the
+                component so the "Sample data" pill and closing line
+                stay interactive).
+              - Otherwise → the real dashboard block, including the
+                amber SampleBetsBanner which sits outside the ghost so
+                it's structurally separate. By construction ghost and
+                banner never mount at the same time (sample bets > 0
+                implies totalCommittedBets > 0).
+              Wrapped as a straight ternary so a crossfade wrapper drops
+              in later without refactoring the branch structure. */}
+          {showGhost ? (
+            <GhostPreview />
           ) : (
             <>
 
@@ -235,11 +252,6 @@ export default function Dashboard() {
               onCleared={() => setLocalBump((n) => n + 1)}
             />
           )}
-
-          <PasteHero
-            onCommitted={() => setLocalBump((n) => n + 1)}
-            firstRun={isFirstRun}
-          />
 
           {cleanup &&
             cleanup.status === "done" &&

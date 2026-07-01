@@ -385,7 +385,9 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
     return () => clearInterval(id);
   }, [justAdded]);
 
-  const bookName = activeBook?.name ?? "your book";
+  // Fallback matches the first-run mockup — new accounts see "Default
+  // book" until they've either used or created a real book.
+  const bookName = activeBook?.name ?? "Default book";
 
   // -------------------------------------------------------------------------
   // Eyebrow row (shared across input + review states)
@@ -587,16 +589,15 @@ or drop a screenshot of your bet slip / X post / Telegram tip in here.`}
                 : `${images.length}/${MAX_IMAGES} image${images.length === 1 ? "" : "s"}`}
             </span>
           </button>
-          {firstRun && isSampleText ? (
-            <span className="paste-hero-firstrun-caption">
-              Try it with this sample tip, or paste one of your own.
-            </span>
-          ) : (
-            <span className="paste-hero-tip">
-              Tip: prefix parlays with <code>Double:</code> or{" "}
-              <code>Treble:</code>
-            </span>
-          )}
+          {/* Status line to the left of the Parse button. Reflects the
+              auto-commit + 30s undo flow (see PasteHero: auto-commit
+              + 30s undo toast commit). The old parlay-tip line was
+              replaced when the ghost preview below the card started
+              carrying the "here's what your dashboard becomes" nudge
+              on its own. */}
+          <span className="paste-hero-commit-status">
+            Logs instantly — undo within 30 seconds
+          </span>
         </span>
         <button
           type="button"

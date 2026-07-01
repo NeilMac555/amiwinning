@@ -1624,6 +1624,14 @@ a.sb-item { cursor: pointer; }
   letter-spacing: -0.005em;
 }
 
+/* Status line to the left of the Parse button — reflects the auto-
+   commit + 30s undo behaviour. Muted 12px per spec. */
+.paste-hero-commit-status {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: -0.005em;
+}
+
 /* Subtle pulse on the Parse button in first-run mode. Uses box-shadow
    rather than transform so it doesn't visually offset the button —
    we want the eye drawn, not the layout jumping. */
@@ -1678,6 +1686,128 @@ a.sb-item { cursor: pointer; }
 .sample-bets-banner-clear:hover {
   color: color-mix(in oklab, var(--amber, #c08a3e), var(--text) 25%);
 }
+
+/* ─── Ghost preview ─── */
+/* First-run empty state. Renders below PasteHero on the dashboard and
+   as the analytics body when the active book has 0 committed bets.
+   Body content is at 65% opacity + pointer-events: none per spec;
+   header + closing line stay at normal opacity so pills and links
+   remain interactive. */
+.ghost-preview {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 10px;
+  border: var(--border-w) solid var(--border);
+  background: color-mix(in oklab, var(--surface), var(--bg) 12%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ghost-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ghost-preview-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.ghost-preview-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--green), var(--text) 25%);
+  background: color-mix(in oklab, var(--green), transparent 88%);
+  border: var(--border-w) solid color-mix(in oklab, var(--green), transparent 65%);
+}
+.ghost-preview-body {
+  opacity: 0.65;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ghost-preview-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+.ghost-preview-kpi {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: var(--border-w) solid var(--border);
+  background: color-mix(in oklab, var(--surface), var(--bg) 4%);
+}
+.ghost-preview-kpi-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+.ghost-preview-kpi-value {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-family: var(--mono);
+}
+.ghost-preview-card {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: var(--border-w) solid var(--border);
+  background: color-mix(in oklab, var(--surface), var(--bg) 4%);
+}
+.ghost-preview-card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 8px;
+}
+.ghost-preview-chart {
+  width: 100%;
+  height: 90px;
+  display: block;
+}
+.ghost-preview-betlog { padding: 4px 14px; }
+.ghost-preview-bet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: var(--border-w) solid color-mix(in oklab, var(--border), transparent 55%);
+}
+.ghost-preview-bet-row:first-child { border-top: none; }
+.ghost-preview-bet-text {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.ghost-preview-bet-pl {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+.ghost-preview-closing {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 4px 0 2px;
+}
+.ghost-preview-closing a {
+  color: var(--green);
+  text-decoration: none;
+  font-weight: 500;
+}
+.ghost-preview-closing a:hover { text-decoration: underline; }
 
 /* Attach screenshot button — ghost style, small, sits beside the tip. */
 .paste-hero-attach {

@@ -14,6 +14,7 @@ import type { ImportedBet } from "@/lib/import/types";
 import { applyTheme, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { SAMPLE_BETS } from "@/lib/sample-profile";
+import { GhostPreview } from "@/components/GhostPreview";
 import {
   byCompetition,
   byDayOfWeek,
@@ -46,7 +47,11 @@ export default function AnalyticsPage() {
   useEffect(() => {
     applyTheme();
     if (!user) consumeSeed();
-    const all = loadBets();
+    const allRaw = loadBets();
+    // Same guard as the dashboard: signed-in accounts must not inherit
+    // the landing-page seed bets that consumeSeed() drops in for the
+    // signed-out preview. Those have stable ids prefixed "seed-".
+    const all = user ? allRaw.filter((b) => !b.id.startsWith("seed-")) : allRaw;
     const scoped = activeBook
       ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
       : all;
@@ -95,7 +100,7 @@ export default function AnalyticsPage() {
                 <h1 className="page-title">Analytics</h1>
                 <div className="page-subtitle">
                   {empty ? (
-                    <>Sample report — based on demo data.</>
+                    <>Sample preview. Log your first bet to unlock the real report.</>
                   ) : (
                     <>
                       Where the edge actually lives. Slice by time, day, and stake size.
@@ -105,38 +110,49 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* Sample-mode banner: shown only when the user has zero bets
-                in the active book. The panels below render the demo data
-                so users see what Analytics actually does, instead of a
-                blank page. */}
-            {empty && <SampleAnalyticsBanner count={SAMPLE_BETS.length} />}
+            {/* Empty state: swap the whole analytics body for the same
+                ghost preview used on the dashboard. The closing line
+                links back to Paste & Parse so the user has an obvious
+                next step. When they log their first bet the ghost
+                unmounts and the full panels render below. */}
+            {empty ? (
+              <GhostPreview
+                closing={
+                  <>
+                    <Link href="/">Back to Paste &amp; Parse →</Link>
+                  </>
+                }
+              />
+            ) : (
+              <>
+                <StreaksPanel streak={streak} />
 
-            <StreaksPanel streak={streak} />
+                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+                  <CalendarPanel bets={displayBets} unit={unit} />
+                </div>
 
-            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-              <CalendarPanel bets={displayBets} unit={unit} />
-            </div>
+                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+                  <MonthlyPanel rows={monthly} unit={unit} />
+                </div>
 
-            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-              <MonthlyPanel rows={monthly} unit={unit} />
-            </div>
+                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+                  <SeasonalPanel rows={seasonal} unit={unit} />
+                </div>
 
-            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-              <SeasonalPanel rows={seasonal} unit={unit} />
-            </div>
+                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+                  <MarketPanel rows={market} unit={unit} />
+                </div>
 
-            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-              <MarketPanel rows={market} unit={unit} />
-            </div>
+                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+                  <CompetitionPanel rows={competition} unit={unit} />
+                </div>
 
-            <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-              <CompetitionPanel rows={competition} unit={unit} />
-            </div>
-
-            <div className="dense-grid row-2">
-              <DowPanel rows={dow} unit={unit} />
-              <StakePanel rows={stakeRows} unit={unit} />
-            </div>
+                <div className="dense-grid row-2">
+                  <DowPanel rows={dow} unit={unit} />
+                  <StakePanel rows={stakeRows} unit={unit} />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -146,41 +162,10 @@ export default function AnalyticsPage() {
 
 // ─────────────────────────────────────────────────────────────────────────
 
-// Shown only when the active book has zero real bets. Makes it
-// unambiguous that the analytics below are seeded from demo data, and
-// gives two clear paths to make the page actually theirs.
-function SampleAnalyticsBanner({ count }: { count: number }) {
-  return (
-    <div className="sample-banner" role="status">
-      <div className="sample-banner-icon" aria-hidden="true">
-        ✦
-      </div>
-      <div className="sample-banner-body">
-        <div className="sample-banner-title">
-          Sample analytics — {count.toLocaleString()} demo bets
-        </div>
-        <div className="sample-banner-sub">
-          You don&rsquo;t have any bets in this book yet, so we&rsquo;re
-          showing a tour of what Analytics looks like once you do.
-          Soccer-and-tennis sample data across the last seven months, ~53%
-          win rate. The moment you log or import a bet of your own, this
-          page switches to your real numbers.
-        </div>
-        <div className="sample-banner-actions">
-          <Link href="/import" className="btn-primary sample-banner-cta">
-            Import a file →
-          </Link>
-          <Link href="/bets/new" className="btn-ghost sample-banner-cta">
-            Log a bet →
-          </Link>
-          <Link href="/u/sample" className="sample-banner-link">
-            or see a real public profile →
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+// (SampleAnalyticsBanner removed — the ghost preview above now owns
+// the empty-state UX on this page. Kept the removal explicit so future
+// spelunkers see the intentional swap rather than deleted code out of
+// context.)
 
 function StreaksPanel({ streak }: { streak: StreakSummary }) {
   const currentColor =
