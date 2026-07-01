@@ -53,7 +53,14 @@ export default function Dashboard() {
   useEffect(() => {
     applyTheme();
     if (!user) consumeSeed();
-    const all = loadBets();
+    const allRaw = loadBets();
+    // Signed-in accounts must not inherit the landing-page seed bets that
+    // consumeSeed() drops into localStorage for the signed-out preview.
+    // Those seeds have stable ids prefixed "seed-" — filter them out so a
+    // fresh signup sees a truly empty ledger and hits the first-run
+    // PasteHero. Signed-out preview still sees them because we don't
+    // apply this filter there.
+    const all = user ? allRaw.filter((b) => !b.id.startsWith("seed-")) : allRaw;
     // Scope to the active book. Bets without a bookId (legacy cache) fall
     // through to the active book so older data still shows up.
     const scoped = activeBook
