@@ -17,6 +17,10 @@ import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
 import { classifySport } from "@/lib/sport-classify";
+import {
+  SAMPLE_SOURCE_TAG,
+  SAMPLE_TIP_TEXT,
+} from "@/lib/sample-tip";
 // Unit display helpers were used by the old review-table render; the
 // auto-commit flow doesn't show stakes/per-bet rows so they're no longer
 // needed here. Keep the import path for if/when we add a per-bet summary
@@ -36,6 +40,14 @@ interface ParsedBet {
 interface Props {
   // Called once bets are committed so the dashboard re-aggregates.
   onCommitted?: (n: number) => void;
+  // When true (signed-in user with zero non-sample bets), the textarea
+  // pre-fills with a demo tip, the Parse button pulses, and a caption
+  // nudges the user to try the sample or paste their own. Bets parsed
+  // from the untouched pre-fill get tagged with source === "sample" so
+  // the dashboard can separate them from real bets. Editing the
+  // textarea before parsing clears the sample flag and reverts to a
+  // normal parse.
+  firstRun?: boolean;
 }
 
 function uid(): string {
@@ -103,9 +115,16 @@ async function fileToDataUrl(file: File | Blob): Promise<string> {
   });
 }
 
-export function PasteHero({ onCommitted }: Props) {
+export function PasteHero({ onCommitted, firstRun = false }: Props) {
   const { activeBook } = useAuth();
-  const [text, setText] = useState("");
+  // Initialise the textarea with the sample tip only when we're mounting
+  // into first-run mode. useState's initial-value function runs once, so
+  // toggling firstRun later doesn't blow away user-typed content.
+  const [text, setText] = useState(() => (firstRun ? SAMPLE_TIP_TEXT : ""));
+  // Tracks whether the current textarea contents are still the untouched
+  // sample. Bets parsed from this state get flagged source === "sample";
+  // any edit (typing, delete, cut, paste-over) clears the flag.
+  const [isSampleText, setIsSampleText] = useState<boolean>(firstRun);
   const [images, setImages] = useState<AttachedImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -215,6 +234,10 @@ export function PasteHero({ onCommitted }: Props) {
 
   const runParse = async () => {
     if (!hasInput) return;
+    // Snapshot the "sample" flag at click-time so the source tag we assign
+    // reflects what the user actually parsed, not any state change that
+    // might happen while the parse call is in flight.
+    const wasSample = isSampleText;
     setLoading(true);
     setError(null);
     setJustAdded(null);
@@ -243,7 +266,7 @@ export function PasteHero({ onCommitted }: Props) {
         // Auto-commit: skip the old review/confirm step that users were
         // forgetting to click. The Undo button in the success toast is
         // the escape hatch for "AI got it wrong".
-        commit(parsed);
+        commit(parsed, wasSample);
       } else if ((body.issues ?? []).length > 0) {
         // Parser found nothing actionable — surface the issues as an
         // error so the input view isn't silently empty.
@@ -263,9 +286,12 @@ export function PasteHero({ onCommitted }: Props) {
 
   // Commit takes the parsed list directly (rather than reading from
   // bets-state) because runParse calls it immediately after a successful
-  // parse — auto-commit, no review step.
-  const commit = (parsed: ParsedBet[]) => {
+  // parse — auto-commit, no review step. `fromSample` flags this batch
+  // as originating from the untouched first-run sample tip so the
+  // dashboard can bucket / clear them without touching real bets.
+  const commit = (parsed: ParsedBet[], fromSample: boolean = false) => {
     if (parsed.length === 0) return;
+    const sourceTag = fromSample ? SAMPLE_SOURCE_TAG : "manual:paste";
     const importedAt = new Date().toISOString();
     const out: ImportedBet[] = parsed.map((p) => {
       const { home, away } = splitTeams(p.event);
@@ -299,7 +325,7 @@ export function PasteHero({ onCommitted }: Props) {
         stake: p.stake,
         status: p.status,
         pl: Math.round(pl * 100) / 100,
-        source: "manual:paste",
+        source: sourceTag,
         importedAt,
         raw: {},
       };
@@ -482,7 +508,12 @@ export function PasteHero({ onCommitted }: Props) {
       <textarea
         className="paste-hero-textarea"
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => {
+          setText(e.target.value);
+          // Any edit invalidates the "this is the untouched sample"
+          // flag — bets parsed from here should count as real.
+          if (isSampleText) setIsSampleText(false);
+        }}
         rows={5}
         placeholder={`Sunday
 Barcelona vs Real Madrid · Barcelona -0.75 @ 1.79 · 2u (win)
@@ -556,14 +587,22 @@ or drop a screenshot of your bet slip / X post / Telegram tip in here.`}
                 : `${images.length}/${MAX_IMAGES} image${images.length === 1 ? "" : "s"}`}
             </span>
           </button>
-          <span className="paste-hero-tip">
-            Tip: prefix parlays with <code>Double:</code> or{" "}
-            <code>Treble:</code>
-          </span>
+          {firstRun && isSampleText ? (
+            <span className="paste-hero-firstrun-caption">
+              Try it with this sample tip, or paste one of your own.
+            </span>
+          ) : (
+            <span className="paste-hero-tip">
+              Tip: prefix parlays with <code>Double:</code> or{" "}
+              <code>Treble:</code>
+            </span>
+          )}
         </span>
         <button
           type="button"
-          className="btn-primary"
+          className={`btn-primary${
+            firstRun && isSampleText ? " paste-hero-firstrun-pulse" : ""
+          }`}
           onClick={runParse}
           disabled={!hasInput || loading}
         >
