@@ -122,7 +122,16 @@ export default function Dashboard() {
   );
   // First-run mode: signed-in user with no real bets yet. Persists across
   // sample-bet commits, only clears once a real (non-sample) bet exists.
-  const isFirstRun = !!user && realBetCount === 0;
+  //
+  // Dev-only override: `?firstrun=1` forces the first-run PasteHero on
+  // regardless of bet count so an account with real history can preview
+  // the flow without wiping localStorage. Gated to development so it
+  // can't accidentally leak to prod.
+  const forceFirstRun =
+    process.env.NODE_ENV === "development" &&
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("firstrun") === "1";
+  const isFirstRun = forceFirstRun || (!!user && realBetCount === 0);
   const inRangeCount = useMemo(
     () => (source === "imported" ? data.kpis.sampleSize : 0),
     [source, data.kpis.sampleSize],
