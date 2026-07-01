@@ -19,6 +19,8 @@ import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
 import { EmptyDashboard } from "@/components/EmptyDashboard";
+import { SampleBetsBanner } from "@/components/SampleBetsBanner";
+import { SAMPLE_SOURCE_TAG } from "@/lib/sample-tip";
 import { ProfitPerStake } from "@/components/ProfitPerStake";
 import { RangeTabs } from "@/components/RangeTabs";
 import { WinRateGauge } from "@/components/WinRateGauge";
@@ -99,6 +101,28 @@ export default function Dashboard() {
   }, [allBets, range, source, now]);
 
   const importedCount = allBets.length;
+
+  // Sample-vs-real bet split. The first-run PasteHero pre-fills with a
+  // demo tip and tags any bets parsed from that untouched pre-fill with
+  // source === "sample". Both counts filter out tombstones that haven't
+  // yet been evicted from localStorage.
+  const sampleBetCount = useMemo(
+    () =>
+      allBets.filter(
+        (b) => b.source === SAMPLE_SOURCE_TAG && !b._pendingDelete,
+      ).length,
+    [allBets],
+  );
+  const realBetCount = useMemo(
+    () =>
+      allBets.filter(
+        (b) => b.source !== SAMPLE_SOURCE_TAG && !b._pendingDelete,
+      ).length,
+    [allBets],
+  );
+  // First-run mode: signed-in user with no real bets yet. Persists across
+  // sample-bet commits, only clears once a real (non-sample) bet exists.
+  const isFirstRun = !!user && realBetCount === 0;
   const inRangeCount = useMemo(
     () => (source === "imported" ? data.kpis.sampleSize : 0),
     [source, data.kpis.sampleSize],
@@ -178,13 +202,30 @@ export default function Dashboard() {
           {/* Signed-in but no bets yet: show the welcome / get-started
               cards instead of mock charts. Bail out of the full layout. */}
           {user && allBets.length === 0 ? (
-            <EmptyDashboard
-              displayName={user.email?.split("@")[0]}
-            />
+            // Zero bets — no aggregate rendering (all-KPI-zero looks broken).
+            // First-run PasteHero drops in here with the sample tip
+            // pre-filled and the pulse nudge on the Parse button.
+            <>
+              <EmptyDashboard displayName={user.email?.split("@")[0]} />
+              <PasteHero
+                onCommitted={() => setLocalBump((n) => n + 1)}
+                firstRun
+              />
+            </>
           ) : (
             <>
 
-          <PasteHero onCommitted={() => setLocalBump((n) => n + 1)} />
+          {sampleBetCount > 0 && (
+            <SampleBetsBanner
+              count={sampleBetCount}
+              onCleared={() => setLocalBump((n) => n + 1)}
+            />
+          )}
+
+          <PasteHero
+            onCommitted={() => setLocalBump((n) => n + 1)}
+            firstRun={isFirstRun}
+          />
 
           {cleanup &&
             cleanup.status === "done" &&
