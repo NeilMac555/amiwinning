@@ -10,7 +10,7 @@ import { UnitProvider, fmtStake, fmtUnit, type DisplayUnit } from "@/components/
 import { appendBets } from "@/lib/import/store";
 import { guessMarket } from "@/lib/import/normalise";
 import type { ImportedBet, MarketGuess } from "@/lib/import/types";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { computeClvPct } from "@/lib/clv";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
@@ -201,7 +201,7 @@ export default function NewBetPage() {
   };
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
   }, []);
 
   const update = (patch: Partial<FormState>) => {

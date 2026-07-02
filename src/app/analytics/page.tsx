@@ -11,7 +11,7 @@ import {
 } from "@/components/UnitContext";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import type { ImportedBet } from "@/lib/import/types";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { SAMPLE_BETS } from "@/lib/sample-profile";
 import { GhostPreview } from "@/components/GhostPreview";
@@ -45,7 +45,7 @@ export default function AnalyticsPage() {
   const { user, betsVersion, activeBook } = useAuth();
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
     if (!user) consumeSeed();
     const allRaw = loadBets();
     // Same guard as the dashboard: signed-in accounts must not inherit

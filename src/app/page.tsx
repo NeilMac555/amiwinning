@@ -28,7 +28,7 @@ import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
 import { BRAND } from "@/lib/brand";
 import { filterByRange, rangeLabel, type Range } from "@/lib/range";
 import type { ImportedBet } from "@/lib/import/types";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyTheme, applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { LandingPage } from "@/components/LandingPage";
 
@@ -52,7 +52,11 @@ export default function Dashboard() {
   // Load bets on mount, and re-read whenever the auth layer signals a fresh
   // pull from Supabase (betsVersion bumps).
   useEffect(() => {
-    applyTheme();
+    // Dashboard route is one of two things: the signed-in dashboard
+    // (terminal-dark default) or the LandingPage marketing surface
+    // (:root cream). Pick the theme applicator to match.
+    if (user) applyThemeForSignedIn();
+    else applyTheme();
     if (!user) consumeSeed();
     const allRaw = loadBets();
     // Signed-in accounts must not inherit the landing-page seed bets that

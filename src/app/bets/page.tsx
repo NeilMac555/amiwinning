@@ -8,7 +8,7 @@ import { TopBar } from "@/components/TopBar";
 import { UnitProvider, fmtPL, fmtStake } from "@/components/UnitContext";
 import { consumeSeed, deleteBet, loadBets } from "@/lib/import/store";
 import type { ImportedBet, Status } from "@/lib/import/types";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 import { betClv } from "@/lib/clv";
@@ -36,7 +36,7 @@ export default function BetsPage() {
   const { user, betsVersion, activeBook } = useAuth();
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
     if (!user) consumeSeed();
     const all = loadBets();
     const scoped = activeBook

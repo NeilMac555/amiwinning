@@ -1,10 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
-import { useSettings, saveSettings, type Theme, type UserSettings } from "@/lib/settings";
+import {
+  applyThemeForSignedIn,
+  useSettings,
+  saveSettings,
+  type Theme,
+  type UserSettings,
+} from "@/lib/settings";
 import { clearBets, loadBets } from "@/lib/import/store";
 import { useAuth } from "@/lib/auth";
 import { createBook, deleteBook, updateBook, type OddsFormat } from "@/lib/books";
@@ -41,8 +47,20 @@ const THEME_OPTIONS: Array<{
     swatch: ["#0A0A09", "#F2F2EE", "#4FB494"],
   },
   {
+    // New default for signed-in surfaces. Dark blue-black background with
+    // amber accent for primary CTAs. See globals.css [data-theme="terminal-dark"].
+    value: "terminal-dark",
+    label: "Terminal Dark",
+    tagline: "Bloomberg-style dark, amber accent",
+    swatch: ["#0A0C10", "#E6EDF3", "#F5A623"],
+  },
+  {
+    // Legacy phosphor-green terminal — kept in place for anyone who saved
+    // it as their theme. Identifier unchanged so saved preferences keep
+    // working; the display label is refined so it doesn't collide with
+    // the new "Terminal Dark" default in the picker.
     value: "terminal",
-    label: "Terminal",
+    label: "Terminal Classic",
     tagline: "Phosphor on black",
     swatch: ["#050805", "#5FE19E", "#FFB546"],
   },
@@ -71,6 +89,12 @@ export default function SettingsPage() {
     useAuth();
   // Settings come from the reactive store hook — SSR-safe, no effect needed.
   const settings = useSettings();
+  // Settings is a signed-in surface — apply the terminal-dark default
+  // on mount so a fresh user hitting this page directly still gets
+  // the new palette while previewing swatches.
+  useEffect(() => {
+    applyThemeForSignedIn();
+  }, []);
   const [clearTick, setClearTick] = useState(0);
   const [confirmClear, setConfirmClear] = useState(false);
   const [savedNotice, setSavedNotice] = useState(false);

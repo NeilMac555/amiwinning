@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { applyTheme } from "@/lib/settings";
+import { applyThemeForSignedIn } from "@/lib/settings";
 import Link from "next/link";
 import { parseFile } from "@/lib/import/parse";
 import { detectPreset, ALL_PRESETS } from "@/lib/import/presets/bettings";
@@ -63,7 +63,7 @@ export default function ImportPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
   }, []);
 
   const onFile = async (f: File) => {

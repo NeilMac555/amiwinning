@@ -12,7 +12,7 @@ import { UnitProvider } from "@/components/UnitContext";
 import { useAuth } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { supabase } from "@/lib/supabase";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 
 interface UserRow {
   id: string;
@@ -68,7 +68,7 @@ export default function AdminPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
   }, []);
 
   const canSeeAdmin =

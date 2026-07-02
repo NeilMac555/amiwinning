@@ -9,7 +9,7 @@ import { UnitProvider, fmtUnit } from "@/components/UnitContext";
 import { deleteBet, getBet, updateBet } from "@/lib/import/store";
 import { guessMarket } from "@/lib/import/normalise";
 import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { computeClvPct } from "@/lib/clv";
 import { useAuth } from "@/lib/auth";
 
@@ -115,7 +115,7 @@ export default function EditBetPage() {
   const { betsVersion } = useAuth();
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
     if (!id) return;
     const b = getBet(id);
     // All form-population setState calls deferred to the next microtask so
