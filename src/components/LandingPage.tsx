@@ -160,21 +160,23 @@ export function LandingPage() {
                 stroke="var(--border)"
                 strokeWidth="0.5"
               />
-              {/* Johnny Bets equity path — hand-tuned to look like real
-                  punter variance. Five segments across 200 units of x:
-                  early growth → first drawdown → recovery + push → big
-                  drawdown (peak-to-trough ~8u) → final grind higher. */}
+              {/* Johnny Bets equity path — 68-point walk hand-tuned to
+                  read as "thousands of settled bets": dense high-frequency
+                  wobble on a positive drift, with two visible drawdowns
+                  (~5u each peak-to-trough) that a real punter's chart
+                  would carry. Same endpoint (y=4) so it still resolves
+                  upward and gives bettors something to hope for. */}
               <path
-                d="M0,30 L10,28 L20,26 L30,28 L40,24 L50,27 L60,26 L70,24 L80,20 L90,17 L100,14 L110,17 L120,13 L130,18 L140,21 L150,17 L160,13 L170,10 L180,12 L190,7 L200,4"
+                d="M0,30 L3,29.6 L6,29.3 L9,29.5 L12,28.8 L15,28.5 L18,29.1 L21,28.4 L24,27.9 L27,28.3 L30,27.6 L33,26.9 L36,27.3 L39,26.5 L42,25.8 L45,26.2 L48,25.5 L51,24.8 L54,25.3 L57,24.6 L60,23.9 L63,24.4 L66,23.5 L69,22.7 L72,21.9 L75,22.6 L78,21.7 L81,22.5 L84,23.8 L87,25.2 L90,26.1 L93,26.8 L96,26.3 L99,25.4 L102,24.5 L105,23.4 L108,22.1 L111,21.0 L114,20.2 L117,19.1 L120,18.4 L123,19.2 L126,18.3 L129,17.5 L132,17.9 L135,16.8 L138,15.9 L141,16.4 L144,17.6 L147,19.2 L150,20.5 L153,21.1 L156,20.4 L159,19.3 L162,18.1 L165,17.0 L168,15.8 L171,14.6 L174,13.5 L177,14.1 L180,12.9 L183,11.7 L186,10.5 L189,11.2 L192,9.8 L195,8.3 L198,6.5 L200,4"
                 stroke="var(--green)"
-                strokeWidth="1.5"
+                strokeWidth="1.3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="none"
               />
               {/* Subtle area fill under the curve */}
               <path
-                d="M0,30 L10,28 L20,26 L30,28 L40,24 L50,27 L60,26 L70,24 L80,20 L90,17 L100,14 L110,17 L120,13 L130,18 L140,21 L150,17 L160,13 L170,10 L180,12 L190,7 L200,4 L200,36 L0,36 Z"
+                d="M0,30 L3,29.6 L6,29.3 L9,29.5 L12,28.8 L15,28.5 L18,29.1 L21,28.4 L24,27.9 L27,28.3 L30,27.6 L33,26.9 L36,27.3 L39,26.5 L42,25.8 L45,26.2 L48,25.5 L51,24.8 L54,25.3 L57,24.6 L60,23.9 L63,24.4 L66,23.5 L69,22.7 L72,21.9 L75,22.6 L78,21.7 L81,22.5 L84,23.8 L87,25.2 L90,26.1 L93,26.8 L96,26.3 L99,25.4 L102,24.5 L105,23.4 L108,22.1 L111,21.0 L114,20.2 L117,19.1 L120,18.4 L123,19.2 L126,18.3 L129,17.5 L132,17.9 L135,16.8 L138,15.9 L141,16.4 L144,17.6 L147,19.2 L150,20.5 L153,21.1 L156,20.4 L159,19.3 L162,18.1 L165,17.0 L168,15.8 L171,14.6 L174,13.5 L177,14.1 L180,12.9 L183,11.7 L186,10.5 L189,11.2 L192,9.8 L195,8.3 L198,6.5 L200,4 L200,36 L0,36 Z"
                 fill="var(--green)"
                 opacity="0.08"
               />
