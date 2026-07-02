@@ -8,6 +8,7 @@ export type Theme =
   | "light"
   | "dark"
   | "terminal"
+  | "terminal-dark"
   | "newspaper"
   | "solar"
   | "slate";
@@ -18,8 +19,14 @@ export type Theme =
 export const DARK_SCHEME_THEMES: ReadonlySet<Theme> = new Set([
   "dark",
   "terminal",
+  "terminal-dark",
   "slate",
 ]);
+
+/** Identifier of the theme that new signed-in surfaces default to
+ *  when the user has no explicit saved preference. Legacy themes and
+ *  the marketing / signed-out surfaces are unaffected. */
+export const SIGNED_IN_DEFAULT_THEME: Theme = "terminal-dark";
 
 export interface UserSettings {
   unit: DisplayUnit;
@@ -105,9 +112,43 @@ export function useSettings(): UserSettings {
 /**
  * Apply persisted theme to the document. Call from a client effect on every
  * page that should respect the setting.
+ *
+ * Used by signed-out and marketing pages (sign-in, terms, learn, compare).
+ * The default fallback (when no explicit preference is saved) is "light",
+ * matching the historical behaviour so those surfaces keep their cream
+ * appearance regardless of the terminal-dark rollout.
  */
 export function applyTheme(): void {
   if (typeof window === "undefined") return;
   const s = loadSettings();
   document.documentElement.dataset.theme = s.theme;
+}
+
+/**
+ * Apply the theme for a signed-in surface (dashboard, bet log, analytics,
+ * pending futures, settings, import, admin).
+ *
+ * If the user has an explicit saved theme, honour it — a user who picked
+ * Newspaper stays on Newspaper. Otherwise fall back to
+ * SIGNED_IN_DEFAULT_THEME ("terminal-dark") rather than the historical
+ * "light" default.
+ *
+ * Detects "explicit saved theme" by inspecting the raw localStorage entry
+ * so we can distinguish "no settings saved" from "settings saved without a
+ * theme key" — both are treated as no-preference and take the new default.
+ */
+export function applyThemeForSignedIn(): void {
+  if (typeof window === "undefined") return;
+  const raw = window.localStorage.getItem(KEY);
+  let explicit: Theme | undefined;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as Partial<UserSettings>;
+      if (parsed.theme) explicit = parsed.theme;
+    } catch {
+      // Fall through — malformed JSON is treated as no saved theme.
+    }
+  }
+  document.documentElement.dataset.theme =
+    explicit ?? SIGNED_IN_DEFAULT_THEME;
 }

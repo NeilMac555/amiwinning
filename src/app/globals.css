@@ -141,6 +141,38 @@
   color-scheme: light;
 }
 
+/* Terminal Dark — Bloomberg-style trading terminal. Dark blue-black
+   background, IBM Plex Sans body, JetBrains Mono numbers, amber
+   accent for primary CTAs. Green and red are reserved for P/L
+   meaning only — no accent overload. Default for signed-in surfaces.
+   See applyThemeForSignedIn() in lib/settings.ts. */
+[data-theme="terminal-dark"] {
+  --bg: #0A0C10;
+  --bg-sidebar: #0A0C10;
+  --surface: #161A21;
+  --surface-2: #1E232C;
+  --text: #E6EDF3;
+  --text-muted: #8B949E;
+  --text-faint: #5B636E;
+  --border: rgba(230, 237, 243, 0.10);
+  --border-strong: rgba(230, 237, 243, 0.22);
+  --green: #00D26A;
+  --green-rgb: 0, 210, 106;
+  --green-tint: rgba(0, 210, 106, 0.16);
+  --green-bg: rgba(0, 210, 106, 0.08);
+  --red: #FF4757;
+  --red-rgb: 255, 71, 87;
+  --red-tint: rgba(255, 71, 87, 0.16);
+  --red-bg: rgba(255, 71, 87, 0.08);
+  --blue: #F5A623;
+  --blue-tint: rgba(245, 166, 35, 0.14);
+  --pulse: #F5A623;
+  --accent: #F5A623;
+  --accent-rgb: 245, 166, 35;
+  --sans: var(--font-plex), -apple-system, system-ui, sans-serif;
+  color-scheme: dark;
+}
+
 /* Slate — Linear/Notion-style cool industrial grey, electric blue
    accent. Reads like a modern SaaS dashboard. */
 [data-theme="slate"] {
@@ -1957,6 +1989,37 @@ a.sb-item { cursor: pointer; }
   filter: saturate(0.6);
 }
 [data-theme="dark"] .btn-primary { color: #0A0A09; }
+
+/* Terminal-dark primary CTA: amber accent instead of green. Green is
+   reserved for P/L meaning only in this theme. Text is the dark
+   background colour for maximum contrast on the amber fill. */
+[data-theme="terminal-dark"] .btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0A0C10;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.30), 0 0 0 0 transparent;
+}
+[data-theme="terminal-dark"] .btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.30),
+    0 0 0 3px rgba(var(--accent-rgb), 0.20);
+}
+
+/* Terminal-dark: sync-dot pulse uses the green sync colour (not
+   accent-amber) because "sync" reads as a positive/liveness signal,
+   independent of the primary CTA. Keeps green reserved for meaning. */
+@keyframes terminal-sync-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(var(--green-rgb), 0.55); }
+  70%  { box-shadow: 0 0 0 6px rgba(var(--green-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--green-rgb), 0); }
+}
+[data-theme="terminal-dark"] .sync-dot {
+  animation: terminal-sync-pulse 2.4s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="terminal-dark"] .sync-dot { animation: none; }
+}
 
 /* Review state — keeps the hero look, swaps the title area for parsed-count */
 .paste-hero--review {

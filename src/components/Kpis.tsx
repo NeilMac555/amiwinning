@@ -46,13 +46,17 @@ function buildKpiItems(kpis: KPIs, sparks: Sparks): KpiItem[] {
     {
       id: "clv",
       label: "CLV",
-      value: fmtPct(kpis.clvPct),
-      sign: signClass(kpis.clvPct),
+      // When there's no CLV data captured yet (kpis.clvPct === 0), show
+      // an em-dash-in-mono placeholder rather than a "+0.00%" that looks
+      // like a real reading. Matches the terminal-dark redesign's empty
+      // state pattern — the KPI cell renders as "pending" not "zero".
+      value: isReal && kpis.clvPct === 0 ? "—" : fmtPct(kpis.clvPct),
+      sign: isReal && kpis.clvPct === 0 ? "" : signClass(kpis.clvPct),
       delta: isReal ? "" : "+0.14",
       deltaSign: isReal ? "" : "num-pos",
       deltaLabel: isReal
         ? kpis.clvPct === 0
-          ? "not yet captured"
+          ? "logs from your next pre-kickoff bet"
           : "average edge vs Pinnacle close"
         : "vs. 30d avg",
       sparkData: sparks.clv,

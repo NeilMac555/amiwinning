@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, JetBrains_Mono, Fraunces } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono, Fraunces, IBM_Plex_Sans } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { MobileNavProvider } from "@/lib/mobile-nav";
 import { BRAND } from "@/lib/brand";
@@ -19,6 +19,17 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
   display: "swap",
+});
+
+// IBM Plex Sans: primary sans of the terminal-dark theme. Chosen for the
+// Bloomberg/trading-terminal aesthetic — geometric, low-personality,
+// designed for dense information display. Self-hosted via next/font so
+// there are no runtime Google CDN calls.
+const ibmPlex = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-plex",
+  display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 // Fraunces: variable serif with editorial feel. Used only for page titles
@@ -137,7 +148,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="light"
-      className={`${sans.variable} ${jetbrainsMono.variable} ${fraunces.variable}`}
+      className={`${sans.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${ibmPlex.variable}`}
     >
       <body>
         {/* SoftwareApplication structured data — renders on every route

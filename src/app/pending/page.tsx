@@ -16,7 +16,7 @@ import { TopBar } from "@/components/TopBar";
 import { UnitProvider, fmtPL, fmtStake } from "@/components/UnitContext";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import type { ImportedBet } from "@/lib/import/types";
-import { applyTheme, useSettings } from "@/lib/settings";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 import { classifySport } from "@/lib/sport-classify";
@@ -37,7 +37,7 @@ export default function PendingPage() {
   const { user, betsVersion, activeBook } = useAuth();
 
   useEffect(() => {
-    applyTheme();
+    applyThemeForSignedIn();
     if (!user) consumeSeed();
     const all = loadBets();
     const scoped = activeBook
