@@ -36,7 +36,10 @@
 
   --mono: var(--font-jetbrains-mono), ui-monospace, monospace;
   --sans: var(--font-plex), var(--font-sans-grotesk), -apple-system, system-ui, sans-serif;
-  --serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  /* No serif — everything is IBM Plex Sans + JetBrains Mono per the
+     terminal-dark spec. --serif is aliased to --sans so any lingering
+     `font-family: var(--serif)` reference still gets Plex. */
+  --serif: var(--font-plex), var(--font-sans-grotesk), -apple-system, system-ui, sans-serif;
 
   --border-w: 0.5px;
   --radius-card: 10px;

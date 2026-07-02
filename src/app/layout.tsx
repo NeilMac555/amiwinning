@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, JetBrains_Mono, Fraunces, IBM_Plex_Sans } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono, IBM_Plex_Sans } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { MobileNavProvider } from "@/lib/mobile-nav";
 import { BRAND } from "@/lib/brand";
@@ -30,15 +30,6 @@ const ibmPlex = IBM_Plex_Sans({
   variable: "--font-plex",
   display: "swap",
   weight: ["400", "500", "600"],
-});
-
-// Fraunces: variable serif with editorial feel. Used only for page titles
-// and hero numbers — the "Bloomberg/FT" accent.
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-  axes: ["opsz", "SOFT"],
 });
 
 // SEO-tuned shared strings. The title leads with the brand (people
@@ -147,8 +138,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="light"
-      className={`${sans.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${ibmPlex.variable}`}
+      className={`${sans.variable} ${jetbrainsMono.variable} ${ibmPlex.variable}`}
     >
       <body>
         {/* SoftwareApplication structured data — renders on every route
