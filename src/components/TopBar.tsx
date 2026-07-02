@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { ThemeToggle } from "./ThemeToggle";
 import { useMobileNav } from "@/lib/mobile-nav";
 
 export function TopBar() {
@@ -109,7 +108,6 @@ export function TopBar() {
             <span className="kbd">N</span>
             <span>New bet</span>
           </Link>
-          <ThemeToggle />
         </div>
       </div>
     </div>

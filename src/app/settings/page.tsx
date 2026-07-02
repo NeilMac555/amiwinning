@@ -8,7 +8,6 @@ import {
   applyThemeForSignedIn,
   useSettings,
   saveSettings,
-  type Theme,
   type UserSettings,
 } from "@/lib/settings";
 import { clearBets, loadBets } from "@/lib/import/store";
@@ -22,66 +21,6 @@ const UNIT_OPTIONS: Array<{ value: DisplayUnit; label: string; sublabel: string 
   { value: "$", label: "US Dollar ($)", sublabel: "Real money tracking in USD." },
   { value: "£", label: "Pound Sterling (£)", sublabel: "Real money tracking in GBP." },
   { value: "€", label: "Euro (€)", sublabel: "Real money tracking in EUR." },
-];
-
-// Six themes, each shown as a swatch card. The `swatch` array is three
-// representative colors from the palette: surface, primary text, accent
-// (green). Lifted directly from the [data-theme] blocks in globals.css —
-// keep these in sync if you change the palette.
-const THEME_OPTIONS: Array<{
-  value: Theme;
-  label: string;
-  tagline: string;
-  swatch: [string, string, string];
-}> = [
-  {
-    value: "light",
-    label: "Light",
-    tagline: "Editorial cream",
-    swatch: ["#F1F0EB", "#0A0A0A", "#0F6E56"],
-  },
-  {
-    value: "dark",
-    label: "Dark",
-    tagline: "Editorial inverted",
-    swatch: ["#0A0A09", "#F2F2EE", "#4FB494"],
-  },
-  {
-    // New default for signed-in surfaces. Dark blue-black background with
-    // amber accent for primary CTAs. See globals.css [data-theme="terminal-dark"].
-    value: "terminal-dark",
-    label: "Terminal Dark",
-    tagline: "Bloomberg-style dark, amber accent",
-    swatch: ["#0A0C10", "#E6EDF3", "#F5A623"],
-  },
-  {
-    // Legacy phosphor-green terminal — kept in place for anyone who saved
-    // it as their theme. Identifier unchanged so saved preferences keep
-    // working; the display label is refined so it doesn't collide with
-    // the new "Terminal Dark" default in the picker.
-    value: "terminal",
-    label: "Terminal Classic",
-    tagline: "Phosphor on black",
-    swatch: ["#050805", "#5FE19E", "#FFB546"],
-  },
-  {
-    value: "newspaper",
-    label: "Newspaper",
-    tagline: "FT pink paper",
-    swatch: ["#F1E1D0", "#1A1612", "#B92434"],
-  },
-  {
-    value: "solar",
-    label: "Solar",
-    tagline: "Warm cream & olive",
-    swatch: ["#FAF3E3", "#2A1F12", "#5A8A3C"],
-  },
-  {
-    value: "slate",
-    label: "Slate",
-    tagline: "Industrial SaaS",
-    swatch: ["#1B1F24", "#E6EBF0", "#4D9DFF"],
-  },
 ];
 
 export default function SettingsPage() {
@@ -222,31 +161,6 @@ export default function SettingsPage() {
                     checked={settings.unit === opt.value}
                     onChange={() => update({ unit: opt.value })}
                   />
-                ))}
-              </div>
-            </Section>
-
-            <Section title="Theme" subtitle="Pick a palette. The whole app re-skins instantly — no reload.">
-              <div className="theme-grid">
-                {THEME_OPTIONS.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    className="theme-card"
-                    data-active={settings.theme === t.value ? "true" : undefined}
-                    onClick={() => update({ theme: t.value })}
-                  >
-                    <div
-                      className="theme-card-preview"
-                      aria-hidden="true"
-                    >
-                      <span style={{ background: t.swatch[0] }} />
-                      <span style={{ background: t.swatch[1] }} />
-                      <span style={{ background: t.swatch[2] }} />
-                    </div>
-                    <div className="theme-card-name">{t.label}</div>
-                    <div className="theme-card-sub">{t.tagline}</div>
-                  </button>
                 ))}
               </div>
             </Section>

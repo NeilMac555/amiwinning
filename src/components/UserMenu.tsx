@@ -32,12 +32,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "@/lib/auth";
 import {
-  DARK_SCHEME_THEMES,
-  saveSettings,
-  useSettings,
-  type Theme,
-} from "@/lib/settings";
-import {
   loadMyProfile,
   updateMyProfile,
   type Profile,
@@ -48,32 +42,8 @@ const SITE = "amiup.io";
 const MAX_BIO = 200;
 const MAX_NAME = 60;
 
-// Mirrors the Settings page's THEME_OPTIONS exactly. Kept in sync manually
-// — both lists live next to the [data-theme] palette blocks in globals.css.
-const THEMES: Array<{
-  value: Theme;
-  label: string;
-  swatch: [string, string, string];
-}> = [
-  { value: "light", label: "Light", swatch: ["#F1F0EB", "#0A0A0A", "#0F6E56"] },
-  { value: "dark", label: "Dark", swatch: ["#0A0A09", "#F2F2EE", "#4FB494"] },
-  {
-    value: "terminal",
-    label: "Terminal",
-    swatch: ["#050805", "#5FE19E", "#FFB546"],
-  },
-  {
-    value: "newspaper",
-    label: "Newspaper",
-    swatch: ["#F1E1D0", "#1A1612", "#B92434"],
-  },
-  { value: "solar", label: "Solar", swatch: ["#FAF3E3", "#2A1F12", "#5A8A3C"] },
-  { value: "slate", label: "Slate", swatch: ["#1B1F24", "#E6EBF0", "#4D9DFF"] },
-];
-
 export function UserMenu() {
   const { user, configured, signOut } = useAuth();
-  const settings = useSettings();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -257,10 +227,6 @@ export function UserMenu() {
     }
   };
 
-  const onPickTheme = (value: Theme) => {
-    saveSettings({ ...settings, theme: value });
-  };
-
   return (
     <>
       <button
@@ -433,37 +399,6 @@ export function UserMenu() {
               >
                 {savingProfile ? "Saving…" : dirty ? "Save" : "Saved"}
               </button>
-            </div>
-          </div>
-
-          {/* Theme picker — six swatches, click to apply instantly. */}
-          <div className="user-menu-section">
-            <div className="user-menu-label">Theme</div>
-            <div className="user-menu-themes">
-              {THEMES.map((t) => {
-                const isActive = settings.theme === t.value;
-                const isDark = DARK_SCHEME_THEMES.has(t.value);
-                return (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => onPickTheme(t.value)}
-                    className="user-menu-theme"
-                    data-active={isActive ? "true" : undefined}
-                    title={`${t.label}${isDark ? " (dark)" : ""}`}
-                  >
-                    <span
-                      className="user-menu-theme-swatch"
-                      aria-hidden="true"
-                    >
-                      <span style={{ background: t.swatch[0] }} />
-                      <span style={{ background: t.swatch[1] }} />
-                      <span style={{ background: t.swatch[2] }} />
-                    </span>
-                    <span className="user-menu-theme-label">{t.label}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
 

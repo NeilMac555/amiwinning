@@ -5,29 +5,37 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --bg: #F1F0EB;
-  --bg-sidebar: #ECEBE5;
-  --surface: #FBFAF7;
-  --surface-2: #F4F3EE;
-  --text: #0A0A0A;
-  --text-muted: #6B6B66;
-  --text-faint: #A8A8A2;
-  --border: rgba(10, 10, 10, 0.09);
-  --border-strong: rgba(10, 10, 10, 0.18);
-  --green: #0F6E56;
-  --green-rgb: 15, 110, 86;
-  --green-tint: rgba(15, 110, 86, 0.10);
-  --green-bg: rgba(15, 110, 86, 0.06);
-  --red: #A32D2D;
-  --red-rgb: 163, 45, 45;
-  --red-tint: rgba(163, 45, 45, 0.10);
-  --red-bg: rgba(163, 45, 45, 0.06);
-  --blue: #2A5BD7;
-  --blue-tint: rgba(42, 91, 215, 0.10);
-  --pulse: #2A5BD7;
+  /* Terminal Dark — the ONLY theme. Bloomberg-style trading terminal palette.
+   * Dark blue-black background, IBM Plex Sans body, JetBrains Mono numbers,
+   * amber accent for primary CTAs. Green + red reserved for P/L meaning only.
+   * Applied globally (signed-in AND signed-out surfaces) as of the terminal-
+   * theme merge. Legacy [data-theme] blocks below are dead code kept for
+   * historical reference; nothing sets data-theme on <html> anymore. */
+  --bg: #0A0C10;
+  --bg-sidebar: #0A0C10;
+  --surface: #161A21;
+  --surface-2: #1E232C;
+  --text: #E6EDF3;
+  --text-muted: #8B949E;
+  --text-faint: #5B636E;
+  --border: rgba(230, 237, 243, 0.10);
+  --border-strong: rgba(230, 237, 243, 0.22);
+  --green: #00D26A;
+  --green-rgb: 0, 210, 106;
+  --green-tint: rgba(0, 210, 106, 0.16);
+  --green-bg: rgba(0, 210, 106, 0.08);
+  --red: #FF4757;
+  --red-rgb: 255, 71, 87;
+  --red-tint: rgba(255, 71, 87, 0.16);
+  --red-bg: rgba(255, 71, 87, 0.08);
+  --blue: #F5A623;
+  --blue-tint: rgba(245, 166, 35, 0.14);
+  --pulse: #F5A623;
+  --accent: #F5A623;
+  --accent-rgb: 245, 166, 35;
 
   --mono: var(--font-jetbrains-mono), ui-monospace, monospace;
-  --sans: var(--font-sans-grotesk), -apple-system, system-ui, sans-serif;
+  --sans: var(--font-plex), var(--font-sans-grotesk), -apple-system, system-ui, sans-serif;
   --serif: var(--font-fraunces), ui-serif, Georgia, serif;
 
   --border-w: 0.5px;
@@ -37,7 +45,7 @@
 
   --pad-card: 22px;
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 [data-theme="dark"] {
@@ -1968,19 +1976,19 @@ a.sb-item { cursor: pointer; }
   border-radius: var(--radius-control);
   font-size: 13px;
   font-weight: 600;
-  color: white;
-  background: var(--green);
-  border: var(--border-w) solid var(--green);
+  color: #0A0C10;
+  background: var(--accent);
+  border: var(--border-w) solid var(--accent);
   letter-spacing: -0.005em;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   transition: filter 0.12s, transform 0.05s, box-shadow 0.15s;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 0 0 0 transparent;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.30), 0 0 0 0 transparent;
 }
 .btn-primary:hover {
   filter: brightness(1.08);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 0 0 3px var(--green-tint);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.30), 0 0 0 3px rgba(var(--accent-rgb), 0.20);
 }
 .btn-primary:active { transform: translateY(1px); }
 .btn-primary:disabled {
@@ -1988,37 +1996,19 @@ a.sb-item { cursor: pointer; }
   cursor: not-allowed;
   filter: saturate(0.6);
 }
-[data-theme="dark"] .btn-primary { color: #0A0A09; }
 
-/* Terminal-dark primary CTA: amber accent instead of green. Green is
-   reserved for P/L meaning only in this theme. Text is the dark
-   background colour for maximum contrast on the amber fill. */
-[data-theme="terminal-dark"] .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #0A0C10;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.30), 0 0 0 0 transparent;
-}
-[data-theme="terminal-dark"] .btn-primary:hover {
-  filter: brightness(1.08);
-  box-shadow:
-    0 1px 0 rgba(0,0,0,0.30),
-    0 0 0 3px rgba(var(--accent-rgb), 0.20);
-}
-
-/* Terminal-dark: sync-dot pulse uses the green sync colour (not
-   accent-amber) because "sync" reads as a positive/liveness signal,
-   independent of the primary CTA. Keeps green reserved for meaning. */
+/* Sync-dot pulse — uses green (not accent-amber) so "sync" reads as
+   liveness, independent of the primary CTA. */
 @keyframes terminal-sync-pulse {
   0%   { box-shadow: 0 0 0 0 rgba(var(--green-rgb), 0.55); }
   70%  { box-shadow: 0 0 0 6px rgba(var(--green-rgb), 0); }
   100% { box-shadow: 0 0 0 0 rgba(var(--green-rgb), 0); }
 }
-[data-theme="terminal-dark"] .sync-dot {
+.sync-dot {
   animation: terminal-sync-pulse 2.4s infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="terminal-dark"] .sync-dot { animation: none; }
+  .sync-dot { animation: none; }
 }
 
 /* Review state — keeps the hero look, swaps the title area for parsed-count */
