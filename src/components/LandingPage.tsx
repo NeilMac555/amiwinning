@@ -135,10 +135,10 @@ export function LandingPage() {
               numbers live at /u/sample. */}
           <div className="landing-preview" aria-hidden="true">
             <div className="landing-preview-head">
-              <div className="landing-preview-avatar">SA</div>
+              <div className="landing-preview-avatar">JB</div>
               <div>
-                <div className="landing-preview-name">Sample Bettor</div>
-                <div className="landing-preview-handle">@sample</div>
+                <div className="landing-preview-name">Johnny Bets</div>
+                <div className="landing-preview-handle">@johnnybets</div>
               </div>
             </div>
             <div className="landing-preview-label">Lifetime P/L</div>
@@ -160,10 +160,12 @@ export function LandingPage() {
                 stroke="var(--border)"
                 strokeWidth="0.5"
               />
-              {/* Sample equity path — choppy but trending up.
-                  Hand-tuned to look like real punter variance. */}
+              {/* Johnny Bets equity path — hand-tuned to look like real
+                  punter variance. Five segments across 200 units of x:
+                  early growth → first drawdown → recovery + push → big
+                  drawdown (peak-to-trough ~8u) → final grind higher. */}
               <path
-                d="M0,30 L8,28 L18,26 L28,29 L40,22 L52,24 L64,18 L78,21 L92,14 L106,17 L120,11 L134,15 L146,9 L160,12 L174,6 L188,8 L200,4"
+                d="M0,30 L10,28 L20,26 L30,28 L40,24 L50,27 L60,26 L70,24 L80,20 L90,17 L100,14 L110,17 L120,13 L130,18 L140,21 L150,17 L160,13 L170,10 L180,12 L190,7 L200,4"
                 stroke="var(--green)"
                 strokeWidth="1.5"
                 strokeLinecap="round"
@@ -172,7 +174,7 @@ export function LandingPage() {
               />
               {/* Subtle area fill under the curve */}
               <path
-                d="M0,30 L8,28 L18,26 L28,29 L40,22 L52,24 L64,18 L78,21 L92,14 L106,17 L120,11 L134,15 L146,9 L160,12 L174,6 L188,8 L200,4 L200,36 L0,36 Z"
+                d="M0,30 L10,28 L20,26 L30,28 L40,24 L50,27 L60,26 L70,24 L80,20 L90,17 L100,14 L110,17 L120,13 L130,18 L140,21 L150,17 L160,13 L170,10 L180,12 L190,7 L200,4 L200,36 L0,36 Z"
                 fill="var(--green)"
                 opacity="0.08"
               />
