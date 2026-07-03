@@ -5705,7 +5705,62 @@ a.sb-item { cursor: pointer; }
   display: flex;
   flex-direction: column;
   gap: 6px;
+  /* Stagger reveal. --i is set inline per card (0, 1, 2, ...). Each
+   * card starts one 70ms beat after the previous. `both` fill mode
+   * holds the from-state before delay elapses so we don't see all
+   * cards flash-in-then-animate on the first frame. */
+  opacity: 0;
+  animation: demo-bet-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
 }
+@keyframes demo-bet-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Summary line beneath the cards. --i on the element = bets.length,
+ * so its animation-delay lands one beat after the last card lands.
+ * Same keyframes shape as the cards; distinct class so it can carry
+ * its own typography (mono, muted, tight tracking). */
+.demo-box-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  padding: 10px 12px;
+  border-top: var(--border-w) solid var(--border);
+  border-bottom: var(--border-w) solid var(--border);
+  background: var(--bg);
+  opacity: 0;
+  animation: demo-bet-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Save row shares the stagger. --i is bets.length + 1 so it lands one
+ * beat behind the summary. */
+.demo-box-save-row {
+  opacity: 0;
+  animation: demo-bet-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Reduced-motion: no transform, no stagger. Elements resolve to their
+ * end state immediately so the results appear at once without motion. */
+@media (prefers-reduced-motion: reduce) {
+  .demo-bet,
+  .demo-box-summary,
+  .demo-box-save-row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .demo-bet-head {
   display: flex;
   align-items: center;

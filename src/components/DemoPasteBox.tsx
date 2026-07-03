@@ -243,7 +243,16 @@ export function DemoPasteBox() {
           ) : (
             <ul className="demo-box-list">
               {view.bets.map((b, i) => (
-                <li className="demo-bet" key={i}>
+                // Stagger index passed as a CSS custom property. The
+                // .demo-bet keyframes rule uses --i * 70ms as its
+                // animation-delay so each card fades/slides in a beat
+                // after the previous. Reduced-motion rule zeroes the
+                // delay and disables the transform.
+                <li
+                  className="demo-bet"
+                  key={i}
+                  style={{ "--i": i } as React.CSSProperties}
+                >
                   <div className="demo-bet-head">
                     <span className="demo-bet-sport">{b.sport}</span>
                     <span className="demo-bet-market">
@@ -280,8 +289,43 @@ export function DemoPasteBox() {
             </ul>
           )}
 
+          {view.bets.length > 0 && (() => {
+            // Summary computed off the parsed results. Total stake in
+            // units (2 dp only when a decimal is present, else integer).
+            // Avg odds always 2 dp. Grammar toggles the "bet"/"bets"
+            // word for a single-bet parse.
+            const n = view.bets.length;
+            const totalStake =
+              view.bets.reduce((sum, b) => sum + b.stake, 0);
+            const avgOdds =
+              view.bets.reduce((sum, b) => sum + b.odds, 0) / n;
+            const stakeStr =
+              Number.isInteger(totalStake)
+                ? String(totalStake)
+                : totalStake.toFixed(2);
+            return (
+              // --i on the summary is bets.length so its animation-delay
+              // lands one beat AFTER the last card. Reduced-motion
+              // handling matches the .demo-bet rule.
+              <div
+                className="demo-box-summary mono"
+                role="status"
+                style={{ "--i": n } as React.CSSProperties}
+              >
+                {n} bet{n === 1 ? "" : "s"} extracted. {stakeStr}u total
+                stake. avg odds {avgOdds.toFixed(2)}
+              </div>
+            );
+          })()}
+
           {view.bets.length > 0 && (
-            <div className="demo-box-save-row">
+            // Save row inherits the same stagger scheme so it doesn't
+            // pop into view before the cards it belongs to. --i is
+            // bets.length + 1, one beat behind the summary line.
+            <div
+              className="demo-box-save-row"
+              style={{ "--i": view.bets.length + 1 } as React.CSSProperties}
+            >
               <Link
                 href="/sign-in"
                 onClick={onSaveForSignup}
