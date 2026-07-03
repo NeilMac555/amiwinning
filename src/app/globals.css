@@ -2757,10 +2757,12 @@ a.sb-item { cursor: pointer; }
   max-width: 1120px;
   width: 100%;
   margin: 0 auto;
-  padding: 60px 40px 80px;
+  padding: 44px 40px 56px;
   display: flex;
   flex-direction: column;
-  gap: 96px;
+  /* Was 96px. Cut roughly in half so the page reads dense like the
+   * dashboard rather than airy marketing. */
+  gap: 48px;
 }
 
 /* Hero ─────────────────────────────────────────────────────────────── */
@@ -2822,8 +2824,9 @@ a.sb-item { cursor: pointer; }
   margin: 4px 0 0;
 }
 
-/* Johnny Bets preview card — used inside the .landing-proof section,
- * one column, centred. No rotation now that it stands alone. */
+/* Johnny Bets preview card — sits in the right column of the merged
+ * proof + CTA section (.landing-proof). Fills its column; the two-column
+ * grid controls placement. */
 .landing-preview {
   background: var(--surface);
   border: var(--border-w) solid var(--border);
@@ -2833,8 +2836,6 @@ a.sb-item { cursor: pointer; }
   flex-direction: column;
   gap: 8px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.30);
-  max-width: 520px;
-  margin: 0 auto;
 }
 .landing-preview-head {
   display: flex;
@@ -3065,6 +3066,11 @@ a.sb-item { cursor: pointer; }
   gap: 18px;
   font-size: 12.5px;
   font-family: var(--mono);
+  /* Allow the SEO links to wrap on narrow viewports instead of pushing
+   * the whole page wider than the mobile viewport. Links themselves
+   * are unchanged per the spec. */
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
 .landing-foot-links a {
   color: var(--text-muted);
@@ -3080,8 +3086,9 @@ a.sb-item { cursor: pointer; }
     padding: 14px 18px;
   }
   .landing-main {
-    padding: 36px 18px 56px;
-    gap: 56px;
+    padding: 28px 18px 44px;
+    /* Was 56px. Halved to match the desktop rhythm cut. */
+    gap: 28px;
   }
   .landing-hero {
     grid-template-columns: 1fr;
@@ -5441,19 +5448,57 @@ a.sb-item { cursor: pointer; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * DemoPasteBox on the signed-out landing page. Dark panel, amber Parse,
- * monospace numbers throughout, green reserved for won-status colour.
+ * Merged proof + CTA section. Two columns on desktop:
+ *   left  = heading + copy + sign-up button
+ *   right = Johnny Bets sample profile card
+ * Stacks card-below-copy on mobile. A subtle top divider separates it
+ * from the hero so the page reads as structured panels on dark, not
+ * one unbroken expanse.
  * ───────────────────────────────────────────────────────────────────────── */
 .landing-proof {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 48px;
+  align-items: center;
+  padding-top: 48px;
+  border-top: var(--border-w) solid var(--border);
+}
+.landing-proof-copy {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  text-align: center;
+  gap: 14px;
+  max-width: 460px;
 }
-.landing-proof .landing-section-eyebrow {
-  text-align: center;
+.landing-proof-title {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--text);
 }
+.landing-proof-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.landing-proof-cta {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 12px 22px;
+  font-size: 14px;
+  text-decoration: none;
+}
+.landing-proof-fine {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+}
+
 .landing-preview-view-link {
   align-self: center;
   margin-top: 10px;
@@ -5469,6 +5514,27 @@ a.sb-item { cursor: pointer; }
 .landing-preview-view-link:hover {
   color: var(--text);
 }
+
+/* Stack + tighten on mobile. Card sits below the copy so the sign-up
+ * CTA stays above the fold on phones. */
+@media (max-width: 900px) {
+  .landing-proof {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 28px;
+  }
+  .landing-proof-copy {
+    max-width: none;
+  }
+  .landing-proof-title {
+    font-size: 28px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * DemoPasteBox on the signed-out landing page. Dark panel, amber Parse,
+ * monospace numbers throughout, green reserved for won-status colour.
+ * ───────────────────────────────────────────────────────────────────────── */
 
 .demo-box {
   background: var(--surface);

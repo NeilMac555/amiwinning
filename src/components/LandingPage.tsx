@@ -144,11 +144,33 @@ export function LandingPage() {
           <DemoPasteBox />
         </section>
 
-        {/* Proof: condensed Johnny Bets card. Equity curve on top, three
-            KPIs underneath. The full profile still lives at /u/sample
-            for anyone who clicks through. */}
+        {/* Merged proof + CTA. Left column: heading, supporting copy,
+            sign-up button. Right column: Johnny Bets sample profile
+            card. One section replaces the old orphaned card + lopsided
+            final-CTA blocks. */}
         <section className="landing-proof">
-          <p className="landing-section-eyebrow">Real profile. Real receipts.</p>
+          <div className="landing-proof-copy">
+            <h2 className="landing-proof-title">Proof, not promises.</h2>
+            <p className="landing-proof-body">
+              Every claim gets receipts. Your public profile shows
+              lifetime P/L, equity curve, and KPI grid, drawn from your
+              actual bet log. Nothing to fake.
+            </p>
+            <p className="landing-proof-body">
+              Free. No credit card. Your data is yours: exportable as
+              CSV whenever you want. Deletable on request.
+            </p>
+            <Link
+              href="/sign-in"
+              className="btn-primary landing-proof-cta"
+            >
+              Sign up with email
+            </Link>
+            <p className="landing-proof-fine">
+              Backed by daily database backups. No card, no lock-in.
+            </p>
+          </div>
+
           <div className="landing-preview" aria-hidden="false">
             <div className="landing-preview-head">
               <div className="landing-preview-avatar">JB</div>
@@ -226,26 +248,6 @@ export function LandingPage() {
               View the full sample profile
             </Link>
           </div>
-        </section>
-
-        {/* Final CTA. */}
-        <section className="landing-final-cta">
-          <h2 className="landing-final-title">Start tracking.</h2>
-          <p className="landing-final-sub">
-            Free. No credit card. Your data is yours: exportable as CSV
-            whenever you want. Deletable on request.
-          </p>
-          <Link
-            href="/sign-in"
-            className="btn-primary"
-            style={{
-              padding: "13px 28px",
-              fontSize: 15,
-              textDecoration: "none",
-            }}
-          >
-            Sign up with email
-          </Link>
         </section>
       </main>
 
