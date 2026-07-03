@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 import { betClv } from "@/lib/clv";
 import { classifySport } from "@/lib/sport-classify";
+import { SafeEvent, SafeField } from "@/components/SafeBetField";
 
 type SortKey = "kickoff" | "odds" | "stake" | "pl" | "clv";
 type SortDir = "asc" | "desc";
@@ -352,16 +353,22 @@ export default function BetsPage() {
                           style={{ cursor: "pointer" }}
                         >
                           <td className="mono" style={{ fontSize: 11 }}>
-                            {b.kickoff.slice(0, 10)}
+                            {b.kickoff ? (
+                              b.kickoff.slice(0, 10)
+                            ) : (
+                              <SafeField value={b.kickoff} label="kickoff" />
+                            )}
                           </td>
                           <td className="event">
                             <span className="league">
                               {b.league || classifySport(b)}
                             </span>
-                            {b.event}
+                            <SafeEvent value={b.event} />
                           </td>
                           <td className="selection">
-                            <span className="sel-main">{b.selection}</span>
+                            <span className="sel-main">
+                              <SafeField value={b.selection} label="selection" />
+                            </span>
                           </td>
                           <td className="mono" style={{ fontSize: 11, color: "var(--text-muted)" }}>
                             {b.market ?? "—"}

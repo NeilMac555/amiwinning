@@ -5808,11 +5808,40 @@ a.sb-item { cursor: pointer; }
   font-weight: 600;
   color: var(--text);
   letter-spacing: -0.005em;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .demo-bet-selection {
   font-size: 12.5px;
   color: var(--text-muted);
   line-height: 1.4;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* Tag rendered next to a partial field: "opponent not stated" etc.
+ * Muted mono chip so it reads as parser metadata, not as data. */
+.demo-bet-missing-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+}
+/* Same styling used inline when the field is totally missing (no
+ * text at all, just the tag). Slightly larger so an empty-field
+ * card does not look like a rendering bug. */
+.demo-bet-missing-inline {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
 }
 .demo-bet-metrics {
   display: flex;

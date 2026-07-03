@@ -23,6 +23,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { SAMPLE_TIP_TEXT } from "@/lib/sample-tip";
+import { displayEvent, displayField } from "@/lib/bet-display";
 
 const MAX_CHARS = 2_000;
 const DEMO_STORAGE_KEY = "aiw_demo_bets";
@@ -262,8 +263,36 @@ export function DemoPasteBox() {
                       {statusLabel(b.status)}
                     </span>
                   </div>
-                  <div className="demo-bet-event">{b.event}</div>
-                  <div className="demo-bet-selection">{b.selection}</div>
+                  {(() => {
+                    const evt = displayEvent(b.event);
+                    return (
+                      <div className="demo-bet-event">
+                        {evt.text || <span className="demo-bet-missing-inline">event not stated</span>}
+                        {evt.missingTag && evt.text && (
+                          <span className="demo-bet-missing-tag">
+                            {evt.missingTag}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  {(() => {
+                    const sel = displayField(b.selection, "selection");
+                    return (
+                      <div className="demo-bet-selection">
+                        {sel.text || (
+                          <span className="demo-bet-missing-inline">
+                            {sel.missingTag}
+                          </span>
+                        )}
+                        {sel.missingTag && sel.text && (
+                          <span className="demo-bet-missing-tag">
+                            {sel.missingTag}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="demo-bet-metrics">
                     <span className="demo-bet-metric">
                       <span className="demo-bet-metric-label">Odds</span>
@@ -279,9 +308,18 @@ export function DemoPasteBox() {
                     </span>
                     <span className="demo-bet-metric">
                       <span className="demo-bet-metric-label">Kickoff</span>
-                      <span className="mono demo-bet-metric-value">
-                        {b.kickoff}
-                      </span>
+                      {(() => {
+                        const k = displayField(b.kickoff, "kickoff");
+                        return k.text ? (
+                          <span className="mono demo-bet-metric-value">
+                            {k.text}
+                          </span>
+                        ) : (
+                          <span className="demo-bet-missing-inline">
+                            {k.missingTag}
+                          </span>
+                        );
+                      })()}
                     </span>
                   </div>
                 </li>

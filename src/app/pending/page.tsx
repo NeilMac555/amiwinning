@@ -20,6 +20,7 @@ import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
 import { classifySport } from "@/lib/sport-classify";
+import { SafeEvent, SafeField } from "@/components/SafeBetField";
 
 type SortKey = "kickoff" | "odds" | "stake" | "maxWin";
 type SortDir = "asc" | "desc";
@@ -273,9 +274,13 @@ export default function PendingPage() {
                           <td className="mono" style={{ fontSize: 11 }}>
                             {formatKickoffCell(b.kickoff)}
                           </td>
-                          <td className="event">{b.event}</td>
+                          <td className="event">
+                            <SafeEvent value={b.event} />
+                          </td>
                           <td className="selection">
-                            <span className="sel-main">{b.selection}</span>
+                            <span className="sel-main">
+                              <SafeField value={b.selection} label="selection" />
+                            </span>
                           </td>
                           <td
                             className="mono"

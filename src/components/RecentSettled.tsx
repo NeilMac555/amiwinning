@@ -4,6 +4,8 @@ import type { SettledBet } from "@/lib/data";
 import { fmtUnit, useUnit } from "./UnitContext";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
+import { SafeEvent, SafeField } from "./SafeBetField";
+import { isMissing } from "@/lib/bet-display";
 
 interface Props {
   bets: SettledBet[];
@@ -59,10 +61,27 @@ export function RecentSettled({ bets, now }: Props) {
               </div>
               <div className="settled-meta">
                 <div className="settled-event">
-                  {b.home} v {b.away}
+                  {(() => {
+                    // Assemble a synthetic "home v away" string and let
+                    // SafeEvent detect + tag any missing side. Handles
+                    // the case where a scrappy paste only surfaced one
+                    // team.
+                    const hasHome = !isMissing(b.home);
+                    const hasAway = !isMissing(b.away);
+                    if (hasHome && hasAway) {
+                      return <>{b.home} v {b.away}</>;
+                    }
+                    if (hasHome || hasAway) {
+                      return (
+                        <SafeEvent value={`${b.home ?? ""} v ${b.away ?? ""}`} />
+                      );
+                    }
+                    return <SafeEvent value="" />;
+                  })()}
                 </div>
                 <div className="settled-selection">
-                  {b.selection} @ {formatOdds(b.odds, oddsFormat)}
+                  <SafeField value={b.selection} label="selection" /> @{" "}
+                  {formatOdds(b.odds, oddsFormat)}
                 </div>
               </div>
               <div>
