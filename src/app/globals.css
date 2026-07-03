@@ -2793,10 +2793,13 @@ a.sb-item { cursor: pointer; }
   font-variation-settings: "opsz" 144, "SOFT" 30;
   color: var(--text);
 }
+/* Deprecated. Landing headline now renders entirely in --text (no green
+ * accent word). Class kept as a no-op so any residual markup that uses
+ * it renders in the default text colour instead of green. */
 .landing-headline-accent {
-  color: var(--green);
-  font-style: italic;
-  font-variation-settings: "opsz" 144, "SOFT" 80;
+  color: var(--text);
+  font-style: normal;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
 }
 .landing-sub {
   font-size: 17px;
@@ -2819,7 +2822,8 @@ a.sb-item { cursor: pointer; }
   margin: 4px 0 0;
 }
 
-/* Preview card on the right of the hero — visual proof */
+/* Johnny Bets preview card — used inside the .landing-proof section,
+ * one column, centred. No rotation now that it stands alone. */
 .landing-preview {
   background: var(--surface);
   border: var(--border-w) solid var(--border);
@@ -2828,8 +2832,9 @@ a.sb-item { cursor: pointer; }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04);
-  transform: rotate(-1deg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.30);
+  max-width: 520px;
+  margin: 0 auto;
 }
 .landing-preview-head {
   display: flex;
@@ -5434,3 +5439,315 @@ a.sb-item { cursor: pointer; }
     font-size: 13px;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * DemoPasteBox on the signed-out landing page. Dark panel, amber Parse,
+ * monospace numbers throughout, green reserved for won-status colour.
+ * ───────────────────────────────────────────────────────────────────────── */
+.landing-proof {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+}
+.landing-proof .landing-section-eyebrow {
+  text-align: center;
+}
+.landing-preview-view-link {
+  align-self: center;
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  border-bottom: var(--border-w) solid var(--border);
+  padding-bottom: 2px;
+  transition: color 0.12s;
+}
+.landing-preview-view-link:hover {
+  color: var(--text);
+}
+
+.demo-box {
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.30);
+}
+.demo-box-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.demo-box-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px var(--green-tint);
+}
+.demo-box-title {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.15;
+}
+.demo-box-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.demo-box-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.65;
+  background: var(--surface-2);
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text);
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.demo-box-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.20);
+  background: var(--bg);
+}
+.demo-box-textarea::placeholder {
+  color: var(--text-faint);
+}
+.demo-box-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.demo-box-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.demo-box-counter {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.demo-box-counter[data-over="true"] {
+  color: var(--red);
+}
+.demo-box-counter-sep {
+  color: var(--text-faint);
+}
+.demo-box-parse {
+  padding: 10px 20px;
+  font-size: 13.5px;
+}
+
+.demo-box-error {
+  background: var(--surface-2);
+  border: var(--border-w) solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.demo-box-error-msg {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+.demo-box-error-cta {
+  align-self: flex-start;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+.demo-box-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+.demo-box-results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+  border-bottom: var(--border-w) solid var(--border);
+}
+.demo-box-results-count {
+  font-size: 12.5px;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.demo-box-results-remaining {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+}
+.demo-box-empty {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  padding: 12px 14px;
+  border: var(--border-w) dashed var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+.demo-box-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-bet {
+  background: var(--surface-2);
+  border: var(--border-w) solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.demo-bet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.demo-bet-sport,
+.demo-bet-market {
+  font-size: 10.5px;
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: var(--border-w) solid var(--border);
+  background: var(--bg);
+}
+.demo-bet-status {
+  font-size: 10.5px;
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: auto;
+}
+.demo-bet-status--won {
+  color: var(--green);
+  background: var(--green-bg);
+  border: var(--border-w) solid var(--green-tint);
+}
+.demo-bet-status--lost {
+  color: var(--red);
+  background: var(--red-bg);
+  border: var(--border-w) solid var(--red-tint);
+}
+.demo-bet-status--neutral {
+  color: var(--text-muted);
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+}
+.demo-bet-event {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.demo-bet-selection {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.demo-bet-metrics {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: var(--border-w) solid var(--border);
+  margin-top: 2px;
+}
+.demo-bet-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.demo-bet-metric-label {
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.demo-bet-metric-value {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.demo-box-save-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+}
+.demo-box-save {
+  padding: 10px 18px;
+  font-size: 13px;
+  text-decoration: none;
+}
+.demo-box-save-fine {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+}
+
+/* Mobile: stack the hero, drop the demo box grid column, tighten padding. */
+@media (max-width: 900px) {
+  .demo-box {
+    padding: 18px 18px 20px;
+  }
+  .demo-box-title {
+    font-size: 20px;
+  }
+  .demo-bet-metrics {
+    gap: 12px;
+  }
+}
+
