@@ -1678,12 +1678,15 @@ a.sb-item { cursor: pointer; }
 /* Subtle pulse on the Parse button in first-run mode. Uses box-shadow
    rather than transform so it doesn't visually offset the button —
    we want the eye drawn, not the layout jumping. */
+/* Pulse ring around the first-run Parse button. Uses --accent (amber)
+ * so it matches the .btn-primary fill in the terminal-dark palette.
+ * Green stays reserved for P/L meaning per the design language. */
 @keyframes paste-hero-firstrun-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--green), transparent 70%);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent), transparent 60%);
   }
   50% {
-    box-shadow: 0 0 0 6px color-mix(in oklab, var(--green), transparent 90%);
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent), transparent 88%);
   }
 }
 .paste-hero-firstrun-pulse {
@@ -1698,15 +1701,18 @@ a.sb-item { cursor: pointer; }
 }
 
 /* Sample-bets banner — shown above the dashboard body whenever the
-   user has any bets with source === "sample". Amber-toned so it reads
-   as "informational, action available" without alarming. */
+ * user has any bets with source === "sample". Amber-toned so it reads
+ * as "informational, action available" without alarming. Uses --accent
+ * (terminal-dark's amber #F5A623) instead of the old undefined --amber
+ * fallback which was rendering as a muted brown that clashed with the
+ * palette. */
 .sample-bets-banner {
   margin: 12px 0 14px;
   padding: 10px 14px;
   font-size: 12.5px;
   color: var(--text);
-  background: color-mix(in oklab, var(--amber, #c08a3e), transparent 90%);
-  border: var(--border-w) solid color-mix(in oklab, var(--amber, #c08a3e), transparent 55%);
+  background: color-mix(in oklab, var(--accent), transparent 90%);
+  border: var(--border-w) solid color-mix(in oklab, var(--accent), transparent 55%);
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -1719,7 +1725,7 @@ a.sb-item { cursor: pointer; }
   margin-left: 4px;
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--amber, #c08a3e);
+  color: var(--accent);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -1727,7 +1733,7 @@ a.sb-item { cursor: pointer; }
   text-underline-offset: 2px;
 }
 .sample-bets-banner-clear:hover {
-  color: color-mix(in oklab, var(--amber, #c08a3e), var(--text) 25%);
+  color: color-mix(in oklab, var(--accent), var(--text) 25%);
 }
 
 /* ─── Ghost preview ─── */
@@ -2661,15 +2667,15 @@ a.sb-item { cursor: pointer; }
   font-size: 12.5px;
   font-weight: 600;
   font-family: var(--sans);
-  color: var(--amber, #c08a3e);
-  background: color-mix(in oklab, var(--amber, #c08a3e), transparent 88%);
-  border: var(--border-w) solid color-mix(in oklab, var(--amber, #c08a3e), transparent 55%);
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent), transparent 88%);
+  border: var(--border-w) solid color-mix(in oklab, var(--accent), transparent 55%);
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 120ms ease, transform 80ms ease;
 }
 .paste-hero-undo-btn:hover {
-  background: color-mix(in oklab, var(--amber, #c08a3e), transparent 78%);
+  background: color-mix(in oklab, var(--accent), transparent 78%);
 }
 .paste-hero-undo-btn:active {
   transform: scale(0.97);
