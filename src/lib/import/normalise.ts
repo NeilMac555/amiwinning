@@ -48,12 +48,22 @@ function parseDate(raw: string): string | null {
     const m = s.match(p.rx);
     if (m) return p.build(m);
   }
-  // Last resort: Date constructor
+  // Last resort: Date constructor. Read the LOCAL calendar components,
+  // not UTC. A date typed into a spreadsheet by a punter means the
+  // wall-clock date on their calendar; extracting via getUTC* shifted
+  // every fallback-parsed date back a day for users east of UTC (all
+  // of Europe / UK / Asia in the summer). This bit spreadsheets whose
+  // date cells came out of Excel with a time attached, e.g.
+  //   "7/5/2026 12:00:00 AM"  (US Excel)
+  //   "05/07/2026 00:00"      (UK Excel)
+  //   "Sun Jul 05 2026"       (long date)
+  // None of those match the regex-based patterns above, so they all
+  // fall through here.
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }
   return null;
