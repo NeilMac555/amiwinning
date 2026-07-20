@@ -18,6 +18,7 @@ import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
 import { ProfileEquity } from "./ProfileEquity";
 import { ProfileGate } from "./ProfileGate";
+import { UtmCapture } from "@/components/UtmCapture";
 import type { ImportedBet } from "@/lib/import/types";
 import { SafeEvent, SafeField } from "@/components/SafeBetField";
 
@@ -117,6 +118,11 @@ export default async function ProfilePage({ params }: PageProps) {
 
   return (
     <div className="profile-page">
+      {/* Capture utm_* on entry so signup attribution fires when the
+          viewer clicks through. Profile URLs are Neil's actual marketing
+          links (X bio, Substack), so this must fire here, not just on /
+          and /sign-in. */}
+      <UtmCapture />
       <header className="profile-topbar">
         <Link href="/" className="brand" style={{ textDecoration: "none" }}>
           <div className="brand-mark" aria-hidden="true"></div>
