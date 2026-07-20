@@ -144,6 +144,92 @@ EV is a long-run average, not a guarantee. A +10% EV bet can and will lose indiv
 
 ---
 
+## What is ROI in Sports Betting? (https://amiup.io/learn/roi)
+
+### The short definition
+
+Return on Investment (ROI) is total net profit divided by the capital you invested, expressed as a percentage. The word "invested" is where betting muddies the finance definition. Two schools coexist: some sites use ROI to mean profit divided by total stake (which is really yield), others reserve ROI for profit divided by bankroll deployed (which is closer to ROC). Neither usage is objectively wrong. Both are common. Always check what the source means before comparing two ROI figures.
+
+### The formula
+
+    ROI % = (Profit / Capital Invested) * 100
+
+Two denominator conventions:
+
+- Stake-based ROI: sum of every stake ever placed. Numerically identical to yield.
+- Bankroll-based ROI: the amount of money deployed as bankroll. Numerically identical to ROC.
+
+### Worked example
+
+100u bankroll. 300 bets at 1.5u average stake, so total stake = 450u. Net profit = 27u.
+
+- Stake-based ROI (yield): 27 / 450 = 6.0%
+- Bankroll-based ROI (ROC): 27 / 100 = 27%
+
+Same 27u profit, same season, two headline numbers that differ by 4.5x depending on which denominator the writer picked. Both are correct. Neither is lying. This is why the distinction matters when comparing tipsters.
+
+### Which denominator to use
+
+- "How good is my staking per bet?" -> stake-based (yield).
+- "How productively is my money working?" -> bankroll-based (ROC).
+- "How confident should I be in my edge?" -> neither on its own. Look at CLV.
+
+### Common dishonesty patterns
+
+- Silent switching of denominator: a tipster reports 27% "ROI" (bankroll-based) but readers assume stake-based when comparing against a 6% yield elsewhere.
+- Variable stake sizes with a bankroll-based ROI headline. Legitimate Kelly staking or cherry-picked wins-with-big-stakes, hard to tell without more data.
+
+---
+
+## What is Return on Capital (ROC)? (https://amiup.io/learn/roc)
+
+### The short definition
+
+Return on Capital (ROC) is total net profit divided by the bankroll deployed, expressed as a percentage. If you set aside 100u to bet with and finish the season up 27u, your ROC is 27%. This is the metric a finance-brained observer would actually care about: the return on the pot you put at risk, not the return on the volume of stake it produced.
+
+### The formula
+
+    ROC % = (Profit / Bankroll Deployed) * 100
+
+Three defensible denominators, in rising order of honesty:
+
+- Starting bankroll: whatever you opened the period with. Easiest, flatters you if the bankroll grew mid-period.
+- Peak bankroll: highest running total during the period. The "risk capital" interpretation. What most serious trackers use because it penalises leverage on a hot streak.
+- Time-weighted average bankroll: textbook finance. Most accurate for cross-asset comparison, rarely worth the effort for a hobbyist.
+
+Am I Up uses a peak-drawdown-adjusted risk-capital denominator (the smallest bankroll you'd have needed to survive your worst losing stretch), which approximates the peak-bankroll definition without rewarding lucky variance.
+
+### Worked example
+
+Same bettor as the ROI example. 100u bankroll. 300 bets, 1.5u average stake, total stake 450u, net profit 27u.
+
+- Peak bankroll: 100u
+- ROC = 27 / 100 = 27%
+- Yield on the same season: 27 / 450 = 6%
+
+The 27% ROC is the number you can honestly compare against "what if I'd bought the S&P 500 that year". The 6% yield is what a tipster shows off with.
+
+### Why serious bettors track ROC
+
+- Yield can hide bad staking. A cautious punter with 10u average stakes on a 10u bankroll is running dangerously overleveraged even if their yield is +5%. ROC surfaces this by dividing against the bankroll actually at risk.
+- ROC lets you compare betting against other asset classes. Yield can't.
+- ROC exposes churn. A bettor turning bankroll over 20 times a year at 3% yield generates ~60% ROC. A bettor at the same yield turning over once a year generates ~3%. Same yield, wildly different capital efficiency.
+
+### Where ROC gets misleading
+
+- Rewards under-stated bankrolls. Claim a small bankroll while regularly betting large stakes and the ROC inflates.
+- Bankroll size is squishy: deposits, withdrawals, promotional credit all shift it. Risk-capital-adjusted denominators are more honest but harder to explain.
+- Small samples still lie. ROC is a historical measure. Look at CLV for a signal that works in small samples.
+
+### ROC benchmarks (1000+ bet samples, sanity check only)
+
+- Negative: honest answer for most bettors.
+- 0-10%: in the ballpark of a savings account or index tracker.
+- 10-30%: genuinely outperforming most passive alternatives.
+- 30%+: professional territory. Also where survival bias and stake-cap dodges get scrutinised.
+
+---
+
 ## Am I Up vs bettin.gs (https://amiup.io/compare/bettin-gs)
 
 Bettin.gs is a European bet tracker with strong support for tipster leaderboards and a monthly-fee model. Am I Up positions differently: free, AI-first for input (no more manual data entry), and CLV as the headline metric rather than yield.

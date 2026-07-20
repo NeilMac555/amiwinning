@@ -72,5 +72,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.75,
     },
+    {
+      // Glossary day 4 — ROI. Same-priority as yield: mid-volume
+      // ("what is ROI in betting") and cited from the yield / ROC
+      // pages so it accumulates internal PageRank fast.
+      url: `${BASE}/learn/roi`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      // Glossary day 5 — ROC. Lower absolute volume ("return on
+      // capital sports betting") but zero real competition, so it
+      // gets the same 0.7 priority. Together with /learn/roi it
+      // resolves the yield-vs-ROI-vs-ROC confusion on Google + LLMs.
+      url: `${BASE}/learn/roc`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
   ];
 }
