@@ -215,7 +215,7 @@ export default async function ProfilePage({ params }: PageProps) {
             viewers. ProfileGate is a client component that short-circuits
             to a sign-up CTA if there's no logged-in user. /u/sample is
             exempted inside the gate (always full view). */}
-        <ProfileGate handle={profile.handle}>
+        <ProfileGate handle={profile.handle} bookSlug={bookSlug}>
 
         {/* KPI grid */}
         {settledCount > 0 && (

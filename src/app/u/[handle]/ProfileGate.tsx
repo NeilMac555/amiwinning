@@ -31,10 +31,16 @@ import { useAuth } from "@/lib/auth";
 
 interface ProfileGateProps {
   handle: string;
+  /** Optional book slug when this gate is rendered on the per-book
+   *  route (/u/<handle>/<bookSlug>). If set, the sign-up returnTo
+   *  preserves the slug so viewers of a book-specific URL come back
+   *  to the SAME book after auth — never bounced to the bare handle
+   *  where they might land on a different public book. */
+  bookSlug?: string;
   children: ReactNode;
 }
 
-export function ProfileGate({ handle, children }: ProfileGateProps) {
+export function ProfileGate({ handle, bookSlug, children }: ProfileGateProps) {
   const { user } = useAuth();
 
   // The sample profile is our marketing tour — never gated.
@@ -48,15 +54,24 @@ export function ProfileGate({ handle, children }: ProfileGateProps) {
   }
 
   // Signed-out: replace the gated sections with a sign-up CTA card.
-  return <SignUpGate handle={handle} />;
+  return <SignUpGate handle={handle} bookSlug={bookSlug} />;
 }
 
 // ─ The gate itself ───────────────────────────────────────────────────────
 
-function SignUpGate({ handle }: { handle: string }) {
+function SignUpGate({
+  handle,
+  bookSlug,
+}: {
+  handle: string;
+  bookSlug?: string;
+}) {
   // Returnto sends the user back to this exact profile after sign-in,
-  // so the gate dissolves seamlessly into the full report.
-  const returnPath = `/u/${handle}`;
+  // so the gate dissolves seamlessly into the full report. When we're
+  // on the per-book route, include the slug so the viewer lands back
+  // on the same book, not on whichever book the bare handle happens
+  // to resolve to for that user.
+  const returnPath = bookSlug ? `/u/${handle}/${bookSlug}` : `/u/${handle}`;
   const signUpHref = `/sign-in?returnTo=${encodeURIComponent(returnPath)}`;
 
   // The visible-but-blurred KPI teaser. Numbers are deliberately
