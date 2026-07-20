@@ -19,6 +19,7 @@ import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
 import { SampleBetsBanner } from "@/components/SampleBetsBanner";
+import { DemoBetImportBanner } from "@/components/DemoBetImportBanner";
 import { GhostPreview } from "@/components/GhostPreview";
 import { SAMPLE_SOURCE_TAG } from "@/lib/sample-tip";
 import { ProfitPerStake } from "@/components/ProfitPerStake";
@@ -245,6 +246,19 @@ export default function Dashboard() {
                 implies totalCommittedBets > 0).
               Wrapped as a straight ternary so a crossfade wrapper drops
               in later without refactoring the branch structure. */}
+          {/* DemoBetImportBanner reads sessionStorage["aiw_demo_bets"]
+              set by the landing-page DemoPasteBox's "Sign up to keep
+              these" button and imports those bets into the active book.
+              Mounted OUTSIDE the showGhost ternary because a fresh
+              signup lands with zero committed bets (showGhost=true),
+              which would mean the banner would never mount if it lived
+              inside the !showGhost branch. Once it fires, onImported
+              bumps localBump, aggregation re-runs, showGhost flips
+              false, and the real dashboard block below takes over. */}
+          <DemoBetImportBanner
+            onImported={() => setLocalBump((n) => n + 1)}
+          />
+
           {showGhost ? (
             <GhostPreview />
           ) : (
@@ -256,6 +270,7 @@ export default function Dashboard() {
               onCleared={() => setLocalBump((n) => n + 1)}
             />
           )}
+
 
           {cleanup &&
             cleanup.status === "done" &&
