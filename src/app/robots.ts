@@ -20,6 +20,7 @@ export default function robots(): MetadataRoute.Robots {
           "/u/",
           "/compare/",
           "/learn/",
+          "/partners",
           "/llms.txt",
           "/llms-full.txt",
         ],
