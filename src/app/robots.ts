@@ -9,7 +9,20 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/terms", "/privacy", "/u/", "/compare/", "/learn/"],
+        // Public content plus the llms.txt / llms-full.txt LLM discovery
+        // files. These are static plain-text files served from /public so
+        // no Next.js route pattern is needed, but we allow-list them here
+        // so no future robots.txt tightening accidentally excludes them.
+        allow: [
+          "/",
+          "/terms",
+          "/privacy",
+          "/u/",
+          "/compare/",
+          "/learn/",
+          "/llms.txt",
+          "/llms-full.txt",
+        ],
         disallow: [
           "/api/",       // server routes, never crawl
           "/admin",      // operator console
@@ -24,5 +37,11 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: "https://amiup.io/sitemap.xml",
+    // LLM discovery hint. Not part of the RFC-standard robots.txt schema,
+    // but Anthropic / Perplexity / OpenAI crawlers explicitly look for
+    // /llms.txt at the site root. Advertising it here lets a curious
+    // human crawler operator find it too. Emitted as a raw directive
+    // via Next's `host` string trick would be brittle — the crawlers
+    // that care already probe /llms.txt directly, so we rely on that.
   };
 }

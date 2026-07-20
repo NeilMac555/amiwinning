@@ -74,6 +74,15 @@ export const metadata: Metadata = {
   verification: {
     google: "ztVlj-Dm3m2YdPKf2dnRt18hnP1mF7I3VqabKF3Hp3M",
   },
+  // Advertise the llms.txt LLM-discovery file via a link-alternate header
+  // so crawlers that don't probe /llms.txt directly (some Perplexity /
+  // ChatGPT variants use rel="alternate" hints) can still find it.
+  // The full-content companion file is llms-full.txt.
+  alternates: {
+    types: {
+      "text/markdown": "/llms.txt",
+    },
+  },
 };
 
 // JSON-LD SoftwareApplication schema. Renders on every page and tells
