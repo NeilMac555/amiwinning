@@ -356,6 +356,105 @@ export async function getPublicProfileServer(
   return { profile, bets };
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Per-book public profile fetcher.
+//
+// Powers /u/<handle>/<bookSlug>. Strict privacy contract, three sequential
+// gates that must ALL pass or we return { profile: null, bets: [] }:
+//
+//   1. profiles: is_public = true AND handle matches.
+//   2. books:    is_public = true AND public_slug matches AND belongs to
+//                the profile owner.
+//   3. bets:     .eq("user_id", <owner>).eq("book_id", <selectedBook.id>)
+//                Double-filter — even if RLS had a hole, the query only
+//                returns rows for that specific book.
+//
+// No fallback, no soft-render, no "if the slug doesn't match maybe just
+// show the first public book" behaviour. Any missing gate returns a null
+// profile and the calling route renders a 404.
+//
+// Legacy no-book-id bets are intentionally NOT included here (unlike the
+// bare-handle fetcher which folds them into the oldest book by convention).
+// Ylose Soccer / Ylose Tennis should never inherit pre-books-system orphan
+// bets — those belong to Personal.
+// ─────────────────────────────────────────────────────────────────────────
+
+export async function getPublicProfileServerByBookSlug(
+  handle: string,
+  bookSlug: string,
+): Promise<PublicProfileFetchResult> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return { profile: null, bets: [] };
+
+  const client = createClient(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  // Gate 1: profile is_public.
+  const { data: profileRow } = await client
+    .from("profiles")
+    .select("*")
+    .eq("handle", handle)
+    .eq("is_public", true)
+    .maybeSingle();
+  if (!profileRow) return { profile: null, bets: [] };
+  const profile = rowToProfile(profileRow as ProfileRow);
+
+  // Gate 2: book is_public AND public_slug matches AND belongs to owner.
+  interface BookRow {
+    id: string;
+    user_id: string;
+    name: string;
+    is_public: boolean;
+    public_slug: string | null;
+    created_at: string;
+  }
+  const { data: bookRow } = await client
+    .from("books")
+    .select("id, user_id, name, is_public, public_slug, created_at")
+    .eq("user_id", profile.userId)
+    .eq("public_slug", bookSlug)
+    .eq("is_public", true)
+    .maybeSingle();
+  if (!bookRow) return { profile: null, bets: [] };
+  const book = bookRow as BookRow;
+
+  // Belt-and-braces re-check — the .eq() filters above should have made
+  // these impossible, but if the DB is ever restored from a snapshot
+  // where the constraint is missing, we still hard-fail closed.
+  if (!book.is_public || book.public_slug !== bookSlug) {
+    return { profile: null, bets: [] };
+  }
+  if (book.user_id !== profile.userId) {
+    return { profile: null, bets: [] };
+  }
+
+  // Gate 3: bets scoped by BOTH user_id and book_id. Paginate to dodge
+  // the 1000-row Supabase default.
+  const PAGE_SIZE = 1000;
+  const MAX_PAGES = 100;
+  const allRows: RawBetRow[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data: pageRows, error } = await client
+      .from("bets")
+      .select("*")
+      .eq("user_id", profile.userId)
+      .eq("book_id", book.id)
+      .order("kickoff", { ascending: true })
+      .range(from, to);
+    if (error) break;
+    const rows = (pageRows ?? []) as RawBetRow[];
+    allRows.push(...rows);
+    if (rows.length < PAGE_SIZE) break;
+  }
+
+  const bets = allRows.map(supabaseRowToImportedBet);
+  return { profile, bets };
+}
+
 interface RawBetRow {
   id: string;
   user_id: string;
