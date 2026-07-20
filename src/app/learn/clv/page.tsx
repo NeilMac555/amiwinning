@@ -66,6 +66,51 @@ export default function ClvPage() {
     mainEntityOfPage: "https://amiup.io/learn/clv",
   };
 
+  // FAQPage schema — Google renders these as expandable Q&A blocks
+  // directly in SERPs (the "People Also Ask" style boxes). Grabs
+  // more visual real estate for the same rank, which lifts CTR
+  // materially. Answers here are compressed versions of what the
+  // page body explains in full; each Q is a real "People Also Ask"
+  // for the CLV keyword cluster.
+  const faqItems: Array<{ q: string; a: string }> = [
+    {
+      q: "What is CLV in sports betting?",
+      a: "CLV (Closing Line Value) is the difference between the odds you took on a bet and the closing odds at a sharp bookmaker like Pinnacle on the same selection. Positive CLV means you got a better price than the market eventually settled on. It is the single best statistical signal that a bettor has a genuine edge.",
+    },
+    {
+      q: "How do you calculate CLV?",
+      a: "The standard formula in decimal odds is: CLV % = (Your Odds / Closing Odds - 1) * 100. If you took 2.20 and the closing line moved to 2.10, your CLV is (2.20 / 2.10 - 1) * 100 = +4.76%. Positive means you beat the close; negative means the close was shorter than your price.",
+    },
+    {
+      q: "Is positive CLV always profitable?",
+      a: "Long-run yes, short-run no. CLV proves you made better decisions than the market on average. Variance still rules the short run: a +3% CLV bettor can lose money for a hundred bets in a row and still have a genuine edge. Sample size matters. Over a thousand bets a positive-CLV bettor is expected to be profitable; over ten, the noise dominates.",
+    },
+    {
+      q: "Why does CLV matter more than win rate?",
+      a: "Win rate is noisy. A 55% bettor can run cold for 200 bets in a row and look like a 48% bettor. CLV gives you signal in dozens of bets, not thousands. If you consistently beat the closing line by 2-3%, the math says you will be profitable long-run even when short-run win rate runs cold. Sharp bettors track CLV because it is the cleanest available measure of whether the next bet was a good decision.",
+    },
+    {
+      q: "What is a good CLV number?",
+      a: "Over a sample of a hundred plus bets, positive CLV of any amount is a good signal. +1 to +2% average CLV is what a break-even punter with soft-book access can achieve. +2 to +4% is professional-grade edge in mainstream sports. +5% and above is exceptional and rarely sustainable at scale in liquid markets.",
+    },
+    {
+      q: "Do I need Pinnacle to track CLV?",
+      a: "Pinnacle is the standard because it takes serious sharp money and its closing line is the tightest available estimate of true odds. If Pinnacle is not available in your jurisdiction, you can substitute Betfair Exchange or Smarkets. The important thing is the closing price comes from a market that takes real money, not a recreational sportsbook.",
+    },
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
+  };
+
   return (
     <>
       <script
@@ -78,6 +123,12 @@ export default function ClvPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(articleJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
         }}
       />
 
@@ -256,11 +307,56 @@ export default function ClvPage() {
                 CLV calculation.
               </li>
               <li>
-                <strong>ROI / ROC:</strong> return on investment / return
-                on capital. Standard accounting-style measures of how
-                much money the betting bank has produced.
+                <strong>
+                  <Link href="/learn/roi">ROI:</Link>
+                </strong>{" "}
+                return on investment. In betting sometimes means yield,
+                sometimes means ROC. The stake-vs-bankroll ambiguity
+                spelled out.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/roc">ROC:</Link>
+                </strong>{" "}
+                return on capital. The honest money-on-money return the
+                bankroll actually earned, versus yield&rsquo;s per-stake
+                measure.
               </li>
             </ul>
+          </section>
+
+          {/* Frequently asked questions. Content mirrors the FAQPage
+              JSON-LD in <head> so Google's rich-snippet requirements
+              (question and answer both visible on page) are satisfied.
+              Each entry is a real "People Also Ask" for the CLV
+              keyword cluster: presence here is worth more SERP real
+              estate than the ranking position alone. */}
+          <section className="learn-section">
+            <h2 className="learn-h2">Frequently asked questions</h2>
+            {faqItems.map((item, i) => (
+              <div key={i} style={{ marginBottom: 16 }}>
+                <h3
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: "0 0 6px",
+                    color: "var(--text)",
+                  }}
+                >
+                  {item.q}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13.5,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {item.a}
+                </p>
+              </div>
+            ))}
           </section>
 
           {/* CTA */}
