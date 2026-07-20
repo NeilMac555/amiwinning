@@ -47,6 +47,35 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      // Bet Diary comparison — third /compare page. Catches
+      // "bet diary alternative" / "betdiary vs" searches. Bet Diary
+      // is UK-focused with a horse-racing lineage; page positions
+      // Am I Up as the AI-first multi-sport alternative.
+      url: `${BASE}/compare/betdiary`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      // /compare hub. Consolidates PageRank across the individual
+      // comparison pages, ranks in its own right for "bet tracker
+      // comparison" style queries, gives Google a topical-authority
+      // signal.
+      url: `${BASE}/compare`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
+      // /learn hub. Same rationale as /compare hub — bare /learn
+      // used to 404, now it's a DefinedTermSet index of the five
+      // glossary entries.
+      url: `${BASE}/learn`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
       // Glossary page — first in the /learn/* series. Targets
       // "what is CLV in betting" + "closing line value" long-tail
       // searches. More pages in this series shipping daily.
