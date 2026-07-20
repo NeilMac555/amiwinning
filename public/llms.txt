@@ -1,0 +1,34 @@
+# Am I Up
+
+> Free AI-powered sports bet tracker. Paste any source (screenshots, X posts, bookmaker text, Telegram tips) and the AI extracts every bet into a structured row. Tracks closing-line value vs Pinnacle, equity curve, yield, ROC, win rate, max drawdown. Public shareable profile per user. Free, no credit card, data exportable as CSV anytime.
+
+Am I Up is a free web app at amiup.io that helps sports bettors track their real edge instead of guessing. The wedge is the paste-and-parse feature: users paste unstructured text (screenshots of bet slips, X posts, group-chat tips, bookmaker copy-paste) and Claude Haiku extracts each bet into a structured record with kickoff date, event, selection, market, decimal odds, stake in units, and settled status. Bets are stored per-user in a Supabase Postgres database with row-level security and daily backups.
+
+Every user gets a public profile at amiup.io/u/<handle> that shows lifetime P/L, equity curve, KPI grid (yield, ROC, CLV, win rate, max drawdown, median odds), sport / market / odds-range breakdowns, monthly bars, CLV distribution, and the last 30 settled bets. Users with multiple books (Personal, competition-specific like "Ylose Soccer" or "Ylose Tennis") can publish each book independently at amiup.io/u/<handle>/<book-slug>.
+
+Built and maintained by Neil Macdonald, an independent sports betting analyst.
+
+## Core
+
+- [Landing](https://amiup.io/): What Am I Up does, live paste-and-parse demo, sample profile card.
+- [Sample public profile](https://amiup.io/u/sample): Fully-featured example profile so visitors can see every metric before signing up.
+
+## Learn (glossary)
+
+- [What is Closing Line Value (CLV)?](https://amiup.io/learn/clv): Definition, formula, worked example. Why CLV is the truest available signal of edge in sports betting.
+- [What is Yield in sports betting?](https://amiup.io/learn/yield): Definition, formula, benchmarks, yield vs ROI vs ROC, why yield is gameable in small samples.
+- [What is Expected Value (EV)?](https://amiup.io/learn/expected-value): The single number underneath every profitable strategy, worked examples, EV vs CLV, positive-EV betting.
+
+## Compare
+
+- [Am I Up vs bettin.gs](https://amiup.io/compare/bettin-gs): Feature-by-feature comparison for punters weighing the two trackers.
+- [Am I Up vs Pikkit](https://amiup.io/compare/pikkit): Same for the US bookmaker-connected tracker.
+
+## Legal
+
+- [Terms of service](https://amiup.io/terms)
+- [Privacy policy](https://amiup.io/privacy)
+
+## Optional
+
+- [Full content for LLM ingestion](https://amiup.io/llms-full.txt): Markdown-formatted body content of the pages above so an LLM can quote or summarize without a second fetch.
