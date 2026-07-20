@@ -79,7 +79,7 @@ export function PartnerApplicationForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          website: honey,
+          hp_verify_ref: honey,
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -88,6 +88,21 @@ export function PartnerApplicationForm() {
           kind: "error",
           message: body.error ?? `Server error (HTTP ${res.status}).`,
           rateLimited: body.rateLimited === true || res.status === 429,
+        });
+        return;
+      }
+      // The server returns 200 with { dropped: true } when the honeypot
+      // trips. Previously we treated 200 as unconditional success, which
+      // meant users whose password manager or browser autofill happened
+      // to fill the hidden field saw "Application received" while the
+      // server silently dropped their submission. Now we detect it and
+      // ask them to email Neil directly instead.
+      if (body.dropped === true) {
+        setView({
+          kind: "error",
+          message:
+            "Your submission was flagged by the spam filter. This is almost always a browser or password manager autofilling a hidden field. Please email filthyjabba@gmail.com directly with your details.",
+          rateLimited: false,
         });
         return;
       }
@@ -194,10 +209,18 @@ export function PartnerApplicationForm() {
         Apply to partner
       </div>
 
-      {/* Honeypot: visually hidden but present in the DOM so bots fill it.
-          Real users never see it. Server drops submissions where this is
-          non-empty. tabIndex=-1 and autoComplete off to keep real
-          keyboards from stumbling onto it. */}
+      {/* Honeypot: visually hidden but present in the DOM so bots fill
+          it. Real users never see it. Server drops submissions where
+          this is non-empty.
+          Renamed from `website` because password managers and browser
+          autofillers happily populate any hidden field with a
+          well-known semantic name (`website`, `url`, `homepage`,
+          `email`), which was silently dropping legitimate submissions
+          before this hotfix. `hp_verify_ref` is deliberately opaque so
+          autofillers ignore it while spray-fill bots still trip it.
+          Extra hardening: autoComplete="off" on both the label and the
+          input, plus a nonsense-looking label that autofillers do not
+          key off. */}
       <div
         aria-hidden="true"
         style={{
@@ -209,17 +232,16 @@ export function PartnerApplicationForm() {
           overflow: "hidden",
         }}
       >
-        <label>
-          Website
-          <input
-            type="text"
-            name="website"
-            tabIndex={-1}
-            autoComplete="off"
-            value={honey}
-            onChange={(e) => setHoney(e.target.value)}
-          />
-        </label>
+        <label htmlFor="pa-hp-verify-ref">Verification reference</label>
+        <input
+          id="pa-hp-verify-ref"
+          type="text"
+          name="hp_verify_ref"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honey}
+          onChange={(e) => setHoney(e.target.value)}
+        />
       </div>
 
       <div>
