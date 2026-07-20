@@ -19,6 +19,7 @@ import { ClvDistribution } from "@/components/ClvDistribution";
 import { ProfileEquity } from "./ProfileEquity";
 import { ProfileGate } from "./ProfileGate";
 import type { ImportedBet } from "@/lib/import/types";
+import { SafeEvent, SafeField } from "@/components/SafeBetField";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
 // so newly-published profiles are reachable without a redeploy.
@@ -483,10 +484,12 @@ function RecentSettledTable({
                   </td>
                   <td className="event">
                     <span className="league">{sport}</span>
-                    {b.event}
+                    <SafeEvent value={b.event} />
                   </td>
                   <td className="selection">
-                    <span className="sel-main">{b.selection}</span>
+                    <span className="sel-main">
+                      <SafeField value={b.selection} label="selection" />
+                    </span>
                   </td>
                   <td className="num mono">{b.odds.toFixed(2)}</td>
                   <td className="num mono">{b.stake.toFixed(1)}u</td>

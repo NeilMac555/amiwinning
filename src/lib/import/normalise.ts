@@ -48,28 +48,31 @@ function parseDate(raw: string): string | null {
     const m = s.match(p.rx);
     if (m) return p.build(m);
   }
-  // Last resort: Date constructor
+  // Last resort: Date constructor. Read the LOCAL calendar components,
+  // not UTC. A date typed into a spreadsheet by a punter means the
+  // wall-clock date on their calendar; extracting via getUTC* shifted
+  // every fallback-parsed date back a day for users east of UTC (all
+  // of Europe / UK / Asia in the summer). This bit spreadsheets whose
+  // date cells came out of Excel with a time attached, e.g.
+  //   "7/5/2026 12:00:00 AM"  (US Excel)
+  //   "05/07/2026 00:00"      (UK Excel)
+  //   "Sun Jul 05 2026"       (long date)
+  // None of those match the regex-based patterns above, so they all
+  // fall through here.
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }
   return null;
 }
 
-function parseTime(raw: string): string | null {
-  const s = raw.trim();
-  if (!s) return null;
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  if (!m) return null;
-  const h = m[1].padStart(2, "0");
-  const min = m[2];
-  const sec = (m[3] ?? "00").padStart(2, "0");
-  if (h === "00" && min === "00" && sec === "00") return null; // bettin.gs "unknown" sentinel
-  return `${h}:${min}:${sec}`;
-}
+// parseTime removed. The importer used to stitch time onto date columns
+// to build a UTC timestamp (YYYY-MM-DDTHH:MM:SSZ). Kickoff is now a
+// date-only field; whatever time the spreadsheet carries is ignored on
+// import. See src/lib/import/normalise.ts kickoff assignment below.
 
 // Numbers -------------------------------------------------------------------
 
@@ -248,9 +251,14 @@ export function normalise(
   const importedAt = new Date().toISOString();
 
   // Resolve column indices once.
+  //
+  // Note on "time": the ColumnMap type still permits a "time" column
+  // so users' saved mappings from before the date-only change do not
+  // error out. It is intentionally not resolved here; kickoff is a
+  // date, and any spreadsheet time column is silently ignored on
+  // import.
   const idx = {
     date: findCol(map, "date"),
-    time: findCol(map, "time"),
     kickoff: findCol(map, "kickoff"),
     event: findCol(map, "event"),
     home: findCol(map, "home"),
@@ -275,18 +283,18 @@ export function normalise(
     const raw: Record<string, string> = {};
     file.headers.forEach((h, i) => (raw[h] = row[i] ?? ""));
 
-    // Kickoff: prefer combined, else date + optional time.
-    let kickoff: string | null = null;
-    if (idx.kickoff != null) {
-      kickoff = parseDate(val(row, idx.kickoff));
-      const timePart = val(row, idx.kickoff).match(/\d{1,2}:\d{2}(:\d{2})?/);
-      if (kickoff && timePart) kickoff = `${kickoff}T${timePart[0].length === 5 ? timePart[0] + ":00" : timePart[0]}Z`;
-    } else {
-      const d = idx.date != null ? parseDate(val(row, idx.date)) : null;
-      const t = idx.time != null ? parseTime(val(row, idx.time)) : null;
-      if (d && t) kickoff = `${d}T${t}Z`;
-      else if (d) kickoff = d;
-    }
+    // Kickoff is date-only. Kickoff column wins if mapped, otherwise
+    // fall back to the standalone date column. Any time value in the
+    // spreadsheet is intentionally discarded: we do not need it for
+    // analytics, aggregations, or the bet log, and stitching it into
+    // a UTC timestamp is the exact pattern that caused the one-day
+    // shift on users east of UTC (see the parseDate fix above).
+    const kickoff: string | null =
+      idx.kickoff != null
+        ? parseDate(val(row, idx.kickoff))
+        : idx.date != null
+          ? parseDate(val(row, idx.date))
+          : null;
     if (!kickoff) {
       issues.push({
         rowIndex: r,

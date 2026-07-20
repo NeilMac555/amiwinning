@@ -14,6 +14,9 @@
 
 export const SAMPLE_SOURCE_TAG = "sample" as const;
 
+// Both bets carry both team names so the parser never has to guess a
+// missing opponent. Keeps the first-run experience clean: no "opponent
+// not stated" tag on the very first parse the user ever sees.
 export const SAMPLE_TIP_TEXT = `Sat weekend tips
-Man City -1 AH 1.85 2u
+Man City v Everton. City -1 AH 1.85 2u
 Arsenal v Liverpool BTTS Yes 1.95 stake 1.5u`;
