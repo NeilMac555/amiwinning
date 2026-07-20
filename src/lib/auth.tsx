@@ -242,10 +242,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!supabase) return { error: "Supabase not configured" };
     const trimmed = email.trim();
     if (!trimmed) return { error: "Email is required" };
+    // Attach captured UTM attribution to the sign-up. Supabase stores
+    // options.data into auth.users.raw_user_meta_data at first sign-in,
+    // which means it lands on the profile creation trigger AND is
+    // visible to the /api/webhooks/new-user handler for Neil's per-
+    // signup attribution email. Lazy-import so this file stays valid
+    // during SSR (utm reads sessionStorage).
+    let utmData: Record<string, string> = {};
+    try {
+      const utm = await import("@/lib/utm");
+      utmData = utm.utmToUserMetadata(utm.readUtm());
+    } catch {
+      // If the utm module fails to load, sign-in still works. We just
+      // lose attribution on this one signup, which is the safe failure
+      // mode: authentication must not depend on marketing telemetry.
+    }
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // data becomes user_metadata / raw_user_meta_data on the
+        // Supabase auth.users row.
+        data: utmData,
       },
     });
     return { error: error?.message ?? null };

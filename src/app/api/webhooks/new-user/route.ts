@@ -145,12 +145,26 @@ export async function POST(req: Request) {
   const resend = new Resend(resendKey);
   const subject = `🎯 New Am I Up signup — @${handle}`;
 
+  // Attribution lookup. Fetch the user's raw_user_meta_data from the
+  // admin API so we can surface utm_source / utm_medium in the
+  // notification email. Wrapped so a missing service-role key or a
+  // bad admin response does not break the notification. The 24h-nudge
+  // helper below does its own lookup for the email address — kept
+  // separate so a change to attribution doesn't risk the nudge.
+  const attribution = await fetchUserAttribution(user_id);
+  const attribLine = attribution.utm_source
+    ? `${attribution.utm_source}${attribution.utm_medium ? ` / ${attribution.utm_medium}` : ""}${attribution.utm_campaign ? ` / ${attribution.utm_campaign}` : ""}`
+    : attribution.utm_referrer
+      ? `(referrer: ${attribution.utm_referrer})`
+      : "(direct / unknown)";
+
   // Plain text first (always works in any client), then HTML version for
   // anything modern. Both carry the same info.
   const lines = [
     `Someone just signed up to Am I Up.`,
     ``,
     `Handle:      @${handle}${displayLine}`,
+    `Attribution: ${attribLine}`,
     `Visibility:  ${is_public ? "Public profile" : "Private (handle not published)"}`,
     `Joined:      ${joinedAt}`,
     `User ID:     ${user_id ?? "—"}`,
@@ -164,7 +178,8 @@ export async function POST(req: Request) {
       <div style="font-size: 14px; color: #5F574F; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px;">Am I Up · new signup</div>
       <h1 style="font-size: 24px; font-weight: 600; margin: 0 0 18px; letter-spacing: -0.01em;">@${escapeHtml(handle)}${displayLine ? ` <span style="font-weight:400;color:#5F574F;">${escapeHtml(displayLine.trim())}</span>` : ""} just joined</h1>
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
-        <tr><td style="padding: 6px 0; color: #5F574F; width: 110px;">Visibility</td><td style="padding: 6px 0;">${is_public ? "Public profile" : "Private (handle not published)"}</td></tr>
+        <tr><td style="padding: 6px 0; color: #5F574F; width: 110px;">Attribution</td><td style="padding: 6px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;">${escapeHtml(attribLine)}</td></tr>
+        <tr><td style="padding: 6px 0; color: #5F574F;">Visibility</td><td style="padding: 6px 0;">${is_public ? "Public profile" : "Private (handle not published)"}</td></tr>
         <tr><td style="padding: 6px 0; color: #5F574F;">Joined</td><td style="padding: 6px 0; font-family: 'JetBrains Mono', monospace;">${escapeHtml(joinedAt)}</td></tr>
         <tr><td style="padding: 6px 0; color: #5F574F;">User&nbsp;ID</td><td style="padding: 6px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8F857A;">${escapeHtml(user_id ?? "—")}</td></tr>
       </table>
@@ -229,6 +244,60 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Attribution lookup. Reads auth.users.raw_user_meta_data via the
+// service-role admin API and pulls out any utm_source / utm_medium /
+// utm_campaign / utm_referrer set at sign-up time by lib/utm.ts.
+//
+// Every path is defensive: missing env vars, admin failures, or a user
+// with no metadata all just return an empty attribution object. The
+// notification email still sends; Neil sees "(direct / unknown)".
+// ────────────────────────────────────────────────────────────────────────
+
+interface Attribution {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_referrer?: string;
+  utm_content?: string;
+  utm_term?: string;
+  utm_landing_path?: string;
+}
+
+async function fetchUserAttribution(
+  userId: string | undefined,
+): Promise<Attribution> {
+  try {
+    if (!userId) return {};
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return {};
+    const admin = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await admin.auth.admin.getUserById(userId);
+    if (error || !data?.user) return {};
+    const meta = data.user.user_metadata ?? {};
+    const pick = (k: string) =>
+      typeof meta[k] === "string" ? (meta[k] as string) : undefined;
+    return {
+      utm_source: pick("utm_source"),
+      utm_medium: pick("utm_medium"),
+      utm_campaign: pick("utm_campaign"),
+      utm_referrer: pick("utm_referrer"),
+      utm_content: pick("utm_content"),
+      utm_term: pick("utm_term"),
+      utm_landing_path: pick("utm_landing_path"),
+    };
+  } catch (e) {
+    console.error(
+      "[new-user] attribution lookup failed:",
+      e instanceof Error ? e.message : String(e),
+    );
+    return {};
+  }
 }
 
 // ────────────────────────────────────────────────────────────────────────

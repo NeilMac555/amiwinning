@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { applyTheme } from "@/lib/settings";
 import { BRAND } from "@/lib/brand";
+import { UtmCapture } from "@/components/UtmCapture";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -18,6 +19,11 @@ export default function SignInPage() {
   useEffect(() => {
     applyTheme();
   }, []);
+
+  // Also re-run UTM capture here in case the user landed directly on
+  // /sign-in from a marketing link (e.g. a paid ad pointing straight
+  // at the auth page rather than the landing). Idempotent — if the
+  // landing page already captured, this call preserves it.
 
   // If already signed in, bounce to dashboard.
   useEffect(() => {
@@ -49,6 +55,7 @@ export default function SignInPage() {
         background: "var(--bg)",
       }}
     >
+      <UtmCapture />
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ marginBottom: 32, textAlign: "center" }}>
           <Link

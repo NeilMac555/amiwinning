@@ -17,6 +17,7 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { DemoPasteBox } from "@/components/DemoPasteBox";
+import { UtmCapture } from "@/components/UtmCapture";
 
 const SAMPLE_HANDLE = "sample";
 
@@ -80,6 +81,12 @@ const EQUITY_PATH =
 export function LandingPage() {
   return (
     <div className="landing-page">
+      {/* Captures utm_source / utm_medium / utm_campaign / referrer
+          into sessionStorage on landing. Forwarded into user_metadata
+          on signup via signInWithEmail in lib/auth.tsx, so Neil sees
+          per-signup attribution in the new-user notification email
+          and can query auth.users.raw_user_meta_data for aggregates. */}
+      <UtmCapture />
       <header className="landing-topbar">
         <div className="brand" style={{ flex: 1 }}>
           <div className="brand-mark" aria-hidden="true"></div>
