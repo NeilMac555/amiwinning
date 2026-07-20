@@ -17,6 +17,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { PartnerApplicationForm } from "@/components/PartnerApplicationForm";
 
 const CONTACT_EMAIL = "filthyjabba@gmail.com";
 const CONTACT_X = "NeilMac555";
@@ -242,38 +243,41 @@ export default function PartnersPage() {
             </ul>
           </section>
 
-          <section className="learn-cta">
-            <div>
-              <div className="learn-cta-title">How to apply</div>
-              <div className="learn-cta-sub">
-                DM{" "}
-                <a
-                  href={`https://x.com/${CONTACT_X}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  @{CONTACT_X}
-                </a>{" "}
-                on X or email{" "}
-                <a href={`mailto:${CONTACT_EMAIL}?subject=Am%20I%20Up%20partnership`}>
-                  {CONTACT_EMAIL}
-                </a>
-                . Include: your handle, roughly how many bets per month
-                you log today, a one-line pitch on your edge, and your
-                preferred payment method.
-              </div>
+          <section className="learn-section">
+            <h2 className="learn-h2">Apply</h2>
+            <p>
+              Fill in the form below. It emails Neil directly. Required
+              fields are contact, handle, and a one-line pitch on your
+              edge. The rest gets asked on the reply if you leave it
+              blank.
+            </p>
+            <div style={{ marginTop: 16 }}>
+              <PartnerApplicationForm />
             </div>
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Am%20I%20Up%20partnership`}
-              className="btn-primary"
+            <p
               style={{
-                padding: "12px 22px",
-                fontSize: 15,
-                textDecoration: "none",
+                fontSize: 11.5,
+                color: "var(--text-faint)",
+                fontFamily: "var(--mono)",
+                marginTop: 12,
               }}
             >
-              Email Neil &rarr;
-            </a>
+              Fallback: DM{" "}
+              <a
+                href={`https://x.com/${CONTACT_X}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                @{CONTACT_X}
+              </a>{" "}
+              on X or email{" "}
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=Am%20I%20Up%20partnership`}
+              >
+                {CONTACT_EMAIL}
+              </a>
+              .
+            </p>
           </section>
 
           <footer className="learn-foot">
