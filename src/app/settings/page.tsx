@@ -15,6 +15,8 @@ import { useAuth } from "@/lib/auth";
 import { createBook, deleteBook, updateBook, type OddsFormat } from "@/lib/books";
 import { downloadBetsCsv } from "@/lib/export";
 import { ProfilePanel } from "@/components/ProfilePanel";
+import { BookShareRow } from "@/components/BookShareRow";
+import { loadMyProfile, type Profile } from "@/lib/profiles";
 
 const UNIT_OPTIONS: Array<{ value: DisplayUnit; label: string; sublabel: string }> = [
   { value: "u", label: "Units (u)", sublabel: "Stake-to-bankroll ratio. Used by most pro bettors and trackers like bettin.gs / Track-A-Bet." },
@@ -44,6 +46,22 @@ export default function SettingsPage() {
   );
   const [exporting, setExporting] = useState(false);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
+  // Profile snapshot so each BookShareRow knows whether the owning
+  // profile is public (needed to render the "Requires public profile"
+  // hint). Refetched on demand via reloadProfile().
+  const [profile, setProfile] = useState<Profile | null>(null);
+  // Explicit setter used by BookShareRow's onSaved callback (which fires
+  // after user interaction, not during effect). Effect below uses the
+  // deferred-microtask pattern the rest of this codebase settled on for
+  // React 19's no-setState-in-effect rule.
+  const reloadProfile = () => {
+    void loadMyProfile().then((p) =>
+      queueMicrotask(() => setProfile(p)),
+    );
+  };
+  useEffect(() => {
+    reloadProfile();
+  }, [user?.id]);
 
   const onExport = async () => {
     if (exporting) return;
@@ -180,14 +198,21 @@ export default function SettingsPage() {
                           key={b.id}
                           style={{
                             display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                            padding: "10px 12px",
+                            flexDirection: "column",
                             borderRadius: 6,
                             border: `var(--border-w) solid ${isActive ? "var(--text)" : "var(--border)"}`,
                             background: isActive
                               ? "var(--surface-2)"
                               : "var(--surface)",
+                            overflow: "hidden",
+                          }}
+                        >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 12px",
                           }}
                         >
                           <span
@@ -272,6 +297,22 @@ export default function SettingsPage() {
                               {isConfirming ? "Confirm?" : "Delete"}
                             </button>
                           )}
+                        </div>
+                        {/* Per-book Public toggle + slug editor. Data lives
+                            on the books row (migration 0007). Server route
+                            /u/<handle>/<slug> hard-rejects unless BOTH the
+                            profile AND this book are public + the slug
+                            matches. */}
+                        {profile && (
+                          <BookShareRow
+                            book={b}
+                            handle={profile.handle}
+                            profileIsPublic={profile.isPublic}
+                            onSaved={() => {
+                              void refreshBooks();
+                            }}
+                          />
+                        )}
                         </div>
                       );
                     })}
