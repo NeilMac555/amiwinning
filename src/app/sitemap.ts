@@ -163,6 +163,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      // Bet Analytix comparison — fourth /compare page and highest
+      // strategic priority. Bet Analytix dominates the iOS + Android
+      // App Store for "bet tracker" searches (esp. EU / French-speaking
+      // markets) and has a $33/year paywall gated behind 200 bets and
+      // 2 bankrolls. Page leads on "unlimited and free forever" +
+      // AI paste as the wedge. Bumped to 0.85 priority — this is a
+      // more real competitor than Pikkit or Bet Diary today.
+      url: `${BASE}/compare/bet-analytix`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       // /compare hub. Consolidates PageRank across the individual
       // comparison pages, ranks in its own right for "bet tracker
       // comparison" style queries, gives Google a topical-authority

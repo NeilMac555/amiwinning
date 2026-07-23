@@ -32,6 +32,12 @@ interface Comparison {
 
 const COMPARISONS: Comparison[] = [
   {
+    slug: "bet-analytix",
+    competitor: "Bet Analytix",
+    short:
+      "App-Store-dominant, French-origin tracker with a $33/year paywall unlocking anything beyond 200 bets. Am I Up is unlimited and free forever, with AI paste and a shareable public profile.",
+  },
+  {
     slug: "bettin-gs",
     competitor: "bettin.gs",
     short:

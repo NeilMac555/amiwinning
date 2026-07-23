@@ -354,6 +354,7 @@ export default function ComparePage() {
             <Link href="/">Back to Am I Up</Link>
             <Link href="/u/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
+            <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
             <Link href="/compare/pikkit">vs Pikkit</Link>
             <Link href="/learn">Glossary</Link>

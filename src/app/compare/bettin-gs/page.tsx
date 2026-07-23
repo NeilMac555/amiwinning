@@ -356,6 +356,10 @@ export default function ComparePage() {
           <footer className="compare-foot">
             <Link href="/">Back to Am I Up</Link>
             <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/compare">All comparisons</Link>
+            <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
+            <Link href="/compare/pikkit">vs Pikkit</Link>
+            <Link href="/compare/betdiary">vs Bet Diary</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
           </footer>
