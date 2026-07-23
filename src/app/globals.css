@@ -3661,6 +3661,146 @@ a.sb-item { cursor: pointer; }
   border-bottom: var(--border-w) solid var(--border);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Recent-bets table — mobile collapse.
+
+   On desktop this is a 7-column table (Kickoff | Event | Selection |
+   Odds | Stake | P/L | Status) wrapped in an overflow-x scroll
+   container. On a 375px viewport the whole rightmost half of the table
+   (P/L, Status) falls outside the visible area and users almost never
+   discover the horizontal scroll — the profile URL is what people
+   share on X and Substack, so this table is the first impression
+   mobile visitors get.
+
+   Fix: below 640px, the table becomes a stack of per-bet cards using
+   CSS Grid template areas. No JSX changes — cells re-flow based on
+   :nth-child position. Desktop rendering is untouched (styles gated
+   inside the media query).
+
+   Layout of each mobile card:
+       ┌────────────────────────────────────┐
+       │ Event (sport + team)      Kickoff  │
+       │ Selection                          │
+       │ Odds     Stake     P/L             │
+       │                          [status]  │
+       └────────────────────────────────────┘
+
+   Specificity note: several rules include `table.tbl[data-density]`
+   so they win against the general `.tbl[data-density="dense"]` desktop
+   overrides at line ~823 without needing !important.
+   ───────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .profile-bets-card table.tbl,
+  .profile-bets-card table.tbl tbody {
+    display: block;
+    width: 100%;
+    /* Override the desktop-mobile "let tables overflow their cards" rule
+       (see .tbl { min-width: 600px } inside @media max-width:500px). Our
+       mobile design replaces horizontal scroll with a stack of cards, so
+       the table must shrink to its container, not force a 600px min. */
+    min-width: 0;
+  }
+  .profile-bets-card table.tbl thead {
+    display: none;
+  }
+
+  /* Each row is a card. Grid areas rewrite the cell layout. */
+  .profile-bets-card table.tbl tbody tr,
+  .profile-bets-card table.tbl tbody tr:hover {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "event  event  date"
+      "sel    sel    sel"
+      "odds   stake  pl"
+      "status status status";
+    row-gap: 8px;
+    column-gap: 12px;
+    padding: 14px 16px;
+    margin: 0 0 10px;
+    border: var(--border-w) solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    /* Neutralise the desktop hover-highlight — no hover semantics on touch. */
+    transition: none;
+  }
+  .profile-bets-card table.tbl tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Cell defaults: strip desktop table cell padding + width caps. */
+  .profile-bets-card table.tbl[data-density] tbody td {
+    display: block;
+    padding: 0;
+    border: 0;
+    max-width: none;
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  /* Kickoff date (col 1) → top right, small muted. */
+  .profile-bets-card table.tbl tbody td:nth-child(1) {
+    grid-area: date;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    align-self: center;
+  }
+
+  /* Event (col 2) → title. Contains the .league sport tag (kept as block). */
+  .profile-bets-card table.tbl tbody td:nth-child(2) {
+    grid-area: event;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  /* Selection (col 3) → full-width subtitle. */
+  .profile-bets-card table.tbl tbody td:nth-child(3) {
+    grid-area: sel;
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+  .profile-bets-card table.tbl tbody td:nth-child(3) .sel-main {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Metrics row: Odds, Stake, P/L each in their own grid cell. */
+  .profile-bets-card table.tbl tbody td:nth-child(4) { grid-area: odds;  text-align: left; }
+  .profile-bets-card table.tbl tbody td:nth-child(5) { grid-area: stake; text-align: left; }
+  .profile-bets-card table.tbl tbody td:nth-child(6) { grid-area: pl;    text-align: left; font-weight: 600; }
+
+  /* Little uppercase labels above each metric — turns "1.85" into
+     "ODDS 1.85" without needing to touch the JSX. */
+  .profile-bets-card table.tbl tbody td:nth-child(4)::before,
+  .profile-bets-card table.tbl tbody td:nth-child(5)::before,
+  .profile-bets-card table.tbl tbody td:nth-child(6)::before {
+    display: block;
+    font-size: 10px;
+    font-family: var(--sans);
+    font-weight: 500;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .profile-bets-card table.tbl tbody td:nth-child(4)::before { content: "Odds"; }
+  .profile-bets-card table.tbl tbody td:nth-child(5)::before { content: "Stake"; }
+  .profile-bets-card table.tbl tbody td:nth-child(6)::before { content: "P/L"; }
+
+  /* Status (col 7) → own row, badge right-aligned. */
+  .profile-bets-card table.tbl tbody td:nth-child(7) {
+    grid-area: status;
+    text-align: right;
+  }
+
+  /* Trim card head padding to match the tighter mobile card body. */
+  .profile-bets-card .profile-chart-head {
+    padding: 16px 16px 12px;
+  }
+}
+
 .profile-cta {
   display: flex;
   align-items: center;
