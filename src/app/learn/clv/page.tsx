@@ -170,6 +170,32 @@ export default function ClvPage() {
             real edge, and it works on far fewer bets than win rate does.
           </p>
 
+          <div className="learn-tldr">
+            <p className="learn-tldr-label">TL;DR</p>
+            <ul>
+              <li>
+                <strong>CLV = your odds vs the closing odds</strong> at a
+                sharp bookmaker (usually Pinnacle) on the same selection,
+                expressed as a percentage.
+              </li>
+              <li>
+                <strong>Positive CLV means you beat the closing line</strong>
+                {" "}
+                — the strongest available signal that a bettor has a real
+                edge, not just variance.
+              </li>
+              <li>
+                <strong>Trustworthy after ~100 bets</strong>, not the
+                ~1,000 you need before win rate stops lying to you.
+              </li>
+              <li>
+                <strong>Sustained positive CLV beats the market long-term</strong>;
+                sustained negative CLV loses to the market long-term.
+                Nothing else predicts profitability as cleanly.
+              </li>
+            </ul>
+          </div>
+
           <section className="learn-section">
             <h2 className="learn-h2">The short definition</h2>
             <p>

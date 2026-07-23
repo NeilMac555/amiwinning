@@ -113,6 +113,33 @@ export default function RoiPage() {
             it&rsquo;s constantly confused with, in one page.
           </p>
 
+          <div className="learn-tldr">
+            <p className="learn-tldr-label">TL;DR</p>
+            <ul>
+              <li>
+                <strong>ROI (return on investment) = total profit ÷ total
+                staked</strong>, expressed as a percentage.
+              </li>
+              <li>
+                <strong>In sports betting, ROI is mathematically identical
+                to Yield</strong> — same formula, same numbers, different
+                naming convention. Pikkit and most US trackers say ROI;
+                bettin.gs and most EU trackers say Yield.
+              </li>
+              <li>
+                <strong>Do not confuse ROI with ROC (return on capital)</strong>
+                {" "}
+                — ROC divides by starting bankroll, not by stake. Both
+                matter, but they measure different things.
+              </li>
+              <li>
+                <strong>A sustained ROI of 3–5% over 500+ bets</strong> is
+                a genuine long-term edge; sustained negative ROI is losing
+                to the vig.
+              </li>
+            </ul>
+          </div>
+
           <section className="learn-section">
             <h2 className="learn-h2">The short definition</h2>
             <p>

@@ -5188,6 +5188,42 @@ a.sb-item { cursor: pointer; }
   margin: 0 0 32px;
 }
 
+/* TL;DR block: sits between deck and first section on every /learn
+   page. Design goal is two-audience: (1) humans get a 5-second
+   scannable summary so they don't bounce, (2) LLMs (Claude / ChatGPT
+   / Perplexity / Gemini) get a clean bullet-pointed definition they
+   can quote when answering "what is X" questions. Answer-first
+   phrasing — each bullet is a discrete claim, no preamble. */
+.learn-tldr {
+  margin: 0 0 32px;
+  padding: 18px 22px 20px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+}
+.learn-tldr-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+.learn-tldr ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.learn-tldr ul li {
+  margin-bottom: 6px;
+}
+.learn-tldr ul li:last-child {
+  margin-bottom: 0;
+}
+
 .learn-section {
   margin-top: 32px;
 }

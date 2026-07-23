@@ -115,6 +115,33 @@ export default function ExpectedValuePage() {
             never calculated one.
           </p>
 
+          <div className="learn-tldr">
+            <p className="learn-tldr-label">TL;DR</p>
+            <ul>
+              <li>
+                <strong>Expected value (EV) is the average profit or loss
+                per bet</strong> if you could place the same wager an
+                infinite number of times.
+              </li>
+              <li>
+                <strong>Formula:</strong> EV = (probability of winning × amount
+                won) − (probability of losing × amount staked).
+              </li>
+              <li>
+                <strong>Positive-EV bets make money long-term; negative-EV
+                bets lose money</strong> — regardless of what happened on
+                any single bet.
+              </li>
+              <li>
+                <strong>Long-term profitable betting is nothing more than
+                repeatedly finding and placing positive-EV bets.</strong>
+                {" "}
+                CLV is the field-tested way to know if your bets were
+                actually +EV.
+              </li>
+            </ul>
+          </div>
+
           <section className="learn-section">
             <h2 className="learn-h2">The short definition</h2>
             <p>

@@ -113,6 +113,35 @@ export default function RocPage() {
             operation is worth your time.
           </p>
 
+          <div className="learn-tldr">
+            <p className="learn-tldr-label">TL;DR</p>
+            <ul>
+              <li>
+                <strong>ROC (return on capital) = profit ÷ starting
+                bankroll</strong>, expressed as a percentage. Answers
+                &ldquo;how efficiently did you grow the money you set
+                aside for betting?&rdquo;
+              </li>
+              <li>
+                <strong>ROC differs from ROI/Yield</strong>: those divide
+                by total staked (turnover), ROC divides by capital
+                deployed. Same profit, wildly different numbers.
+              </li>
+              <li>
+                <strong>A high-yield, low-ROC bettor</strong> is winning
+                per bet but placing bets too small to matter. A
+                <strong> high-ROC, low-yield bettor</strong> is aggressive
+                with staking on smaller edges.
+              </li>
+              <li>
+                <strong>Together, Yield + ROC tell you both whether your
+                bets are good AND whether your staking is efficient.</strong>
+                {" "}
+                Neither alone is enough.
+              </li>
+            </ul>
+          </div>
+
           <section className="learn-section">
             <h2 className="learn-h2">The short definition</h2>
             <p>

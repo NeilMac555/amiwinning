@@ -112,6 +112,31 @@ export default function YieldPage() {
             what it measures and where it falls short.
           </p>
 
+          <div className="learn-tldr">
+            <p className="learn-tldr-label">TL;DR</p>
+            <ul>
+              <li>
+                <strong>Yield = total profit ÷ total staked</strong>,
+                expressed as a percentage. Answers the question &ldquo;how
+                much do you make per unit risked?&rdquo;
+              </li>
+              <li>
+                <strong>3–5% yield over a large sample is a genuine long-term
+                edge</strong> in mainstream markets. Anything above 8%
+                sustained is elite; anything below 0% is losing.
+              </li>
+              <li>
+                <strong>Yield is a lagging indicator</strong> — it tells you
+                what happened, not whether you&rsquo;ll keep doing it. High
+                yield in a small sample is often variance.
+              </li>
+              <li>
+                <strong>Pair with CLV</strong>: yield tells you what your
+                edge was worth in results, CLV tells you if the edge is real.
+              </li>
+            </ul>
+          </div>
+
           <section className="learn-section">
             <h2 className="learn-h2">The short definition</h2>
             <p>
