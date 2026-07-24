@@ -6288,6 +6288,34 @@ a.sb-item { cursor: pointer; }
   color: var(--red);
 }
 
+/* AI insight row — generated per card by Claude Haiku via
+   /api/leaks/insight. Subtle amber accent so it reads as a
+   different beat from the raw metrics above. */
+.leaks-card-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--accent) 6%, var(--surface));
+  border-left: 2px solid var(--accent);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.leaks-card-insight-mark {
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.5;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.leaks-card-insight-loading {
+  color: var(--text-muted);
+  font-style: italic;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
 .leaks-card-foot {
   display: flex;
   justify-content: space-between;

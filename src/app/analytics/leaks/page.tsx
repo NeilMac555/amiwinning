@@ -23,6 +23,7 @@ import { useAuth } from "@/lib/auth";
 import { SAMPLE_BETS } from "@/lib/sample-profile";
 import { analyzeLeaks, type Leak, type Confidence } from "@/lib/leaks";
 import { filterByRange, rangeLabel, type Range } from "@/lib/range";
+import { useLeakInsight } from "@/lib/hooks/useLeakInsight";
 
 // Leak analysis over very short windows produces noise (a single bad
 // weekend in 7 days can look like a leak). Restrict the range picker
@@ -213,6 +214,7 @@ export default function LeaksPage() {
     rank: number;
     tone: "leak" | "strength";
   }) {
+    const { insight, loading, error } = useLeakInsight(leak, tone);
     return (
       <div className={`leaks-card leaks-card--${tone}`}>
         <div className="leaks-card-head">
@@ -246,6 +248,22 @@ export default function LeaksPage() {
             <div className="leaks-card-metric-value">{leak.winRate.toFixed(1)}%</div>
           </div>
         </div>
+
+        {/* AI insight row — one sentence generated per card by Claude
+            Haiku (see /api/leaks/insight). Cached client-side so a
+            re-render doesn't re-fetch. Silently absent on error. */}
+        {(loading || insight) && !error && (
+          <div className="leaks-card-insight">
+            <span className="leaks-card-insight-mark" aria-hidden="true">✦</span>
+            {loading ? (
+              <span className="leaks-card-insight-loading">
+                Reading the numbers…
+              </span>
+            ) : (
+              <span>{insight}</span>
+            )}
+          </div>
+        )}
 
         <div className="leaks-card-foot">
           <span className={`leaks-badge leaks-badge--${leak.confidence}`}>
