@@ -28,6 +28,215 @@ interface Rule {
   label: string;
 }
 
+// ─ Soccer teams → league lookup ─────────────────────────────────────────
+// Most user-imported bets don't mention the league in the event text —
+// they look like "Botafogo vs Vitória" or "Barcelona v Real Madrid".
+// The text-based rules below can't catch those. So we also carry a
+// team-name → league map: when no text rule matches, we scan for known
+// team names and use those to infer the league.
+//
+// Design principles:
+//   - Team patterns use word boundaries so "Real" doesn't inadvertently
+//     match "Real Sociedad" as Real Madrid.
+//   - Ambiguous shorthands like "United" or "City" are never used
+//     alone — always paired with a qualifier ("Manchester City",
+//     "Man City", "Utd" only when preceded by a city name).
+//   - If the bet text contains teams from >1 league (e.g. a Champions
+//     League match "Barcelona v Bayern Munich"), the classifier
+//     returns null rather than picking one arbitrarily. Multi-league
+//     bets are usually cup / continental / friendly matches which the
+//     specific text rules should have caught.
+//   - Teams from the last ~5 seasons are included so relegated /
+//     recently-promoted clubs still classify correctly.
+//
+// Coverage: top-5 European leagues (Premier League, La Liga, Serie A,
+// Bundesliga, Ligue 1), plus Eredivisie, Primeira Liga, Scottish
+// Premiership. Rough total ~150 teams. Championship / lower leagues
+// deliberately omitted for v1 to keep the false-positive rate low —
+// too many obscure name collisions with international sides.
+
+interface TeamRule {
+  re: RegExp;
+  league: string;
+}
+
+const SOCCER_TEAMS: TeamRule[] = [
+  // ─── Premier League ─────────────────────────────────────────────────
+  { re: /\barsenal\b/, league: "Premier League" },
+  { re: /\baston\s*villa\b/, league: "Premier League" },
+  { re: /\bbournemouth\b/, league: "Premier League" },
+  { re: /\bbrentford\b/, league: "Premier League" },
+  { re: /\bbrighton\b/, league: "Premier League" },
+  { re: /\bburnley\b/, league: "Premier League" },
+  { re: /\bchelsea\b/, league: "Premier League" },
+  { re: /\bcrystal\s*palace\b/, league: "Premier League" },
+  { re: /\beverton\b/, league: "Premier League" },
+  { re: /\bfulham\b/, league: "Premier League" },
+  { re: /\bipswich\b/, league: "Premier League" },
+  { re: /\bleeds\b/, league: "Premier League" },
+  { re: /\bleicester\b/, league: "Premier League" },
+  { re: /\bliverpool\b/, league: "Premier League" },
+  { re: /\bluton\b/, league: "Premier League" },
+  { re: /\bman(?:chester)?\s*city\b|\bmancity\b/, league: "Premier League" },
+  { re: /\bman(?:chester)?\s*(?:united|utd)\b|\bmanutd\b/, league: "Premier League" },
+  { re: /\bnewcastle\b/, league: "Premier League" },
+  { re: /\bnott(?:ingham|s)?\s*forest\b|\bnottingham\s*forest\b/, league: "Premier League" },
+  { re: /\bsheffield\s*(?:united|utd)\b/, league: "Premier League" },
+  { re: /\bsouthampton\b/, league: "Premier League" },
+  { re: /\bsunderland\b/, league: "Premier League" },
+  { re: /\btottenham\b|\bspurs\b/, league: "Premier League" },
+  { re: /\bwatford\b/, league: "Premier League" },
+  { re: /\bwest\s*ham\b/, league: "Premier League" },
+  { re: /\bwolves\b|\bwolverhampton\b/, league: "Premier League" },
+
+  // ─── La Liga ────────────────────────────────────────────────────────
+  { re: /\bbarcelona\b|\bbarça\b|\bbarca\b/, league: "La Liga" },
+  { re: /\breal\s*madrid\b/, league: "La Liga" },
+  { re: /\batl(?:ético|etico)\s*madrid\b|\batleti\b|\batletico\s*madrid\b/, league: "La Liga" },
+  { re: /\bsevilla\b/, league: "La Liga" },
+  { re: /\breal\s*sociedad\b/, league: "La Liga" },
+  { re: /\bathletic\s*(?:bilbao|club)\b/, league: "La Liga" },
+  { re: /\breal\s*betis\b|\bbetis\b/, league: "La Liga" },
+  { re: /\bvillarreal\b/, league: "La Liga" },
+  { re: /\bvalencia\b/, league: "La Liga" },
+  { re: /\bosasuna\b/, league: "La Liga" },
+  { re: /\bcelta\s*vigo\b|\bcelta\b/, league: "La Liga" },
+  { re: /\brayo\s*vallecano\b/, league: "La Liga" },
+  { re: /\bespanyol\b/, league: "La Liga" },
+  { re: /\bgetafe\b/, league: "La Liga" },
+  { re: /\bgirona\b/, league: "La Liga" },
+  { re: /\balav(?:é|e)s\b/, league: "La Liga" },
+  { re: /\bcadiz\b|\bcádiz\b/, league: "La Liga" },
+  { re: /\belche\b/, league: "La Liga" },
+  { re: /\bgranada\b/, league: "La Liga" },
+  { re: /\blas\s*palmas\b/, league: "La Liga" },
+  { re: /\bmallorca\b/, league: "La Liga" },
+  { re: /\balmer(?:í|i)a\b/, league: "La Liga" },
+  { re: /\bleganés\b|\bleganes\b/, league: "La Liga" },
+  { re: /\bvalladolid\b/, league: "La Liga" },
+
+  // ─── Serie A ────────────────────────────────────────────────────────
+  { re: /\bjuventus\b|\bjuve\b/, league: "Serie A" },
+  { re: /\bac\s*milan\b/, league: "Serie A" },
+  { re: /\binter\s*milan\b|\bfc\s*inter\b/, league: "Serie A" },
+  { re: /\bnapoli\b/, league: "Serie A" },
+  { re: /\bas\s*roma\b/, league: "Serie A" },
+  { re: /\blazio\b/, league: "Serie A" },
+  { re: /\batalanta\b/, league: "Serie A" },
+  { re: /\bfiorentina\b/, league: "Serie A" },
+  { re: /\bbologna\b/, league: "Serie A" },
+  { re: /\btorino\b/, league: "Serie A" },
+  { re: /\bsassuolo\b/, league: "Serie A" },
+  { re: /\budinese\b/, league: "Serie A" },
+  { re: /\bsampdoria\b/, league: "Serie A" },
+  { re: /\bgenoa\b/, league: "Serie A" },
+  { re: /\bhellas\s*verona\b|\bverona\b/, league: "Serie A" },
+  { re: /\bspezia\b/, league: "Serie A" },
+  { re: /\blecce\b/, league: "Serie A" },
+  { re: /\bcagliari\b/, league: "Serie A" },
+  { re: /\bsalernitana\b/, league: "Serie A" },
+  { re: /\bempoli\b/, league: "Serie A" },
+  { re: /\bcremonese\b/, league: "Serie A" },
+  { re: /\bmonza\b/, league: "Serie A" },
+  { re: /\bfrosinone\b/, league: "Serie A" },
+  { re: /\bparma\b/, league: "Serie A" },
+  { re: /\bvenezia\b/, league: "Serie A" },
+  { re: /\bcomo\b/, league: "Serie A" },
+
+  // ─── Bundesliga ─────────────────────────────────────────────────────
+  { re: /\bbayern\s*(?:munich|münchen|munchen)?\b/, league: "Bundesliga" },
+  { re: /\bborussia\s*dortmund\b|\bbvb\b/, league: "Bundesliga" },
+  { re: /\brb\s*leipzig\b|\brb\s*lipsia\b/, league: "Bundesliga" },
+  { re: /\bbayer\s*leverkusen\b/, league: "Bundesliga" },
+  { re: /\beintracht\s*frankfurt\b/, league: "Bundesliga" },
+  { re: /\bwolfsburg\b/, league: "Bundesliga" },
+  { re: /\bfreiburg\b/, league: "Bundesliga" },
+  { re: /\bunion\s*berlin\b/, league: "Bundesliga" },
+  { re: /\bborussia\s*m(?:ö|o)nchengladbach\b|\bgladbach\b/, league: "Bundesliga" },
+  { re: /\bwerder\s*bremen\b/, league: "Bundesliga" },
+  { re: /\bmainz\b/, league: "Bundesliga" },
+  { re: /\bhoffenheim\b/, league: "Bundesliga" },
+  { re: /\baugsburg\b/, league: "Bundesliga" },
+  { re: /\b(?:vfb\s*)?stuttgart\b/, league: "Bundesliga" },
+  { re: /\bk(?:ö|o)ln\b|\bcologne\b/, league: "Bundesliga" },
+  { re: /\bschalke\b/, league: "Bundesliga" },
+  { re: /\bhertha\s*berlin\b/, league: "Bundesliga" },
+  { re: /\bbochum\b/, league: "Bundesliga" },
+  { re: /\bdarmstadt\b/, league: "Bundesliga" },
+  { re: /\bheidenheim\b/, league: "Bundesliga" },
+  { re: /\bsankt\s*pauli\b|\bst\.?\s*pauli\b/, league: "Bundesliga" },
+  { re: /\bholstein\s*kiel\b/, league: "Bundesliga" },
+
+  // ─── Ligue 1 ────────────────────────────────────────────────────────
+  { re: /\bpsg\b|\bparis\s*saint[\s-]?germain\b/, league: "Ligue 1" },
+  { re: /\bmarseille\b|\bom\b/, league: "Ligue 1" },
+  { re: /\blyon\b|\bol\b/, league: "Ligue 1" },
+  { re: /\bmonaco\b/, league: "Ligue 1" },
+  { re: /\blille\b|\blosc\b/, league: "Ligue 1" },
+  { re: /\brennes\b|\bstade\s*rennais\b/, league: "Ligue 1" },
+  { re: /\bnice\b|\bogc\s*nice\b/, league: "Ligue 1" },
+  { re: /\bracing\s*club\s*de\s*lens\b|\brc\s*lens\b|\blens\b/, league: "Ligue 1" },
+  { re: /\bstrasbourg\b/, league: "Ligue 1" },
+  { re: /\bnantes\b/, league: "Ligue 1" },
+  { re: /\breims\b/, league: "Ligue 1" },
+  { re: /\btoulouse\b/, league: "Ligue 1" },
+  { re: /\bmontpellier\b/, league: "Ligue 1" },
+  { re: /\bbrest\b|\bstade\s*brestois\b/, league: "Ligue 1" },
+  { re: /\ble\s*havre\b/, league: "Ligue 1" },
+  { re: /\bfc\s*metz\b/, league: "Ligue 1" },
+  { re: /\bauxerre\b/, league: "Ligue 1" },
+  { re: /\bangers\b/, league: "Ligue 1" },
+  { re: /\bsaint[\s-]?(?:é|e)tienne\b|\basse\b/, league: "Ligue 1" },
+
+  // ─── Eredivisie ─────────────────────────────────────────────────────
+  { re: /\bajax\b/, league: "Eredivisie" },
+  { re: /\bpsv\s*eindhoven\b|\bpsv\b/, league: "Eredivisie" },
+  { re: /\bfeyenoord\b/, league: "Eredivisie" },
+  { re: /\baz\s*alkmaar\b|\baz\b/, league: "Eredivisie" },
+  { re: /\btwente\b/, league: "Eredivisie" },
+  { re: /\bvitesse\b/, league: "Eredivisie" },
+  { re: /\bsparta\s*rotterdam\b/, league: "Eredivisie" },
+  { re: /\bfc\s*utrecht\b/, league: "Eredivisie" },
+  { re: /\bheerenveen\b/, league: "Eredivisie" },
+  { re: /\bfc\s*groningen\b/, league: "Eredivisie" },
+
+  // ─── Primeira Liga ──────────────────────────────────────────────────
+  { re: /\bbenfica\b/, league: "Primeira Liga" },
+  { re: /\bfc\s*porto\b/, league: "Primeira Liga" },
+  { re: /\bsporting\s*cp\b|\bsporting\s*lisbon\b/, league: "Primeira Liga" },
+  { re: /\bsc\s*braga\b/, league: "Primeira Liga" },
+  { re: /\bvit(?:ó|o)ria\s*(?:guimarães|guimaraes|sc)\b/, league: "Primeira Liga" },
+  { re: /\bboavista\b/, league: "Primeira Liga" },
+
+  // ─── Scottish Premiership ───────────────────────────────────────────
+  { re: /\bceltic\b/, league: "Scottish Premiership" },
+  { re: /\brangers\s*(?:fc)?\b(?!\s*(?:new\s*york|texas))/, league: "Scottish Premiership" },
+  { re: /\baberdeen\b/, league: "Scottish Premiership" },
+  { re: /\bhearts\b/, league: "Scottish Premiership" },
+  { re: /\bhibernian\b|\bhibs\b/, league: "Scottish Premiership" },
+  { re: /\bmotherwell\b/, league: "Scottish Premiership" },
+  { re: /\bst\.?\s*mirren\b/, league: "Scottish Premiership" },
+  { re: /\bkilmarnock\b/, league: "Scottish Premiership" },
+];
+
+/**
+ * Infer the league from soccer team names in the bet text.
+ * Returns the league label if exactly one league is detected;
+ * returns null when 0 leagues match OR when 2+ leagues match
+ * (usually a cup / continental / friendly match).
+ */
+function classifyByTeamNames(haystack: string): string | null {
+  const hits = new Set<string>();
+  for (const rule of SOCCER_TEAMS) {
+    if (rule.re.test(haystack)) {
+      hits.add(rule.league);
+      if (hits.size > 1) return null; // multi-league → don't guess
+    }
+  }
+  if (hits.size === 1) return [...hits][0] ?? null;
+  return null;
+}
+
 // ─ Soccer competitions (unchanged from v1) ───────────────────────────────
 const SOCCER_RULES: Rule[] = [
   // European club competitions
@@ -221,5 +430,16 @@ export function classifyCompetition(input: ClassifyInput): string | null {
   for (const { re, label } of rules) {
     if (re.test(haystack)) return label;
   }
+
+  // Soccer fallback: if the text-based rules missed but the bet
+  // mentions known teams, use those to infer the league. Most user
+  // imports have no explicit league marker — just team names — so
+  // this is where the vast majority of soccer bets actually get
+  // classified.
+  if (sport === "Soccer") {
+    const byTeam = classifyByTeamNames(haystack);
+    if (byTeam) return byTeam;
+  }
+
   return null;
 }
