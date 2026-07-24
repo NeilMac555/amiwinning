@@ -15,17 +15,28 @@ import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, fmtPL } from "@/components/UnitContext";
+import { RangeTabs } from "@/components/RangeTabs";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import type { ImportedBet } from "@/lib/import/types";
 import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { SAMPLE_BETS } from "@/lib/sample-profile";
 import { analyzeLeaks, type Leak, type Confidence } from "@/lib/leaks";
+import { filterByRange, rangeLabel, type Range } from "@/lib/range";
+
+// Leak analysis over very short windows produces noise (a single bad
+// weekend in 7 days can look like a leak). Restrict the range picker
+// to windows where sample sizes have a chance to matter.
+const LEAKS_RANGES: Range[] = ["3M", "6M", "YTD", "12M", "All"];
 
 const MIN_TOTAL_SETTLED_FOR_REAL_ANALYSIS = 50;
 
 export default function LeaksPage() {
   const [bets, setBets] = useState<ImportedBet[]>([]);
+  const [range, setRange] = useState<Range>("All");
+  // Freeze `now` once on mount so filterByRange is deterministic across
+  // the memo — required by React 19's no-Date.now-in-render rule.
+  const [now, setNow] = useState<number>(() => Date.now());
   const unit = useSettings().unit;
   const { user, betsVersion, activeBook } = useAuth();
 
@@ -39,7 +50,13 @@ export default function LeaksPage() {
     const scoped = activeBook
       ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
       : all;
-    queueMicrotask(() => setBets(scoped));
+    // Reset the reference time whenever we reload bets so the range
+    // filter is stable across the analysis run.
+    const nowMs = Date.now();
+    queueMicrotask(() => {
+      setBets(scoped);
+      setNow(nowMs);
+    });
   }, [betsVersion, user, activeBook]);
 
   // If the user has almost no data, run the analysis on SAMPLE_BETS so
@@ -56,7 +73,14 @@ export default function LeaksPage() {
   const usingSampleData = settledCount < MIN_TOTAL_SETTLED_FOR_REAL_ANALYSIS;
   const displayBets = usingSampleData ? SAMPLE_BETS : bets;
 
-  const analysis = useMemo(() => analyzeLeaks(displayBets), [displayBets]);
+  // Apply the range filter before running the analyser. Freeze `now`
+  // at render time (via the state above) so the memo stays pure —
+  // React 19 forbids Date.now() inside useMemo.
+  const windowedBets = useMemo(
+    () => filterByRange(displayBets, range, now),
+    [displayBets, range, now],
+  );
+  const analysis = useMemo(() => analyzeLeaks(windowedBets), [windowedBets]);
 
   return (
     <UnitProvider unit={unit}>
@@ -79,11 +103,13 @@ export default function LeaksPage() {
                   ) : (
                     <>
                       Where you&rsquo;re losing (and winning) the most money.
-                      Analysed across {analysis.totalSettled.toLocaleString()} settled bets.
+                      Analysed across {analysis.totalSettled.toLocaleString()} settled bets over{" "}
+                      {rangeLabel(range, now)}.
                     </>
                   )}
                 </div>
               </div>
+              <RangeTabs value={range} onChange={setRange} options={LEAKS_RANGES} />
             </div>
 
             {analysis.leaks.length === 0 && analysis.strengths.length === 0 ? (
