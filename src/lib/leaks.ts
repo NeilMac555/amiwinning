@@ -49,7 +49,19 @@ export interface LeakAnalysis {
 
 const MIN_N_FOR_ROI_LEAK = 30;
 const TOP_LEAKS = 5;
-const TOP_STRENGTHS = 3;
+const TOP_STRENGTHS = 5;
+
+// If ONE sport accounts for more than this fraction of a user's settled
+// bets, drop the sport dimension entirely. Telling a soccer tipster
+// "your biggest edge is soccer" is not an insight — it's a tautology
+// that crowds out actually-useful market / competition breakdowns.
+const SPORT_DOMINANCE_THRESHOLD = 0.70;
+
+// Maximum entries any single dimension can contribute to a list. Without
+// this, high-P/L high-sample dimensions (sport, odds) can hog every
+// slot and drown out granular insights (specific markets, specific
+// competitions).
+const MAX_PER_DIMENSION = 2;
 
 function isSettled(b: ImportedBet): boolean {
   return b.status !== "pending" && b.status !== "void";
@@ -209,24 +221,64 @@ function competitionLeaks(bets: ImportedBet[]): Leak[] {
 
 export function analyzeLeaks(bets: ImportedBet[]): LeakAnalysis {
   const settledCount = bets.filter(isSettled).length;
+
+  // Sport dominance check — if one sport accounts for >70% of the user's
+  // settled bets, exclude the sport dimension entirely. The insight
+  // "your biggest edge is <the sport you exclusively bet>" is
+  // meaningless; keeping it in just crowds out the actionable stuff.
+  const sportSlices = bySport(bets);
+  const dominantSport = settledCount > 0
+    ? sportSlices.find((s) => s.n / settledCount > SPORT_DOMINANCE_THRESHOLD)
+    : undefined;
+  const includeSportDim = !dominantSport;
+
   const all: Leak[] = [
-    ...bySport(bets),
+    ...(includeSportDim ? sportSlices : []),
     ...competitionLeaks(bets),
     ...marketLeaks(bets),
     ...byOddsBucket(bets),
   ];
 
-  const leaks = all
-    .filter((l) => l.pl < 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, TOP_LEAKS);
-
-  const strengths = all
-    .filter((l) => l.pl > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, TOP_STRENGTHS);
+  const leaks = pickTopByDimension(
+    all.filter((l) => l.pl < 0),
+    TOP_LEAKS,
+  );
+  const strengths = pickTopByDimension(
+    all.filter((l) => l.pl > 0),
+    TOP_STRENGTHS,
+  );
 
   return { totalSettled: settledCount, leaks, strengths };
+}
+
+/**
+ * Pick top-N leaks with per-dimension caps so no single dimension
+ * (sport, odds, market, competition) can hog every slot. Sort by
+ * composite score desc, then greedily fill respecting MAX_PER_DIMENSION.
+ * Falls through to unbounded selection once the caps are exhausted so
+ * we never return fewer than `n` items when raw data is available.
+ */
+function pickTopByDimension(pool: Leak[], n: number): Leak[] {
+  const sorted = [...pool].sort((a, b) => b.score - a.score);
+  const counts = new Map<LeakDimension, number>();
+  const chosen: Leak[] = [];
+  // Pass 1: respect per-dimension caps.
+  for (const l of sorted) {
+    if (chosen.length >= n) break;
+    const c = counts.get(l.dimension) ?? 0;
+    if (c >= MAX_PER_DIMENSION) continue;
+    counts.set(l.dimension, c + 1);
+    chosen.push(l);
+  }
+  // Pass 2: if we still need more, fill with anything (caps aside).
+  if (chosen.length < n) {
+    for (const l of sorted) {
+      if (chosen.length >= n) break;
+      if (chosen.includes(l)) continue;
+      chosen.push(l);
+    }
+  }
+  return chosen;
 }
 
 // ─ Helpers ───────────────────────────────────────────────────────────────

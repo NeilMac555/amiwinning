@@ -6134,6 +6134,37 @@ a.sb-item { cursor: pointer; }
   margin-top: 16px;
 }
 
+/* Distinct wrapper blocks for the Leaks vs Edges sections. Bigger
+   padding, subtle tinted background derived from the accent color,
+   full-height coloured left rule. Makes it unmistakable which
+   section you're reading without needing to parse the numbers. */
+.leaks-block {
+  padding: 22px 22px 24px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  margin-top: 36px;
+}
+.leaks-block:first-of-type {
+  margin-top: 20px;
+}
+.leaks-block--leak {
+  border-left: 4px solid var(--red);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--red) 4%, var(--surface)) 0%,
+    var(--surface) 40%
+  );
+}
+.leaks-block--strength {
+  border-left: 4px solid var(--green);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--green) 4%, var(--surface)) 0%,
+    var(--surface) 40%
+  );
+}
+
 .leaks-h2 {
   font-family: var(--serif);
   font-size: 22px;

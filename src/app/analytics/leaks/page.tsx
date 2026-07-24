@@ -101,14 +101,15 @@ export default function LeaksPage() {
             ) : (
               <>
                 {analysis.leaks.length > 0 && (
-                  <section className="leaks-section">
+                  <section className="leaks-section leaks-block leaks-block--leak">
                     <h2 className="leaks-h2 leaks-h2--leak">
-                      Biggest leaks
+                      Biggest Leaks
                     </h2>
                     <p className="leaks-lead">
-                      Ranked by how much money each pattern has cost you,
-                      weighted by sample size. Sustained negative
-                      segments — not one-off cold streaks.
+                      Where you&rsquo;re losing money. Ranked by how much
+                      each pattern has cost you, weighted by sample size.
+                      Sustained negative segments — not one-off cold
+                      streaks.
                     </p>
                     <div className="leaks-grid">
                       {analysis.leaks.map((l, i) => (
@@ -119,13 +120,14 @@ export default function LeaksPage() {
                 )}
 
                 {analysis.strengths.length > 0 && (
-                  <section className="leaks-section">
+                  <section className="leaks-section leaks-block leaks-block--strength">
                     <h2 className="leaks-h2 leaks-h2--strength">
-                      Where you actually make money
+                      Biggest Edges
                     </h2>
                     <p className="leaks-lead">
-                      For contrast. Same slicing, same threshold — but
-                      these are segments where your P/L is positive.
+                      Where you actually make money. Same slicing, same
+                      threshold — these are the segments to double down
+                      on.
                     </p>
                     <div className="leaks-grid">
                       {analysis.strengths.map((s, i) => (
