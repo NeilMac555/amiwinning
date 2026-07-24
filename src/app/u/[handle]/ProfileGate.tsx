@@ -1,29 +1,38 @@
 "use client";
 
 // ProfileGate — wraps the deep-analysis sections of a public profile so
-// they're only shown to signed-in viewers. Signed-out viewers see a
-// sign-up CTA instead, with a blurred KPI teaser hinting at what's
-// behind the gate.
+// they're only shown to the profile owner. Everyone else sees a gate:
 //
-// Why gate this:
-//   The snapshot (identity + lifetime P/L + equity curve) is enough to
-//   verify "this person is real and has an edge." The deep KPIs, market
-//   breakdowns, monthly P/L, CLV distribution, and recent-bets table
-//   are the real value. Gating them turns every X share of a profile
-//   into a signup driver — viewers see enough to want more, then need
-//   an account to get it.
+//   Signed-out visitor    → sign-up CTA with a blurred KPI teaser
+//                            ("sign up to unlock" — high-intent conversion
+//                            surface, unchanged from v1).
+//   Signed-in stranger    → "private to owner" card. They're already a
+//                            user; asking them to sign up again would be
+//                            confusing. Instead we're transparent: the
+//                            profile owner keeps their deep report to
+//                            themselves.
+//   Profile owner         → full content, no gate.
+//   /u/sample handle      → always full content (marketing tour bypass).
 //
-// Exceptions:
-//   - /u/sample is the marketing tour — always fully visible. We
-//     detect it by handle and short-circuit the gate.
-//   - Signed-in viewers (any account) see everything as before.
+// Why owner-only for the whole deep report (v2, 2026-07):
+//   The signed-in-stranger case previously saw the full KPI grid, market
+//   breakdowns, monthly P/L, and recent-bets table. That exposed
+//   competitive/strategic detail — where the owner leaks, where they
+//   win, and their upcoming individual selections — to anyone with an
+//   AmIUp account. Users shouldn't have to trade their strategy privacy
+//   for a shareable profile URL.
+//
+// What non-owners can still see (above the gate, in page.tsx):
+//   Identity (name, handle, avatar), lifetime P/L, and the equity
+//   curve. Enough to verify "this person is real and has an edge" —
+//   the proof-of-edge share hook is preserved.
 //
 // Why client-side gating:
 //   Supabase JS stores sessions in localStorage, not cookies, so the
 //   server can't read auth state during the SSR pass without a major
 //   infrastructure change. Client-side is fine here — the data is
-//   already user-public by definition. We're creating signup
-//   incentive, not protecting secrets.
+//   already user-public by definition. We're creating a privacy layer,
+//   not protecting secrets that the server itself must guard.
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -31,6 +40,9 @@ import { useAuth } from "@/lib/auth";
 
 interface ProfileGateProps {
   handle: string;
+  /** Auth user_id of the profile owner. When the signed-in viewer's
+   *  id matches this, the gate is bypassed and the deep report renders. */
+  ownerUserId?: string;
   /** Optional book slug when this gate is rendered on the per-book
    *  route (/u/<handle>/<bookSlug>). If set, the sign-up returnTo
    *  preserves the slug so viewers of a book-specific URL come back
@@ -40,21 +52,75 @@ interface ProfileGateProps {
   children: ReactNode;
 }
 
-export function ProfileGate({ handle, bookSlug, children }: ProfileGateProps) {
-  const { user } = useAuth();
+export function ProfileGate({
+  handle,
+  ownerUserId,
+  bookSlug,
+  children,
+}: ProfileGateProps) {
+  const { user, loading } = useAuth();
 
   // The sample profile is our marketing tour — never gated.
   if (handle === "sample") {
     return <>{children}</>;
   }
 
-  // Signed-in viewers see the full report regardless of whose profile.
-  if (user) {
+  // While auth is resolving, render nothing rather than briefly
+  // flashing gate content that then swaps to owner content (or vice
+  // versa) on a slow connection.
+  if (loading) return null;
+
+  // Owner viewing their own profile → full report.
+  if (user && ownerUserId && user.id === ownerUserId) {
     return <>{children}</>;
   }
 
-  // Signed-out: replace the gated sections with a sign-up CTA card.
+  // Signed-in stranger → a distinct "private to owner" card. Different
+  // from the signup CTA because asking a signed-in user to sign up
+  // makes no sense.
+  if (user) {
+    return <PrivateToOwnerGate handle={handle} />;
+  }
+
+  // Signed-out visitor → the signup CTA (existing high-intent conversion).
   return <SignUpGate handle={handle} bookSlug={bookSlug} />;
+}
+
+// ─ Private-to-owner gate (signed-in stranger) ──────────────────────────
+// Shown when the viewer is a signed-in AmIUp user but not the profile
+// owner. No sign-up CTA — they're already a user. Just an honest
+// message that the owner keeps their deep report private, with a
+// pointer to build their own if they want one.
+
+function PrivateToOwnerGate({ handle }: { handle: string }) {
+  return (
+    <section
+      className="profile-gate profile-gate--private"
+      aria-label="Deep report is private to the owner"
+    >
+      <div className="profile-gate-card">
+        <div className="profile-gate-eyebrow">
+          <span className="profile-gate-dot" aria-hidden="true" />
+          Private to owner
+        </div>
+        <h2 className="profile-gate-title">
+          <span className="profile-gate-handle">@{handle}</span>&rsquo;s
+          detailed report is private.
+        </h2>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: "0 0 20px" }}>
+          The lifetime P/L and equity curve above are the public snapshot.
+          The KPI grid, per-market breakdown, monthly P/L, and recent bets
+          are kept private to the profile owner.
+        </p>
+        <Link href="/" className="btn-primary profile-gate-cta">
+          Build your own profile →
+        </Link>
+        <p className="profile-gate-fine">
+          Free. Your data stays yours. You choose what to make public.
+        </p>
+      </div>
+    </section>
+  );
 }
 
 // ─ The gate itself ───────────────────────────────────────────────────────

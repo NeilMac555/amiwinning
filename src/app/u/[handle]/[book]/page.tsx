@@ -24,7 +24,6 @@ import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
 import { ProfileEquity } from "../ProfileEquity";
 import { ProfileGate } from "../ProfileGate";
-import { OwnerOnly } from "../OwnerOnly";
 import { UtmCapture } from "@/components/UtmCapture";
 import type { ImportedBet } from "@/lib/import/types";
 
@@ -221,7 +220,7 @@ export default async function ProfilePage({ params }: PageProps) {
             viewers. ProfileGate is a client component that short-circuits
             to a sign-up CTA if there's no logged-in user. /u/sample is
             exempted inside the gate (always full view). */}
-        <ProfileGate handle={profile.handle} bookSlug={bookSlug}>
+        <ProfileGate handle={profile.handle} ownerUserId={profile.userId} bookSlug={bookSlug}>
 
         {/* KPI grid */}
         {settledCount > 0 && (
@@ -300,29 +299,26 @@ export default async function ProfilePage({ params }: PageProps) {
         )}
 
         {/* Breakdowns: sport / market / odds bucket / competition.
-            Effectively per-slice P/L — same shape as the /analytics/leaks
-            page. Owner-only: strangers see equity + top-line only, not
-            the "where you leak" detail. */}
+            Sits inside ProfileGate above — signed-in strangers see the
+            private-to-owner card instead, so no extra wrapper needed. */}
         {settledCount > 0 && (
-          <OwnerOnly ownerUserId={profile.userId} handle={profile.handle}>
-            <section className="profile-breakdown-row">
-              {data.sportBd && data.sportBd.length > 0 && (
-                <Breakdown title="By sport" rows={data.sportBd.slice(0, 8)} />
-              )}
-              {data.marketBd.length > 0 && (
-                <Breakdown title="By market" rows={data.marketBd.slice(0, 8)} />
-              )}
-              {data.oddsBd.length > 0 && (
-                <Breakdown title="By odds range" rows={data.oddsBd} />
-              )}
-              {data.competitionBd && data.competitionBd.length > 0 && (
-                <Breakdown
-                  title="By competition (soccer)"
-                  rows={data.competitionBd.slice(0, 8)}
-                />
-              )}
-            </section>
-          </OwnerOnly>
+          <section className="profile-breakdown-row">
+            {data.sportBd && data.sportBd.length > 0 && (
+              <Breakdown title="By sport" rows={data.sportBd.slice(0, 8)} />
+            )}
+            {data.marketBd.length > 0 && (
+              <Breakdown title="By market" rows={data.marketBd.slice(0, 8)} />
+            )}
+            {data.oddsBd.length > 0 && (
+              <Breakdown title="By odds range" rows={data.oddsBd} />
+            )}
+            {data.competitionBd && data.competitionBd.length > 0 && (
+              <Breakdown
+                title="By competition (soccer)"
+                rows={data.competitionBd.slice(0, 8)}
+              />
+            )}
+          </section>
         )}
 
         {/* Monthly P/L bars */}
