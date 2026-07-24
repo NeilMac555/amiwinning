@@ -149,11 +149,22 @@ export function Sidebar() {
         <Item
           label="Analytics"
           href="/analytics"
-          active={is("/analytics")}
+          active={is("/analytics") && path !== "/analytics/leaks"}
           icon={ic(
             <>
               <path d="M1.5 12V2M1.5 12h11" />
               <path d="M3 9l3-3 3 2 3-5" />
+            </>,
+          )}
+        />
+        <Item
+          label="Biggest leaks"
+          href="/analytics/leaks"
+          active={is("/analytics/leaks")}
+          icon={ic(
+            <>
+              {/* Downward triangle "leak" glyph */}
+              <path d="M1.5 3.5h11L7 12z" />
             </>,
           )}
         />
