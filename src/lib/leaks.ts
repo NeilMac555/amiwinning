@@ -168,6 +168,9 @@ function bySport(bets: ImportedBet[]): Leak[] {
   const rows: Leak[] = [];
   for (const [label, v] of groups.entries()) {
     if (v.n < MIN_N_FOR_ROI_LEAK) continue;
+    // Catch-all bucket has no actionable meaning ("your biggest edge
+    // is a mixed bag of unclassified sports" isn't advice).
+    if (isGenericBucket(label)) continue;
     rows.push({
       dimension: "sport",
       label,
@@ -183,11 +186,21 @@ function bySport(bets: ImportedBet[]): Leak[] {
   return rows;
 }
 
+// Labels that are catch-all buckets from the underlying classifiers
+// rather than specific segments the user can reason about. Filtered
+// out of leak/edge selection so we never claim someone's biggest edge
+// is a bucket of miscellany.
+function isGenericBucket(label: string): boolean {
+  const l = label.toLowerCase().trim();
+  return l === "other" || l === "other sport" || l === "unknown";
+}
+
 // ─ Adapter: wrap byMarket / byCompetition rows into Leak shape ───────────
 
 function marketLeaks(bets: ImportedBet[]): Leak[] {
   return byMarket(bets)
     .filter((r) => r.bets >= MIN_N_FOR_ROI_LEAK)
+    .filter((r) => !isGenericBucket(r.label))
     .map((r) => ({
       dimension: "market" as const,
       label: r.label,
