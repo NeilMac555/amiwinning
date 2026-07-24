@@ -22,7 +22,7 @@ import { SampleBetsBanner } from "@/components/SampleBetsBanner";
 import { DemoBetImportBanner } from "@/components/DemoBetImportBanner";
 import { GhostPreview } from "@/components/GhostPreview";
 import { SAMPLE_SOURCE_TAG } from "@/lib/sample-tip";
-import { ProfitPerStake } from "@/components/ProfitPerStake";
+import { DashboardEdgeCallout } from "@/components/DashboardEdgeCallout";
 import { RangeTabs } from "@/components/RangeTabs";
 import { WinRateGauge } from "@/components/WinRateGauge";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
@@ -300,11 +300,7 @@ export default function Dashboard() {
                 settledCount={data.secondary.settledCount ?? 0}
                 avgOdds={data.secondary.avgOdds}
               />
-              <ProfitPerStake
-                lifetimePlUnits={data.kpis.lifetimePl}
-                totalBets={data.kpis.sampleSize}
-                yearsSpan={lifetimeYears}
-              />
+              <DashboardEdgeCallout bets={allBets} />
             </div>
           )}
 
