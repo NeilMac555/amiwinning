@@ -18,6 +18,7 @@ import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
 import { ProfileEquity } from "./ProfileEquity";
 import { ProfileGate } from "./ProfileGate";
+import { OwnerOnly } from "./OwnerOnly";
 import { UtmCapture } from "@/components/UtmCapture";
 import type { ImportedBet } from "@/lib/import/types";
 import { SafeEvent, SafeField } from "@/components/SafeBetField";
@@ -265,25 +266,33 @@ export default async function ProfilePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* Breakdowns: sport / market / odds bucket / competition */}
+        {/* Breakdowns: sport / market / odds bucket / competition.
+            Effectively per-slice P/L — the same data the /analytics/leaks
+            page presents as leaks/edges. Owner-only so strangers viewing
+            the profile can see the equity curve + top-line P/L (the
+            proof-of-edge share hook) but not the "where you leak" detail.
+            Signed-in AmIUp strangers get the same treatment as
+            signed-out viewers here — nothing rendered. */}
         {settledCount > 0 && (
-          <section className="profile-breakdown-row">
-            {data.sportBd && data.sportBd.length > 0 && (
-              <Breakdown title="By sport" rows={data.sportBd.slice(0, 8)} />
-            )}
-            {data.marketBd.length > 0 && (
-              <Breakdown title="By market" rows={data.marketBd.slice(0, 8)} />
-            )}
-            {data.oddsBd.length > 0 && (
-              <Breakdown title="By odds range" rows={data.oddsBd} />
-            )}
-            {data.competitionBd && data.competitionBd.length > 0 && (
-              <Breakdown
-                title="By competition (soccer)"
-                rows={data.competitionBd.slice(0, 8)}
-              />
-            )}
-          </section>
+          <OwnerOnly ownerUserId={profile.userId} handle={profile.handle}>
+            <section className="profile-breakdown-row">
+              {data.sportBd && data.sportBd.length > 0 && (
+                <Breakdown title="By sport" rows={data.sportBd.slice(0, 8)} />
+              )}
+              {data.marketBd.length > 0 && (
+                <Breakdown title="By market" rows={data.marketBd.slice(0, 8)} />
+              )}
+              {data.oddsBd.length > 0 && (
+                <Breakdown title="By odds range" rows={data.oddsBd} />
+              )}
+              {data.competitionBd && data.competitionBd.length > 0 && (
+                <Breakdown
+                  title="By competition (soccer)"
+                  rows={data.competitionBd.slice(0, 8)}
+                />
+              )}
+            </section>
+          </OwnerOnly>
         )}
 
         {/* Monthly P/L bars */}
