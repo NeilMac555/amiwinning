@@ -19,6 +19,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "Am I Up vs Pikkit — honest bet tracker comparison",
@@ -80,8 +81,20 @@ export default function ComparePage() {
     })),
   };
 
+  const breadcrumbJsonLd = buildBreadcrumbList([
+    { name: BRAND.name, url: "https://amiup.io" },
+    { name: "Compare", url: "https://amiup.io/compare" },
+    { name: "Pikkit", url: "https://amiup.io/compare/pikkit" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

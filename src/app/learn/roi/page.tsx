@@ -13,6 +13,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "What is ROI in Sports Betting?",
@@ -61,8 +62,20 @@ export default function RoiPage() {
     mainEntityOfPage: "https://amiup.io/learn/roi",
   };
 
+  const breadcrumbJsonLd = buildBreadcrumbList([
+    { name: BRAND.name, url: "https://amiup.io" },
+    { name: "Learn", url: "https://amiup.io/learn" },
+    { name: "ROI", url: "https://amiup.io/learn/roi" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

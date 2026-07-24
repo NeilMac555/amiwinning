@@ -13,6 +13,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "What is Closing Line Value (CLV) in Sports Betting?",
@@ -111,8 +112,20 @@ export default function ClvPage() {
     })),
   };
 
+  const breadcrumbJsonLd = buildBreadcrumbList([
+    { name: BRAND.name, url: "https://amiup.io" },
+    { name: "Learn", url: "https://amiup.io/learn" },
+    { name: "CLV", url: "https://amiup.io/learn/clv" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

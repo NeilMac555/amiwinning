@@ -18,6 +18,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { PartnerApplicationForm } from "@/components/PartnerApplicationForm";
+import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 const CONTACT_EMAIL = "filthyjabba@gmail.com";
 const CONTACT_X = "NeilMac555";
@@ -56,8 +57,17 @@ export default function PartnersPage() {
     },
   };
 
+  const breadcrumbJsonLd = buildBreadcrumbList([
+    { name: BRAND.name, url: "https://amiup.io" },
+    { name: "Partners", url: "https://amiup.io/partners" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

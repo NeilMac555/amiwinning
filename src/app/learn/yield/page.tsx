@@ -12,6 +12,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   title: "What is Yield in Sports Betting?",
@@ -60,8 +61,20 @@ export default function YieldPage() {
     mainEntityOfPage: "https://amiup.io/learn/yield",
   };
 
+  const breadcrumbJsonLd = buildBreadcrumbList([
+    { name: BRAND.name, url: "https://amiup.io" },
+    { name: "Learn", url: "https://amiup.io/learn" },
+    { name: "Yield", url: "https://amiup.io/learn/yield" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
