@@ -4,6 +4,7 @@
 import type { ImportedBet } from "./import/types";
 import { guessMarket } from "./import/normalise";
 import { classifyCompetition } from "./competition-classify";
+import { classifySport } from "./sport-classify";
 
 function isSettled(b: ImportedBet): boolean {
   return (
@@ -519,22 +520,91 @@ const MARKET_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+// Sport-specific overrides for markets whose "unit" changes per sport.
+// The default in MARKET_LABELS assumes soccer (goals). When >60% of a
+// market group's bets are a specific non-soccer sport, we swap to the
+// sport-appropriate label so tennis over/unders say "games" not "goals",
+// basketball says "points", baseball says "runs", etc.
+const SPORT_MARKET_OVERRIDES: Record<string, Record<string, string>> = {
+  Tennis: {
+    ou: "Over / under (games)",
+    totals_team: "Team totals (games)",
+  },
+  Basketball: {
+    ou: "Over / under (points)",
+    totals_team: "Team totals (points)",
+    ah: "Point spread",
+    scorer: "Player points",
+  },
+  Baseball: {
+    ou: "Over / under (runs)",
+    totals_team: "Team totals (runs)",
+    ah: "Run line",
+  },
+  "American Football": {
+    ou: "Over / under (points)",
+    totals_team: "Team totals (points)",
+    ah: "Point spread",
+    scorer: "Touchdown scorer",
+  },
+  "Ice Hockey": {
+    ou: "Over / under (goals)",
+    ah: "Puck line",
+  },
+};
+
+// Threshold — market group must be this dominant in one sport before
+// we swap its label. Below the threshold (mixed-sport bucket), keep
+// the default so we don't mislead about a minority.
+const SPORT_DOMINANCE_FOR_LABEL = 0.6;
+
+function labelForMarket(marketKey: string, sportCounts: Map<string, number>): string {
+  const base = MARKET_LABELS[marketKey] ?? marketKey;
+  const total = [...sportCounts.values()].reduce((a, b) => a + b, 0);
+  if (total === 0) return base;
+  for (const [sport, count] of sportCounts) {
+    if (count / total < SPORT_DOMINANCE_FOR_LABEL) continue;
+    const override = SPORT_MARKET_OVERRIDES[sport]?.[marketKey];
+    if (override) return override;
+  }
+  return base;
+}
+
 export function byMarket(bets: ImportedBet[]): MarketRow[] {
   const groups = new Map<
     string,
-    { pl: number; stake: number; bets: number; wins: number; oddsSum: number }
+    {
+      pl: number;
+      stake: number;
+      bets: number;
+      wins: number;
+      oddsSum: number;
+      // Per-market sport histogram so the label can adapt when the
+      // group is dominantly one sport (tennis O/U → "games", not
+      // "goals"). See labelForMarket().
+      sportCounts: Map<string, number>;
+    }
   >();
   for (const b of bets) {
     if (!isSettled(b)) continue;
     const k = guessMarket(b.selection);
     if (!k) continue;
     const cur =
-      groups.get(k) ?? { pl: 0, stake: 0, bets: 0, wins: 0, oddsSum: 0 };
+      groups.get(k) ?? {
+        pl: 0,
+        stake: 0,
+        bets: 0,
+        wins: 0,
+        oddsSum: 0,
+        sportCounts: new Map<string, number>(),
+      };
     cur.pl += b.pl;
     cur.stake += b.stake;
     cur.bets++;
     cur.oddsSum += b.odds;
     if (isWin(b)) cur.wins++;
+    const sport = classifySport(b) ?? "Other";
+    cur.sportCounts.set(sport, (cur.sportCounts.get(sport) ?? 0) + 1);
     groups.set(k, cur);
   }
   const rows: MarketRow[] = [];
@@ -542,7 +612,7 @@ export function byMarket(bets: ImportedBet[]): MarketRow[] {
     if (v.bets < 20) continue; // suppress small samples
     rows.push({
       key: k,
-      label: MARKET_LABELS[k] ?? k,
+      label: labelForMarket(k, v.sportCounts),
       pl: round(v.pl, 2),
       stake: round(v.stake, 2),
       bets: v.bets,
