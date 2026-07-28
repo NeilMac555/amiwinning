@@ -16,6 +16,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn/expected-value" },
   title: "What is Expected Value (EV) in Sports Betting?",
   description:
     "Expected value is the mathematical foundation of every winning bet. Definition, formula, worked example, how to find positive-EV bets, why +EV is the only thing that matters long-term.",

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/privacy" },
   title: "Privacy Policy",
   description: `Privacy Policy for ${BRAND.name}.`,
 };

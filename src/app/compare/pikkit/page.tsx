@@ -22,6 +22,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/compare/pikkit" },
   title: "Am I Up vs Pikkit — honest bet tracker comparison",
   description:
     "Both eliminate manual bet entry, but in very different ways. Pikkit syncs your US sportsbook accounts directly. Am I Up uses AI to extract bets from any source. Honest comparison from a daily user.",

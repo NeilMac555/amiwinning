@@ -13,6 +13,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn/roc" },
   title: "What is Return on Capital (ROC) in Sports Betting?",
   description:
     "ROC measures profit against the bankroll you actually deployed. The honest money-on-money number. Definition, formula, worked example. Free at Am I Up.",

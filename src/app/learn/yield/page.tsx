@@ -15,6 +15,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn/yield" },
   title: "What is Yield in Sports Betting?",
   description:
     "Yield is the headline metric for tipsters: profit divided by total stake. Definition, formula, worked example, what counts as a good yield, why it's not the whole story.",

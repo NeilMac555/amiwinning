@@ -24,6 +24,7 @@ const CONTACT_EMAIL = "filthyjabba@gmail.com";
 const CONTACT_X = "NeilMac555";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/partners" },
   title: "Partners. Get paid to prove your edge.",
   description:
     "Am I Up pays tipsters with real audiences to adopt it as their tracker of record. Monthly cash for logging real bets and posting an honest summary. Terms in one page.",

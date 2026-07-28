@@ -16,6 +16,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn/roi" },
   title: "What is ROI in Sports Betting?",
   description:
     "ROI in betting: definition, formula, worked example, and the important difference between ROI, yield, and ROC. Free bet tracker at Am I Up.",

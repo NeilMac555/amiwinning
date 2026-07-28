@@ -21,6 +21,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/compare/bettin-gs" },
   title: "Am I Up vs bettin.gs — honest bet tracker comparison",
   description:
     "I used bettin.gs for a decade before building Am I Up. Honest side-by-side of both bet trackers: where each one wins, who should pick which, what's actually different.",

@@ -78,7 +78,19 @@ export const metadata: Metadata = {
   // so crawlers that don't probe /llms.txt directly (some Perplexity /
   // ChatGPT variants use rel="alternate" hints) can still find it.
   // The full-content companion file is llms-full.txt.
+  //
+  // Also: default canonical points at the landing page. This is the
+  // fallback for the "/" route (client component so can't declare its
+  // own metadata) and for any other route that doesn't explicitly set
+  // one. Every public SEO page (/learn/*, /compare/*, /partners, /terms,
+  // /privacy, /u/*) overrides alternates entirely with its own canonical
+  // pointing at itself — Next merges metadata shallowly, so the whole
+  // alternates block replaces this one on those pages. Signed-in /
+  // internal routes (/bets, /analytics, /import, /settings, /sign-in,
+  // etc.) inherit canonical="/" but are all in robots.txt disallow so
+  // they're never crawled and it doesn't matter.
   alternates: {
+    canonical: "/",
     types: {
       "text/markdown": "/llms.txt",
     },

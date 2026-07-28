@@ -14,6 +14,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/compare" },
   title: "Bet Tracker Comparisons. Am I Up vs the alternatives.",
   description:
     "Honest head-to-head comparisons of Am I Up against every major sports bet tracker. bettin.gs, Pikkit, Bet Diary, and more. Pick the tool that fits your betting style.",

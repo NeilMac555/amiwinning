@@ -15,6 +15,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn" },
   title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC.",
   description:
     "Plain-English definitions of the metrics that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC. Each with formula and worked example.",

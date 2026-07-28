@@ -16,6 +16,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn/clv" },
   title: "What is Closing Line Value (CLV) in Sports Betting?",
   description:
     "CLV measures whether you beat the sharp closing odds. Definition, formula, worked example, why it matters more than win rate. Track yours free on Am I Up.",

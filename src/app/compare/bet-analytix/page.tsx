@@ -21,6 +21,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/compare/bet-analytix" },
   title: "Am I Up vs Bet Analytix. Free bet tracker with AI paste.",
   description:
     "Bet Analytix caps you at 200 bets and 2 bankrolls unless you pay $33/year. Am I Up is unlimited and free forever, with AI paste from screenshots, X posts, and Telegram tips. Honest side-by-side comparison.",

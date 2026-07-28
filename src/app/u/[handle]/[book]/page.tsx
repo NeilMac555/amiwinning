@@ -65,6 +65,10 @@ export async function generateMetadata({
   return {
     title: `${scoped} (${profile.handle})`,
     description: `${plLabel} across ${settledCount.toLocaleString()} bets · tracked on ${BRAND.name}`,
+    // Self-canonical (see /u/[handle] for the rationale). Each book
+    // is its own resource so its canonical points to itself, even
+    // when the user only has one book.
+    alternates: { canonical: `/u/${handle}/${bookSlug}` },
     openGraph: {
       title: `${scoped} · ${plLabel}`,
       description: `${settledCount.toLocaleString()} bets tracked on ${BRAND.name}`,

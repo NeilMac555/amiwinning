@@ -53,6 +53,10 @@ export async function generateMetadata({
   return {
     title: `${name} (${profile.handle})`,
     description: `${plLabel} across ${settledCount.toLocaleString()} bets · tracked on ${BRAND.name}`,
+    // Self-canonical so Google doesn't merge this into the per-book
+    // URL /u/handle/book (which serves the same content for single-
+    // book users). Fixes GSC "Duplicate without user-selected canonical".
+    alternates: { canonical: `/u/${handle}` },
     openGraph: {
       title: `${name} · ${plLabel}`,
       description: `${settledCount.toLocaleString()} bets tracked on ${BRAND.name}`,

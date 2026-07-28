@@ -17,6 +17,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/compare/betdiary" },
   title: "Am I Up vs Bet Diary. Honest bet tracker comparison.",
   description:
     "Bet Diary is a UK-focused manual bet tracker with a long horse-racing lineage. Am I Up is AI-first and free. Honest side-by-side of both trackers so you can pick the right one.",
