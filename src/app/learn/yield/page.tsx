@@ -394,6 +394,13 @@ export default function YieldPage() {
                 &ldquo;unit&rdquo; mean something.
               </li>
               <li>
+                <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy that generates real yield. Yield without
+                +EV selection is either luck or short-run variance.
+              </li>
+              <li>
                 <strong>Win rate:</strong> the percentage of bets you
                 won. Noisier than yield because it ignores odds.
               </li>

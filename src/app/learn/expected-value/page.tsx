@@ -417,9 +417,19 @@ export default function ExpectedValuePage() {
                 short-run results don&rsquo;t prove edge.
               </li>
               <li>
-                <strong>Devig:</strong> stripping the bookmaker&rsquo;s
-                margin out of a price to estimate true probability.
-                Required for honest EV calculation.
+                <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy underneath every profitable bettor. EV is
+                the metric; positive EV betting is what you do with it.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/devigging">Devigging:</Link>
+                </strong>{" "}
+                the technique of stripping bookmaker margin out of a
+                price to estimate true probability. Required for honest
+                EV calculation against a sharp reference.
               </li>
               <li>
                 <strong>

@@ -399,6 +399,13 @@ export default function RoiPage() {
                 context that makes any &ldquo;ROI&rdquo; number mean
                 something.
               </li>
+              <li>
+                <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy behind any sustained ROI. Without +EV
+                selection, ROI (of either flavour) trends negative.
+              </li>
             </ul>
           </section>
 

@@ -23,6 +23,8 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 - [What is Return on Capital (ROC)?](https://amiup.io/learn/roc): The bankroll-based return metric, why serious bettors track it alongside yield, worked example.
 - [Kelly Criterion for Sports Betting](https://amiup.io/learn/kelly-criterion): The optimal stake-sizing formula. Full Kelly, half-Kelly, quarter-Kelly, and the 2× Kelly cliff that turns positive-edge betting into a losing strategy.
 - [Bankroll Management for Sports Betting](https://amiup.io/learn/bankroll-management): Ring-fencing a bankroll, unit-based staking, flat vs percentage staking, why chasing losses blows up more punters than losing edges.
+- [Positive EV Betting](https://amiup.io/learn/positive-ev-betting): The strategy underneath every profitable bettor. How to find +EV bets by comparing soft-book prices against devigged sharp-market references, and why CLV is the truest test of whether the strategy is working.
+- [Devigging Odds](https://amiup.io/learn/devigging): Stripping bookmaker margin (vig, juice, overround) out of odds to get a clean no-vig implied probability. Multiplicative and power methods, worked two-way and three-way examples.
 
 ## Compare
 

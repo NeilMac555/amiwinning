@@ -312,6 +312,80 @@ A genuine 5% ROI bettor at 1u stakes should expect drawdowns of 15-25% of bankro
 
 ---
 
+## Positive EV Betting (https://amiup.io/learn/positive-ev-betting)
+
+### The short definition
+
+Positive EV (positive expected value) betting is the practice of only placing bets where your estimate of the true win probability implies better odds than the price on offer. Every profitable sports bettor is a positive-EV bettor whether they use that language or not.
+
+If a sharp market implies 55% and your bookmaker offers 2.00 (implied 50%), you have positive EV on that bet. Repeated across many bets, positive EV compounds into real profit.
+
+### How to find positive EV bets
+
+Two common approaches. Both require a reference probability more accurate than the bookmaker offering you the price.
+
+- Sharp-book comparison. Take the closing (or near-closing) odds at Pinnacle or Betfair Exchange, devig them, then compare against your soft-book price. Any positive gap in your favour is a +EV bet.
+- Modeling. Build your own probability model in a market you understand deeply. Compare against bookmaker prices; take bets where the model disagrees in your favour by a material margin.
+
+### Why sharp books are the reference
+
+Sharp bookmakers (Pinnacle, Betfair Exchange) accept large stakes from serious bettors and adjust prices based on where the money goes. Their closing lines aggregate the information of everyone with real money to risk, making them the tightest available estimate of true probability.
+
+Soft bookmakers price for the recreational market and can be systematically wrong for weeks in specific niches. This gap is exactly where +EV strategies extract value. You cannot do +EV betting using soft-book prices as the reference — that's just comparing two flavours of noise.
+
+### Realistic edge
+
+For most bettors with soft-book access, +1% to +3% EV per bet is the realistic ceiling on liquid markets. Getting to +4-5% requires less liquid markets, faster line movement, or genuine modeling edge. Above +5% sustained is usually either exploiting a glitch or overestimating edge.
+
+### The two killers
+
+- Account limits. Soft books limit or close winning accounts. As you win, +EV access shrinks. Serious +EV bettors treat account turnover as a cost of doing business.
+- Bad probability estimates. If your reference is not truly sharp, your +EV estimate is systematically wrong. Consistent negative CLV is the diagnostic — if you think you're taking +EV bets but the sharp closing line disagrees, your inputs are broken.
+
+---
+
+## Devigging Odds (https://amiup.io/learn/devigging)
+
+### The short definition
+
+Devigging is the process of stripping the bookmaker's built-in margin (vig, juice, or overround) out of a set of odds to estimate the true implied probability of each outcome. Sharp bettors devig sharp-market prices to derive a reference probability, then compare their soft-book price against it to spot positive EV.
+
+### Vig, juice, overround — same thing
+
+Bookmakers price so implied probabilities sum to more than 100%. Two sides both at 1.91 imply 52.4% each, summing to 104.7% — the 4.7% overage is the vig. Sharp books like Pinnacle run ~2-3% vig; soft books often run 5-10%+.
+
+### The formula (multiplicative devig)
+
+For any set of mutually exclusive outcomes:
+
+`No-vig prob(i) = (1 / odds(i)) / Σ(1 / odds(j))`
+
+Compute each outcome's implied probability, sum them, divide each by the sum. Result sums to exactly 100%.
+
+### Worked example: three-way market (soccer 1X2)
+
+Premier League, Pinnacle: Home 2.10, Draw 3.40, Away 3.60.
+
+- Implied Home: 1 / 2.10 = 47.6%
+- Implied Draw: 1 / 3.40 = 29.4%
+- Implied Away: 1 / 3.60 = 27.8%
+- Sum: 104.8% (vig = 4.8%)
+- No-vig Home: 47.6 / 104.8 = 45.4%
+- No-vig Draw: 29.4 / 104.8 = 28.1%
+- No-vig Away: 27.8 / 104.8 = 26.5%
+
+If your soft book has Home at 2.30 (43.5% implied), sharp devigged says 45.4%. You get a positive gap of 1.9 percentage points — that's a +EV bet.
+
+### Multiplicative vs power devig
+
+Multiplicative divides each implied probability by the sum. Simple, works well for balanced markets. Power methods (Shin, logistic) account for the fact that bookmakers pad longshots more than favourites. Practical difference on liquid balanced markets is usually under 1 percentage point.
+
+### Where devigging fits
+
+The full sharp-book +EV loop: pick a sharp reference → devig it → compare against your soft-book price → size with Kelly → track CLV after. Skip the devig step and every downstream number is wrong.
+
+---
+
 ## Am I Up vs bettin.gs (https://amiup.io/compare/bettin-gs)
 
 Bettin.gs is a European bet tracker with strong support for tipster leaderboards and a monthly-fee model. Am I Up positions differently: free, AI-first for input (no more manual data entry), and CLV as the headline metric rather than yield.

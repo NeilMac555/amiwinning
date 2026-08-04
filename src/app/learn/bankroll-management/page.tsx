@@ -363,6 +363,14 @@ export default function BankrollPage() {
                 saves you.
               </li>
               <li>
+                <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy that gives bankroll management something
+                worth managing. Without +EV, all the bankroll discipline
+                in the world just prolongs the loss.
+              </li>
+              <li>
                 <strong>Drawdown:</strong> the peak-to-trough drop in
                 bankroll over a run of bets. Bankroll management&rsquo;s
                 explicit purpose is to survive drawdown; measuring maximum

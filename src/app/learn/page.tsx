@@ -16,13 +16,13 @@ import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn" },
-  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC, Kelly.",
+  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC, Kelly, +EV, Devig.",
   description:
-    "Plain-English definitions of the metrics and strategies that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management. Formula and worked example on every entry.",
+    "Plain-English definitions of the metrics and strategies that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management, positive EV betting, devigging. Formula and worked example on every entry.",
   openGraph: {
     title: `${BRAND.name} Betting Analytics Glossary`,
     description:
-      "CLV, Yield, EV, ROI, ROC, Kelly, bankroll management. Definitions, formulas, worked examples.",
+      "CLV, Yield, EV, ROI, ROC, Kelly, bankroll, positive EV, devig. Definitions, formulas, worked examples.",
     type: "website",
   },
 };
@@ -84,6 +84,20 @@ const ENTRIES: Entry[] = [
       "The discipline of ring-fencing money for betting, sizing stakes in units, and surviving the drawdowns that even genuine edge produces.",
     aka: ["Bankroll", "Unit Staking", "Betting Bankroll"],
   },
+  {
+    slug: "positive-ev-betting",
+    title: "Positive EV Betting",
+    short:
+      "The strategy underneath every profitable sports bettor. How to find +EV bets, why sharp books matter, and how to prove the edge is real.",
+    aka: ["Positive EV", "+EV Betting", "Value Betting"],
+  },
+  {
+    slug: "devigging",
+    title: "Devigging Odds",
+    short:
+      "How to strip bookmaker vig out of odds to get a clean no-vig probability. The unglamorous step that makes +EV analysis honest.",
+    aka: ["Devig", "No-Vig Odds", "Vig Removal"],
+  },
 ];
 
 export default function LearnHubPage() {
@@ -92,7 +106,7 @@ export default function LearnHubPage() {
     "@type": "DefinedTermSet",
     name: `${BRAND.name} Sports Betting Glossary`,
     description:
-      "Definitions of the metrics and strategies that matter in sports betting analytics: closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management. Each entry includes a formula and a worked example.",
+      "Definitions of the metrics and strategies that matter in sports betting analytics: closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management, positive EV betting, devigging. Each entry includes a formula and a worked example.",
     url: "https://amiup.io/learn",
     hasDefinedTerm: ENTRIES.map((e) => ({
       "@type": "DefinedTerm",

@@ -417,6 +417,14 @@ export default function RocPage() {
                 the framework that makes ROC a coherent number. No
                 bankroll = no ROC.
               </li>
+              <li>
+                <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy that produces a positive ROC over any
+                meaningful sample. Without +EV, ROC trends toward zero
+                minus vig.
+              </li>
             </ul>
           </section>
 

@@ -262,6 +262,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      // Glossary — Positive EV Betting. Strategy-oriented companion
+      // to /learn/expected-value ("positive ev betting" ~4k/mo,
+      // "how to find positive ev bets" ~1.5k/mo, "+ev betting" ~1k/mo).
+      // Highest commercial intent in the cluster — searchers here are
+      // actively hunting for a tool.
+      url: `${BASE}/learn/positive-ev-betting`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      // Glossary — Devigging. Technical prerequisite for +EV analysis
+      // ("devigging" ~2k/mo, "how to devig odds" ~1.5k/mo, "no-vig
+      // calculator" ~800/mo). Lower absolute volume than the strategy
+      // pages but highest match intent — searchers know exactly what
+      // they want.
+      url: `${BASE}/learn/devigging`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       // Tipster partnership landing. Lower priority (0.5) than the
       // marketing / glossary pages because organic search intent is
       // small, but we still want Google + LLMs to know it exists so

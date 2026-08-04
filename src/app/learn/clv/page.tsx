@@ -334,6 +334,22 @@ export default function ClvPage() {
               </li>
               <li>
                 <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy that seeks out bets where the price is longer
+                than true probability implies. CLV is the diagnostic that
+                catches whether the +EV estimates are real.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/devigging">Devigging:</Link>
+                </strong>{" "}
+                the technique of stripping bookmaker margin out of the
+                closing line. CLV should always be computed against a
+                devigged closing line for an honest comparison.
+              </li>
+              <li>
+                <strong>
                   <Link href="/learn/yield">Yield:</Link>
                 </strong>{" "}
                 total profit divided by total stake, expressed as a

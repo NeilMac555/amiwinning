@@ -335,6 +335,22 @@ export default function KellyPage() {
                 stake-sizing decisions — the metric Kelly optimises.
               </li>
               <li>
+                <strong>
+                  <Link href="/learn/positive-ev-betting">Positive EV betting:</Link>
+                </strong>{" "}
+                the strategy Kelly sizes. Kelly needs positive EV as
+                input; without +EV selection there&rsquo;s nothing for
+                Kelly to optimise.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/devigging">Devigging:</Link>
+                </strong>{" "}
+                the technique for extracting an accurate probability
+                estimate from a sharp market price. Bad devig = bad
+                probability = bad Kelly stake.
+              </li>
+              <li>
                 <strong>Risk of ruin:</strong> the probability of losing
                 your entire bankroll. Kelly explicitly minimises this; full
                 Kelly&rsquo;s risk of ruin is zero if edge is truly
