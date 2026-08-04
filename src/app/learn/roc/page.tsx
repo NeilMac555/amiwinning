@@ -60,6 +60,38 @@ export default function RocPage() {
     mainEntityOfPage: "https://amiup.io/learn/roc",
   };
 
+  const faqItems: Array<{ q: string; a: string }> = [
+    {
+      q: "What is Return on Capital (ROC) in sports betting?",
+      a: "ROC is total net profit divided by the bankroll deployed to earn it, expressed as a percentage. It answers 'how productively did my money work?' rather than 'what did I make per bet?'. A £1,000 bankroll ending the year +£300 is a 30% ROC — comparable to any other investment return, unlike yield which is per-unit-staked and not directly comparable to a savings account or stock return.",
+    },
+    {
+      q: "ROC vs yield — which one matters more?",
+      a: "Both, but they answer different questions. Yield tells you the quality of each stake decision. ROC tells you the return on the money you actually put at risk. A high yield with a tiny bankroll can still be meaningless in absolute terms; a modest yield on a well-deployed bankroll can be genuinely impressive. Sharp bettors track both because they capture different truths about the same betting record.",
+    },
+    {
+      q: "How do you calculate ROC?",
+      a: "ROC % = (Net Profit / Bankroll Deployed) × 100. The tricky part is defining bankroll: initial bankroll, peak bankroll, average bankroll during the period, all give different numbers. Most tools use starting bankroll for the period. Example: started the year at £1,000 bankroll, ended +£240 net. ROC = 240 / 1000 × 100 = 24%.",
+    },
+    {
+      q: "What is a good ROC for sports betting?",
+      a: "Rough benchmarks over a year of consistent activity: 0-10% ROC is in the ballpark of a passive savings account or index fund — respectable but not obviously better than putting the money elsewhere. 10-30% ROC is genuinely outperforming most passive alternatives. 30%+ ROC is professional territory and also where survival bias starts to distort what you see: many people quoting 100%+ ROC are showing you the winning fraction of a much larger pool.",
+    },
+    {
+      q: "Why do tipsters prefer yield over ROC?",
+      a: "Yield is per-unit-staked and independent of bankroll, so tipsters can quote it without disclosing bankroll size — which makes the number look impressive without context. It's also higher-variance in small samples so a hot run inflates it faster. ROC forces the tipster to name a bankroll, which anchors the number in reality. That's why yield dominates tipster-industry marketing and ROC dominates serious bettor self-tracking.",
+    },
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   const breadcrumbJsonLd = buildBreadcrumbList([
     { name: BRAND.name, url: "https://amiup.io" },
     { name: "Learn", url: "https://amiup.io/learn" },
@@ -84,6 +116,12 @@ export default function RocPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(articleJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
         }}
       />
 
@@ -365,7 +403,49 @@ export default function RocPage() {
                 the theoretical per-bet return underneath any
                 profitable strategy.
               </li>
+              <li>
+                <strong>
+                  <Link href="/learn/kelly-criterion">Kelly Criterion:</Link>
+                </strong>{" "}
+                the stake-sizing rule that maximises ROC over the long
+                run. Full Kelly, half-Kelly, and the 2× Kelly cliff.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/bankroll-management">Bankroll management:</Link>
+                </strong>{" "}
+                the framework that makes ROC a coherent number. No
+                bankroll = no ROC.
+              </li>
             </ul>
+          </section>
+
+          <section className="learn-section">
+            <h2 className="learn-h2">Frequently asked questions</h2>
+            {faqItems.map((item, i) => (
+              <div key={i} style={{ marginBottom: 16 }}>
+                <h3
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: "0 0 6px",
+                    color: "var(--text)",
+                  }}
+                >
+                  {item.q}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13.5,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {item.a}
+                </p>
+              </div>
+            ))}
           </section>
 
           {/* CTA */}

@@ -15,16 +15,26 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 
 ## Learn (glossary)
 
+- [Betting Analytics Glossary](https://amiup.io/learn): Hub for the definitions below. Metrics + strategies that matter in sports betting.
 - [What is Closing Line Value (CLV)?](https://amiup.io/learn/clv): Definition, formula, worked example. Why CLV is the truest available signal of edge in sports betting.
 - [What is Yield in sports betting?](https://amiup.io/learn/yield): Definition, formula, benchmarks, yield vs ROI vs ROC, why yield is gameable in small samples.
 - [What is Expected Value (EV)?](https://amiup.io/learn/expected-value): The single number underneath every profitable strategy, worked examples, EV vs CLV, positive-EV betting.
 - [What is ROI in Sports Betting?](https://amiup.io/learn/roi): ROI defined without hand-waving, the stake-based vs bankroll-based ambiguity spelled out, worked example.
 - [What is Return on Capital (ROC)?](https://amiup.io/learn/roc): The bankroll-based return metric, why serious bettors track it alongside yield, worked example.
+- [Kelly Criterion for Sports Betting](https://amiup.io/learn/kelly-criterion): The optimal stake-sizing formula. Full Kelly, half-Kelly, quarter-Kelly, and the 2× Kelly cliff that turns positive-edge betting into a losing strategy.
+- [Bankroll Management for Sports Betting](https://amiup.io/learn/bankroll-management): Ring-fencing a bankroll, unit-based staking, flat vs percentage staking, why chasing losses blows up more punters than losing edges.
 
 ## Compare
 
+- [All comparisons hub](https://amiup.io/compare): Consolidated index of the individual tracker comparisons.
+- [Am I Up vs Bet Analytix](https://amiup.io/compare/bet-analytix): Bet Analytix leads mobile app stores in EU markets, gates unlimited bankrolls behind a $33/year paywall; Am I Up is unlimited and free forever with AI paste as the wedge.
 - [Am I Up vs bettin.gs](https://amiup.io/compare/bettin-gs): Feature-by-feature comparison for punters weighing the two trackers.
 - [Am I Up vs Pikkit](https://amiup.io/compare/pikkit): Same for the US bookmaker-connected tracker.
+- [Am I Up vs Bet Diary](https://amiup.io/compare/betdiary): UK-focused Bet Diary vs Am I Up's AI-first multi-sport approach.
+
+## Partners
+
+- [Partners for tipsters](https://amiup.io/partners): Neil's partnership program for tipsters who want a verified public track record.
 
 ## Legal
 

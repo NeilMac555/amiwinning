@@ -362,6 +362,21 @@ export default function ClvPage() {
                 bankroll actually earned, versus yield&rsquo;s per-stake
                 measure.
               </li>
+              <li>
+                <strong>
+                  <Link href="/learn/kelly-criterion">Kelly Criterion:</Link>
+                </strong>{" "}
+                the optimal stake-sizing formula. Uses your edge (which
+                positive CLV implies) as the input.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/bankroll-management">Bankroll management:</Link>
+                </strong>{" "}
+                the discipline of ring-fencing money and staking in
+                units. CLV proves you have edge; bankroll management
+                lets you survive long enough for that edge to compound.
+              </li>
             </ul>
           </section>
 

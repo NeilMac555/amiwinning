@@ -63,6 +63,42 @@ export default function ExpectedValuePage() {
     mainEntityOfPage: "https://amiup.io/learn/expected-value",
   };
 
+  const faqItems: Array<{ q: string; a: string }> = [
+    {
+      q: "What is expected value (EV) in sports betting?",
+      a: "Expected value is the average profit or loss per bet you should expect if the exact same situation happened an infinite number of times. It is calculated as (win probability × win amount) minus (loss probability × loss amount). Positive EV means the bet is profitable on average; negative EV means it loses money on average.",
+    },
+    {
+      q: "How do you calculate EV for a bet?",
+      a: "EV = (win probability × win amount) − (loss probability × stake). Example: bet 1u at 2.20 odds on Arsenal, estimating a 50% win chance. Win amount is 1.20u profit if it wins; loss amount is 1u if it loses. EV = (0.50 × 1.20) − (0.50 × 1.00) = 0.60 − 0.50 = +0.10u per bet. That is a +10% EV bet.",
+    },
+    {
+      q: "What is positive EV betting?",
+      a: "Positive EV betting means only placing bets where your estimated true probability implies better odds than the price on offer. Over enough bets, positive EV compounds into real profit. The catch: you need a reliable source of true probability estimates, usually derived from sharp-market prices (Pinnacle, Betfair Exchange no-vig lines).",
+    },
+    {
+      q: "Is CLV the same as EV?",
+      a: "Related but not the same. EV is measured against your own estimate of true probability. CLV (Closing Line Value) is measured against the closing odds at a sharp bookmaker, which is the market's best estimate of true probability at kickoff. Consistently beating the closing line usually implies positive EV, but only if the closing line is truly sharp on that market.",
+    },
+    {
+      q: "How do you find positive EV bets?",
+      a: "Two common methods. First: compare your bookmaker's odds against a sharp reference (Pinnacle or Betfair Exchange no-vig). If the sharp implies 55% and your bookmaker gives you 2.00 (implied 50%), you have a positive-EV bet on that price. Second: build your own probability model in a market you know deeply, then hunt for bookmaker prices that disagree in your favour. Both methods depend on the reference being accurate — a wrong probability estimate turns positive-EV theory into negative-EV reality.",
+    },
+    {
+      q: "Can I be profitable long-term without tracking EV?",
+      a: "Extremely unlikely. Every professional bettor's edge reduces to consistently taking positive-EV bets. You can win short-term without tracking EV — variance rewards a lot of losing strategies for a while — but you cannot maintain profit across thousands of bets without something that at least approximates positive-EV selection.",
+    },
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   const breadcrumbJsonLd = buildBreadcrumbList([
     { name: BRAND.name, url: "https://amiup.io" },
     { name: "Learn", url: "https://amiup.io/learn" },
@@ -87,6 +123,12 @@ export default function ExpectedValuePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(articleJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
         }}
       />
 
@@ -380,11 +422,49 @@ export default function ExpectedValuePage() {
                 Required for honest EV calculation.
               </li>
               <li>
-                <strong>Kelly Criterion:</strong> formula for how much
-                to stake given a known EV and bankroll. Optimises
-                long-run bankroll growth.
+                <strong>
+                  <Link href="/learn/kelly-criterion">Kelly Criterion:</Link>
+                </strong>{" "}
+                formula for how much to stake given a known EV and
+                bankroll. Optimises long-run bankroll growth.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/bankroll-management">Bankroll management:</Link>
+                </strong>{" "}
+                the discipline that turns positive-EV theory into
+                sustained profit. EV without bankroll management still
+                blows up on variance.
               </li>
             </ul>
+          </section>
+
+          <section className="learn-section">
+            <h2 className="learn-h2">Frequently asked questions</h2>
+            {faqItems.map((item, i) => (
+              <div key={i} style={{ marginBottom: 16 }}>
+                <h3
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: "0 0 6px",
+                    color: "var(--text)",
+                  }}
+                >
+                  {item.q}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13.5,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {item.a}
+                </p>
+              </div>
+            ))}
           </section>
 
           <section className="learn-cta">

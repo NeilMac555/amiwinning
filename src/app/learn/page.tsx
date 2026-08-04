@@ -16,13 +16,13 @@ import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn" },
-  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC.",
+  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC, Kelly.",
   description:
-    "Plain-English definitions of the metrics that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC. Each with formula and worked example.",
+    "Plain-English definitions of the metrics and strategies that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management. Formula and worked example on every entry.",
   openGraph: {
     title: `${BRAND.name} Betting Analytics Glossary`,
     description:
-      "CLV, Yield, EV, ROI, ROC. Definitions, formulas, worked examples.",
+      "CLV, Yield, EV, ROI, ROC, Kelly, bankroll management. Definitions, formulas, worked examples.",
     type: "website",
   },
 };
@@ -70,6 +70,20 @@ const ENTRIES: Entry[] = [
       "The honest money-on-money return. What your bankroll actually earned, not what your stake volume produced.",
     aka: ["ROC", "Return on Capital"],
   },
+  {
+    slug: "kelly-criterion",
+    title: "Kelly Criterion",
+    short:
+      "The mathematical formula for optimal stake sizing given a known edge. Full Kelly vs half-Kelly vs quarter-Kelly, with the 2× Kelly cliff spelled out.",
+    aka: ["Kelly", "Kelly Formula", "Kelly Staking"],
+  },
+  {
+    slug: "bankroll-management",
+    title: "Bankroll Management",
+    short:
+      "The discipline of ring-fencing money for betting, sizing stakes in units, and surviving the drawdowns that even genuine edge produces.",
+    aka: ["Bankroll", "Unit Staking", "Betting Bankroll"],
+  },
 ];
 
 export default function LearnHubPage() {
@@ -78,7 +92,7 @@ export default function LearnHubPage() {
     "@type": "DefinedTermSet",
     name: `${BRAND.name} Sports Betting Glossary`,
     description:
-      "Definitions of the metrics that matter in sports betting analytics: closing line value, yield, expected value, ROI, ROC. Each entry includes a formula and a worked example.",
+      "Definitions of the metrics and strategies that matter in sports betting analytics: closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management. Each entry includes a formula and a worked example.",
     url: "https://amiup.io/learn",
     hasDefinedTerm: ENTRIES.map((e) => ({
       "@type": "DefinedTerm",
@@ -159,8 +173,8 @@ export default function LearnHubPage() {
             The metrics that actually matter.
           </h1>
           <p className="learn-deck">
-            Plain-English definitions of the five numbers a serious
-            sports bettor should understand. Each entry has the
+            Plain-English definitions of the numbers and strategies a
+            serious sports bettor should understand. Each entry has the
             definition, the formula, a worked example, and a note on
             what the metric does not tell you.
           </p>
@@ -230,17 +244,17 @@ export default function LearnHubPage() {
           </section>
 
           <section className="learn-section">
-            <h2 className="learn-h2">Why these five</h2>
+            <h2 className="learn-h2">Why this set</h2>
             <p>
               Betting analytics is drowning in vanity metrics. These
-              five, understood together, are enough to answer the only
+              seven, understood together, are enough to answer the only
               questions a bettor needs the numbers to answer:
-              <em> am I making money, was that a good decision, and
-              would a rational observer say I have an edge.</em> The
-              rest is noise or window dressing.
+              <em> am I making money, was that a good decision, was I
+              staking it correctly, and would a rational observer say I
+              have an edge.</em> The rest is noise or window dressing.
             </p>
             <p>
-              If you understand these five you can hold your own in a
+              If you understand these you can hold your own in a
               conversation with any sharp bettor or oddsmaker. You can
               also spot the tipsters who quote yield without a bankroll
               context, quote ROI without saying which denominator, or

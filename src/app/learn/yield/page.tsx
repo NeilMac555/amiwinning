@@ -62,6 +62,42 @@ export default function YieldPage() {
     mainEntityOfPage: "https://amiup.io/learn/yield",
   };
 
+  const faqItems: Array<{ q: string; a: string }> = [
+    {
+      q: "What is yield in sports betting?",
+      a: "Yield is total net profit divided by total stake, expressed as a percentage. It's the industry-standard headline metric because it normalises performance across bettors with different stake sizes. A +5% yield means you made 5 units of profit for every 100 units you staked.",
+    },
+    {
+      q: "How do you calculate betting yield?",
+      a: "Yield % = (Profit / Total Stake) × 100. Profit is net: total returns minus total stake. Example: 100 bets at 1 unit each (100u total staked), net profit 6u. Yield = 6 / 100 × 100 = +6%. That would be professional-tipster territory in most sports.",
+    },
+    {
+      q: "What is a good yield in sports betting?",
+      a: "Assuming a large sample (1,000+ bets), 2-5% is a genuine sustainable edge in mainstream markets, 5-10% is excellent (top-tier tipsters and sharps), and 10%+ is exceptional and rare. Under 100 bets, yield is mostly variance and any number should be discounted heavily.",
+    },
+    {
+      q: "Yield vs ROI in betting — what is the difference?",
+      a: "Yield is always profit divided by total stake. ROI in betting is used loosely: sometimes it means yield (stake-based), sometimes it means ROC (bankroll-based). Always check which definition a source is using — the two can differ by an order of magnitude for the same bettor.",
+    },
+    {
+      q: "Why is yield not enough on its own?",
+      a: "Yield is a lagging indicator. It describes what happened, not whether the edge is real going forward. A small-sample yield can be pure variance. Pair yield with CLV (Closing Line Value) for a forward-looking signal, and pair it with ROC to see how productively your bankroll is actually working, not just how well each stake performed.",
+    },
+    {
+      q: "Can tipsters game yield?",
+      a: "Yes. By varying stake size based on confidence, a tipster can disproportionately credit wins and discount losses. Some platforms let tipsters retroactively adjust stakes after a result. Fixed-stake records (1u every bet) are the credible ones. Anything with variable stakes should be inspected before you trust the headline yield.",
+    },
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   const breadcrumbJsonLd = buildBreadcrumbList([
     { name: BRAND.name, url: "https://amiup.io" },
     { name: "Learn", url: "https://amiup.io/learn" },
@@ -86,6 +122,12 @@ export default function YieldPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(articleJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
         }}
       />
 
@@ -325,6 +367,33 @@ export default function YieldPage() {
                 massive sample to be informative.
               </li>
               <li>
+                <strong>
+                  <Link href="/learn/roc">Return on Capital (ROC):</Link>
+                </strong>{" "}
+                the bankroll-based counterpart to yield. Tells you how
+                productively your money is working, not just each stake.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/roi">ROI:</Link>
+                </strong>{" "}
+                the yield-vs-ROC ambiguity spelled out in one place.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/kelly-criterion">Kelly Criterion:</Link>
+                </strong>{" "}
+                the stake-sizing formula that turns yield into a
+                bankroll growth curve.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/bankroll-management">Bankroll management:</Link>
+                </strong>{" "}
+                yield is per-unit-staked; bankroll management makes
+                &ldquo;unit&rdquo; mean something.
+              </li>
+              <li>
                 <strong>Win rate:</strong> the percentage of bets you
                 won. Noisier than yield because it ignores odds.
               </li>
@@ -338,6 +407,34 @@ export default function YieldPage() {
                 literally.
               </li>
             </ul>
+          </section>
+
+          <section className="learn-section">
+            <h2 className="learn-h2">Frequently asked questions</h2>
+            {faqItems.map((item, i) => (
+              <div key={i} style={{ marginBottom: 16 }}>
+                <h3
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: "0 0 6px",
+                    color: "var(--text)",
+                  }}
+                >
+                  {item.q}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13.5,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {item.a}
+                </p>
+              </div>
+            ))}
           </section>
 
           <section className="learn-cta">

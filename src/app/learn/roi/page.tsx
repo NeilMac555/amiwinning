@@ -63,6 +63,38 @@ export default function RoiPage() {
     mainEntityOfPage: "https://amiup.io/learn/roi",
   };
 
+  const faqItems: Array<{ q: string; a: string }> = [
+    {
+      q: "What is ROI in sports betting?",
+      a: "ROI (Return on Investment) is a return metric borrowed from finance. In betting, ROI is used loosely: sometimes it means yield (profit / total stake), sometimes it means ROC (profit / bankroll deployed). The two give very different numbers for the same bettor. Always check which denominator a source is using before comparing across bettors or tipsters.",
+    },
+    {
+      q: "How is ROI calculated in sports betting?",
+      a: "The most common calculation is ROI = (Net Profit / Total Stake) × 100, which is the same as yield. Example: 100 bets at 1u each, +6u profit, ROI = 6%. The bankroll-based calculation (ROI = Net Profit / Bankroll Deployed) is the same as ROC and usually gives a much larger number because bankroll is smaller than cumulative stake.",
+    },
+    {
+      q: "What is a good ROI in sports betting?",
+      a: "As yield (stake-based ROI): 2-5% is a genuine edge over a large sample; 5-10% is excellent; 10%+ is exceptional and rare. As ROC (bankroll-based ROI): 10-30% annually is genuinely outperforming most passive alternatives; 30%+ is professional territory. The gap between the two is why you must know which definition the source is using.",
+    },
+    {
+      q: "ROI vs yield — are they the same in betting?",
+      a: "In many contexts yes — many tipsters and platforms use ROI as a direct synonym for yield (profit / total stake). But some sources use ROI to mean bankroll-based return (ROC). Without a clarifying definition the ambiguity is real. When in doubt, ask which denominator is used, or default to reporting both yield and ROC separately.",
+    },
+    {
+      q: "Why does the ROI definition matter so much?",
+      a: "A bettor with 1u stakes on a 10u bankroll who ends the year +2u has 20% ROC but only 0.4% yield (10 bets? 100 bets? 1,000?). Two different tipsters both claiming +20% ROI could mean +20% yield (very high, elite) or +20% ROC (unremarkable). The gap between the two is often an order of magnitude, so quoting one without labelling it is close to meaningless.",
+    },
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   const breadcrumbJsonLd = buildBreadcrumbList([
     { name: BRAND.name, url: "https://amiup.io" },
     { name: "Learn", url: "https://amiup.io/learn" },
@@ -87,6 +119,12 @@ export default function RoiPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(articleJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
         }}
       />
 
@@ -346,7 +384,50 @@ export default function RoiPage() {
                 the theoretical per-bet return underneath any
                 profitable strategy.
               </li>
+              <li>
+                <strong>
+                  <Link href="/learn/kelly-criterion">Kelly Criterion:</Link>
+                </strong>{" "}
+                the stake-sizing rule that turns positive-return bets
+                into optimal bankroll growth. Kelly optimises ROC, not
+                yield.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/bankroll-management">Bankroll management:</Link>
+                </strong>{" "}
+                context that makes any &ldquo;ROI&rdquo; number mean
+                something.
+              </li>
             </ul>
+          </section>
+
+          <section className="learn-section">
+            <h2 className="learn-h2">Frequently asked questions</h2>
+            {faqItems.map((item, i) => (
+              <div key={i} style={{ marginBottom: 16 }}>
+                <h3
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: "0 0 6px",
+                    color: "var(--text)",
+                  }}
+                >
+                  {item.q}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13.5,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {item.a}
+                </p>
+              </div>
+            ))}
           </section>
 
           {/* CTA */}

@@ -240,6 +240,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      // Glossary — Kelly Criterion. High-volume search cluster
+      // ("kelly criterion sports betting" ~4k/mo, "kelly criterion
+      // formula" ~5k/mo, "kelly criterion calculator" ~3k/mo).
+      // Bumped to 0.75 for the volume; internal-linked from
+      // bankroll-management and expected-value.
+      url: `${BASE}/learn/kelly-criterion`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
+      // Glossary — Bankroll Management. Highest absolute volume in
+      // the education cluster ("bankroll management sports betting"
+      // ~8k/mo, "sports betting bankroll" ~5k/mo). Top-of-funnel
+      // education intent, feeds into kelly + yield + ROC. Bumped
+      // to 0.8.
+      url: `${BASE}/learn/bankroll-management`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       // Tipster partnership landing. Lower priority (0.5) than the
       // marketing / glossary pages because organic search intent is
       // small, but we still want Google + LLMs to know it exists so

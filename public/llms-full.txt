@@ -230,6 +230,88 @@ The 27% ROC is the number you can honestly compare against "what if I'd bought t
 
 ---
 
+## Kelly Criterion for Sports Betting (https://amiup.io/learn/kelly-criterion)
+
+### The short definition
+
+The Kelly criterion is a stake-sizing formula that tells you what fraction of your bankroll to bet given your estimated edge and the odds. Its output is the stake that maximises long-run bankroll growth. If you have no edge, Kelly says bet nothing; if you have a huge edge, Kelly says bet a lot; if you have a small edge, Kelly says bet a small fraction.
+
+Developed by John Kelly at Bell Labs in 1956 for information theory, adopted by professional gamblers and portfolio managers because it is the mathematically optimal answer to "how much should I bet on this."
+
+### The formula
+
+For a decimal-odds bet:
+
+`Kelly % = (Odds × Win Probability − 1) / (Odds − 1)`
+
+"Win Probability" here is the bettor's estimate of the true win chance, not the bookmaker's implied probability. If your estimate matches the bookmaker exactly, Kelly outputs zero (no edge). Positive Kelly = the market underprices your selection.
+
+### Worked example
+
+You back Arsenal at 2.20, you estimate their true win probability at 50%.
+
+`Kelly % = (2.20 × 0.50 − 1) / (2.20 − 1) = 0.10 / 1.20 = 8.3%`
+
+Full Kelly says stake 8.3% of bankroll. On £1,000 that is £83. Half-Kelly cuts that to about £42.
+
+### Why almost no one uses full Kelly
+
+Full Kelly is theoretically optimal but only if the edge estimate is exact. In practice two things go wrong:
+
+- Estimation error. Real bettors do not know their edge exactly. A 4-percentage-point overestimate turns full Kelly into a long-run loser even though the maths of full Kelly says otherwise.
+- Variance. Full Kelly produces 30-50% bankroll drawdowns routinely. Most bettors tilt or quit before the strategy has time to work.
+
+Half-Kelly (staking half the recommended amount) keeps most of the growth advantage while roughly quartering the variance. Quarter-Kelly is even safer.
+
+### The 2× Kelly cliff
+
+If you stake more than 2× the Kelly-recommended amount, long-run bankroll growth turns negative even if the edge is positive. Variance overwhelms edge and compounds the bankroll into the ground.
+
+This is why "going big on my locks" loses money for confident bettors who do have edge. Confidence is not edge; edge is what Kelly cares about; Kelly punishes overbetting harder than it rewards correct sizing.
+
+---
+
+## Bankroll Management for Sports Betting (https://amiup.io/learn/bankroll-management)
+
+### The short definition
+
+Bankroll management is the discipline of setting aside a specific sum of money for betting (the bankroll), staking each bet as a small consistent fraction of that bankroll (the unit), and treating wins and losses as bankroll changes rather than income to withdraw or debt to chase.
+
+The goal is not to maximise short-run profit. It is to survive drawdown long enough for edge to compound. Almost every punter who blows up does it not because they had no edge, but because they had bad bankroll management on top of real edge.
+
+### How much should the bankroll be
+
+Only money you can afford to lose entirely. A useful test: if the bankroll went to zero tomorrow, would your life meaningfully change? If yes, the bankroll is too big for you. A sensible ceiling for most non-professional bettors is 1-5% of net worth.
+
+### Units, and why they matter
+
+A unit is a fixed fraction of bankroll, usually 1%. On a £2,000 bankroll, 1 unit = £20. Every bet is expressed in units, not pounds.
+
+Three reasons to speak in units:
+
+- Comparability: a tipster claiming +200u over a year is meaningful, +£4,000 is unfalsifiable.
+- Consistency: units enforce standard stake sizing, no gut-feel per bet.
+- Compounding: recalculated periodically, stakes grow with a winning bankroll and shrink with a losing one — automatic risk control.
+
+### Flat vs percentage staking
+
+- Flat staking: same amount on every bet. Simpler, lower variance, arithmetic growth.
+- Percentage staking: same percentage of current bankroll (e.g. 1%). Compounds, self-protects on losses. More complex to track.
+
+Pragmatic middle ground: flat staking with periodic (monthly) unit recalculation at 1% of the fresh bankroll. Most of the compounding advantage, none of the per-bet arithmetic.
+
+### The chasing trap
+
+The single most common way real bettors blow up: they double stakes to recover a losing week. It feels reasonable. The maths says otherwise.
+
+A 20% drawdown at 1u stakes needs +25% at the same stakes to recover. Doubling to 2u chasing pushes into a hole where recovery becomes mathematically implausible. The correct response to any losing streak: next bet is 1u.
+
+### Expect drawdown even with edge
+
+A genuine 5% ROI bettor at 1u stakes should expect drawdowns of 15-25% of bankroll every year or two, and 30%+ drawdowns periodically. Not a symptom of losing edge — standard variance of positive-EV betting. Bankroll and unit size should be built around this expectation, not around best months.
+
+---
+
 ## Am I Up vs bettin.gs (https://amiup.io/compare/bettin-gs)
 
 Bettin.gs is a European bet tracker with strong support for tipster leaderboards and a monthly-fee model. Am I Up positions differently: free, AI-first for input (no more manual data entry), and CLV as the headline metric rather than yield.
