@@ -173,7 +173,12 @@ export default async function Image({ params }: OgProps) {
               fontFamily: "monospace",
             }}
           >
-            amiup.io/u/{profile.handle}
+            {/* Satori requires single-child text nodes on plain divs.
+                Interpolating `${handle}` inside a template literal
+                keeps this a single React child; the naked form
+                "amiup.io/u/{handle}" is two children and crashes with
+                "Expected <div> to have explicit display: flex". */}
+            {`amiup.io/u/${profile.handle}`}
           </div>
         </div>
 
@@ -282,7 +287,10 @@ export default async function Image({ params }: OgProps) {
                 color: C.text,
               }}
             >
-              {settledCount.toLocaleString()} bets
+              {/* Same Satori single-child rule — collapse into a
+                  template literal so this div has exactly one text
+                  node child. */}
+              {`${settledCount.toLocaleString()} bets`}
             </div>
           </div>
           {sparkD && (
