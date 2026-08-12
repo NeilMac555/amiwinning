@@ -256,12 +256,32 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
           })),
         }),
       });
-      const body = await res.json();
+      // Read as text first so a non-JSON response (Railway proxy
+      // 502/504 with a plain-text "upstream error" body, an Anthropic
+      // API timeout, an HTML error page, etc.) doesn't crash the
+      // client with a raw SyntaxError. We try to JSON-parse only
+      // after we know we have the text in hand.
+      const raw = await res.text();
+      let body: { bets?: unknown[]; issues?: unknown[]; error?: string } = {};
+      try {
+        body = raw ? JSON.parse(raw) : {};
+      } catch {
+        // Server returned something that isn't JSON. Surface a friendly
+        // message with a hint at the raw body so we can diagnose without
+        // spamming the user with parser exceptions.
+        const snippet = raw.slice(0, 120).trim();
+        setError(
+          `The server returned an unexpected response (HTTP ${res.status})${
+            snippet ? ` — "${snippet}"` : ""
+          }. Try again in a few seconds.`,
+        );
+        return;
+      }
       if (!res.ok) {
         setError(body.error ?? `HTTP ${res.status}`);
         return;
       }
-      const parsed: ParsedBet[] = body.bets ?? [];
+      const parsed: ParsedBet[] = (body.bets ?? []) as ParsedBet[];
       if (parsed.length > 0) {
         // Auto-commit: skip the old review/confirm step that users were
         // forgetting to click. The Undo button in the success toast is
@@ -270,7 +290,7 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
       } else if ((body.issues ?? []).length > 0) {
         // Parser found nothing actionable — surface the issues as an
         // error so the input view isn't silently empty.
-        const issues: string[] = body.issues;
+        const issues: string[] = (body.issues ?? []) as string[];
         setError(
           `Couldn't extract a bet. ${issues.length} issue${issues.length === 1 ? "" : "s"}: ${issues
             .slice(0, 2)
