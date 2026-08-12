@@ -270,9 +270,8 @@ export default async function ProfilePage({ params }: PageProps) {
         )}
 
         {/* Breakdowns: sport / market / odds bucket / competition.
-            Sits inside ProfileGate above — signed-in strangers now see
-            the private-to-owner card instead of these breakdowns, so
-            no extra wrapper is needed here. */}
+            Sits inside ProfileGate above — any signed-in viewer sees
+            these; only signed-out visitors hit the wall. */}
         {settledCount > 0 && (
           <section className="profile-breakdown-row">
             {data.sportBd && data.sportBd.length > 0 && (
@@ -434,9 +433,13 @@ function MonthlyBars({ bets }: { bets: ImportedBet[] }) {
   );
 }
 
-// ─ RecentSettledTable ─────────────────────────────────────────────────────
-// Last 30 settled bets. Server-rendered, no interactivity. Pending bets
-// excluded — strangers should never see what the tipster is about to bet.
+// ─ SettledBetsTable ───────────────────────────────────────────────────────
+// Every settled bet, newest first. Server-rendered, no interactivity.
+// Pending bets excluded so strangers never see live picks. No hard cap
+// on rows — deliberate product call in 2026-08: a shared profile is a
+// receipt, and receipts don't hide anything. If a user has thousands
+// of bets and the table gets heavy, we'll add virtualization or a
+// "show more" chunk, but not by capping the visible history.
 
 function RecentSettledTable({
   bets,
@@ -453,17 +456,16 @@ function RecentSettledTable({
       ...b,
       _sort: Math.min(new Date(b.kickoff).getTime(), nowMs),
     }))
-    .sort((a, b) => b._sort - a._sort)
-    .slice(0, 30);
+    .sort((a, b) => b._sort - a._sort);
 
   if (settled.length === 0) return null;
 
   return (
     <section className="card profile-bets-card">
       <div className="profile-chart-head">
-        <h2 className="profile-chart-title">Recent settled</h2>
+        <h2 className="profile-chart-title">Bet history</h2>
         <div className="profile-chart-sub">
-          last 30 results · pending bets stay private
+          all {settled.length.toLocaleString()} settled bets · pending stays private
         </div>
       </div>
       <div style={{ overflowX: "auto" }}>

@@ -1,31 +1,25 @@
 "use client";
 
-// ProfileGate — wraps the deep-analysis sections of a public profile so
-// they're only shown to the profile owner. Everyone else sees a gate:
+// ProfileGate — the sign-up wall on public profiles. Anonymous viewers
+// see a CTA; anyone signed in sees the full report.
 //
 //   Signed-out visitor    → sign-up CTA with a blurred KPI teaser
 //                            ("sign up to unlock" — high-intent conversion
-//                            surface, unchanged from v1).
-//   Signed-in stranger    → "private to owner" card. They're already a
-//                            user; asking them to sign up again would be
-//                            confusing. Instead we're transparent: the
-//                            profile owner keeps their deep report to
-//                            themselves.
+//                            surface).
+//   Signed-in stranger    → full content, no gate. Signing up buys them
+//                            access to every user's full report, including
+//                            every settled bet. That's the deal.
 //   Profile owner         → full content, no gate.
 //   /u/sample handle      → always full content (marketing tour bypass).
 //
-// Why owner-only for the whole deep report (v2, 2026-07):
-//   The signed-in-stranger case previously saw the full KPI grid, market
-//   breakdowns, monthly P/L, and recent-bets table. That exposed
-//   competitive/strategic detail — where the owner leaks, where they
-//   win, and their upcoming individual selections — to anyone with an
-//   AmIUp account. Users shouldn't have to trade their strategy privacy
-//   for a shareable profile URL.
-//
-// What non-owners can still see (above the gate, in page.tsx):
-//   Identity (name, handle, avatar), lifetime P/L, and the equity
-//   curve. Enough to verify "this person is real and has an edge" —
-//   the proof-of-edge share hook is preserved.
+// Policy note (v3, 2026-08):
+//   Previously the deep report was owner-only; signed-in strangers got a
+//   "private to owner" card. Neil's product call to reverse that: the
+//   sign-up wall is the only barrier, and once past it a viewer sees the
+//   entire bet history. Pending bets are still hidden from strangers
+//   (page.tsx filters them out) so live picks don't leak — but every
+//   settled bet is visible, which is what makes the shared profile a
+//   real receipt.
 //
 // Why client-side gating:
 //   Supabase JS stores sessions in localStorage, not cookies, so the
@@ -70,57 +64,20 @@ export function ProfileGate({
   // versa) on a slow connection.
   if (loading) return null;
 
-  // Owner viewing their own profile → full report.
-  if (user && ownerUserId && user.id === ownerUserId) {
-    return <>{children}</>;
-  }
-
-  // Signed-in stranger → a distinct "private to owner" card. Different
-  // from the signup CTA because asking a signed-in user to sign up
-  // makes no sense.
+  // Any signed-in viewer (owner or stranger) → full report. Once you
+  // have an AmIUp account you can see every public profile's deep
+  // report, including full bet history. The signup CTA is the only
+  // gate.
   if (user) {
-    return <PrivateToOwnerGate handle={handle} />;
+    // Suppress the unused-variable warning without changing the
+    // signature — ownerUserId is still passed in from the profile
+    // pages for future policy tweaks (e.g. per-user privacy toggles).
+    void ownerUserId;
+    return <>{children}</>;
   }
 
   // Signed-out visitor → the signup CTA (existing high-intent conversion).
   return <SignUpGate handle={handle} bookSlug={bookSlug} />;
-}
-
-// ─ Private-to-owner gate (signed-in stranger) ──────────────────────────
-// Shown when the viewer is a signed-in AmIUp user but not the profile
-// owner. No sign-up CTA — they're already a user. Just an honest
-// message that the owner keeps their deep report private, with a
-// pointer to build their own if they want one.
-
-function PrivateToOwnerGate({ handle }: { handle: string }) {
-  return (
-    <section
-      className="profile-gate profile-gate--private"
-      aria-label="Deep report is private to the owner"
-    >
-      <div className="profile-gate-card">
-        <div className="profile-gate-eyebrow">
-          <span className="profile-gate-dot" aria-hidden="true" />
-          Private to owner
-        </div>
-        <h2 className="profile-gate-title">
-          <span className="profile-gate-handle">@{handle}</span>&rsquo;s
-          detailed report is private.
-        </h2>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, margin: "0 0 20px" }}>
-          The lifetime P/L and equity curve above are the public snapshot.
-          The KPI grid, per-market breakdown, monthly P/L, and recent bets
-          are kept private to the profile owner.
-        </p>
-        <Link href="/" className="btn-primary profile-gate-cta">
-          Build your own profile →
-        </Link>
-        <p className="profile-gate-fine">
-          Free. Your data stays yours. You choose what to make public.
-        </p>
-      </div>
-    </section>
-  );
 }
 
 // ─ The gate itself ───────────────────────────────────────────────────────
@@ -194,8 +151,8 @@ function SignUpGate({
             full CLV distribution chart.
           </li>
           <li>
-            <strong>The last 30 settled bets</strong> with closing-line
-            context on each.
+            <strong>Every settled bet</strong>, full history — event,
+            selection, odds, stake, P/L on each. Nothing hidden.
           </li>
         </ul>
         <Link href={signUpHref} className="btn-primary profile-gate-cta">
