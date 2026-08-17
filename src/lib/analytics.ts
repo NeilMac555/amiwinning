@@ -678,6 +678,73 @@ export function byCompetition(bets: ImportedBet[]): CompetitionRow[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// By bookmaker — Pinnacle, Bet365, DraftKings, etc.
+// Case-insensitive grouping so "Pinnacle" and "pinnacle" merge; the
+// display label uses the first-seen casing. Bets with no bookmaker
+// recorded are bucketed as "Unspecified" so the row surfaces (and
+// so users can see how much of their history predates the field).
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface BookmakerRow {
+  label: string;
+  pl: number;
+  stake: number;
+  bets: number;
+  yieldPct: number;
+  winRate: number;
+  avgOdds: number;
+}
+
+export function byBookmaker(bets: ImportedBet[]): BookmakerRow[] {
+  const groups = new Map<
+    string,
+    {
+      display: string;
+      pl: number;
+      stake: number;
+      bets: number;
+      wins: number;
+      oddsSum: number;
+    }
+  >();
+  for (const b of bets) {
+    if (!isSettled(b)) continue;
+    const raw = (b.bookmaker ?? "").trim();
+    const key = raw ? raw.toLowerCase() : "__unspecified__";
+    const cur =
+      groups.get(key) ?? {
+        display: raw || "Unspecified",
+        pl: 0,
+        stake: 0,
+        bets: 0,
+        wins: 0,
+        oddsSum: 0,
+      };
+    cur.pl += b.pl;
+    cur.stake += b.stake;
+    cur.bets++;
+    cur.oddsSum += b.odds;
+    if (isWin(b)) cur.wins++;
+    groups.set(key, cur);
+  }
+  const rows: BookmakerRow[] = [];
+  for (const v of groups.values()) {
+    if (v.bets < 20) continue;
+    rows.push({
+      label: v.display,
+      pl: round(v.pl, 2),
+      stake: round(v.stake, 2),
+      bets: v.bets,
+      yieldPct: v.stake > 0 ? round((v.pl / v.stake) * 100, 2) : 0,
+      winRate: round((v.wins / v.bets) * 100, 1),
+      avgOdds: round(v.oddsSum / v.bets, 2),
+    });
+  }
+  rows.sort((a, b) => b.pl - a.pl);
+  return rows;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // By day of week — Mon-first. UK convention.
 // ─────────────────────────────────────────────────────────────────────────
 

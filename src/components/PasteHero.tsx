@@ -35,6 +35,7 @@ interface ParsedBet {
   stake: number;
   status: Status;
   sport?: string;
+  bookmaker?: string;
 }
 
 interface Props {
@@ -348,6 +349,10 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
         source: sourceTag,
         importedAt,
         raw: {},
+        // Preserve the AI-extracted bookmaker (Pinnacle, Bet365, etc.)
+        // when the source text mentioned one. Undefined ⇒ omitted at
+        // the DB layer, which surfaces as "Unspecified" in analytics.
+        ...(p.bookmaker ? { bookmaker: p.bookmaker } : {}),
       };
     });
     appendBets(out);

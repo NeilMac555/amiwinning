@@ -139,7 +139,9 @@ export interface DashboardData {
   secondary: SecondaryStats;
   clvDist: ClvDistBin[];
   marketBd: BreakdownRow[];
-  /** Was "by bookmaker"; bookmaker tracking removed. Now "by odds range". */
+  /** Yield breakdown by odds range (favs, mid, longshots). Formerly
+   *  the bookmaker slot — bookmaker breakdown now lives in its own
+   *  `bookmakerBd` field below. */
   oddsBd: BreakdownRow[];
   /** Yield breakdown by sport. Optional for back-compat with the mock
    *  data path which doesn't compute it. */
@@ -148,6 +150,10 @@ export interface DashboardData {
    *  League, La Liga, etc.). Optional — only populated by the real
    *  aggregator, not the mock data path. Soccer-only for v1. */
   competitionBd?: BreakdownRow[];
+  /** Yield breakdown by bookmaker (Pinnacle, Bet365, etc.). Optional
+   *  — only populated by the real aggregator. Rows use the first-seen
+   *  display casing; grouping is case-insensitive under the hood. */
+  bookmakerBd?: BreakdownRow[];
   weekly: number[];
 }
 

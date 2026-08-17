@@ -24,6 +24,7 @@ interface FormState {
   odds: string;
   stake: string;
   closingOdds: string; // optional Pinnacle close
+  bookmaker: string; // optional book the bet was placed at
   notes: string;
 }
 
@@ -35,6 +36,7 @@ interface ParsedBet {
   odds: number;
   stake: number;
   status: import("@/lib/import/types").Status;
+  bookmaker?: string;
 }
 
 const MARKET_OPTIONS: Array<{ value: FormState["market"]; label: string }> = [
@@ -109,6 +111,7 @@ export default function NewBetPage() {
     odds: "",
     stake: "",
     closingOdds: "",
+    bookmaker: "",
     notes: "",
   });
   const [error, setError] = useState<string | null>(null);
@@ -194,6 +197,7 @@ export default function NewBetPage() {
         source: "manual:paste",
         importedAt,
         raw: {},
+        ...(p.bookmaker ? { bookmaker: p.bookmaker } : {}),
       };
     });
     appendBets(bets);
@@ -276,6 +280,7 @@ export default function NewBetPage() {
           closingParsed != null
             ? Math.round(closingParsed * 1000) / 1000
             : undefined,
+        bookmaker: f.bookmaker.trim() || undefined,
         notes: f.notes.trim() || undefined,
         status: "pending",
         pl: 0,
@@ -522,6 +527,21 @@ export default function NewBetPage() {
                     </span>
                   </Hint>
                 )}
+              </Field>
+
+              <Field
+                label="Bookmaker"
+                hint="Optional. e.g. Pinnacle, Bet365, DraftKings. Analytics groups your P/L by bookmaker."
+              >
+                <input
+                  type="text"
+                  value={f.bookmaker}
+                  onChange={(e) => update({ bookmaker: e.target.value })}
+                  placeholder="Pinnacle"
+                  autoComplete="off"
+                  style={input}
+                  maxLength={60}
+                />
               </Field>
 
               {showNotes ? (

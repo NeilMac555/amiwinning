@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/auth";
 import { SAMPLE_BETS } from "@/lib/sample-profile";
 import { GhostPreview } from "@/components/GhostPreview";
 import {
+  byBookmaker,
   byCompetition,
   byDayOfWeek,
   byMarket,
@@ -26,6 +27,7 @@ import {
   streaks,
   weekCalendar,
   yearCalendar,
+  type BookmakerRow,
   type CalendarDay,
   type CompetitionRow,
   type DowRow,
@@ -79,6 +81,10 @@ export default function AnalyticsPage() {
   const market = useMemo(() => byMarket(displayBets), [displayBets]);
   const competition = useMemo(
     () => byCompetition(displayBets),
+    [displayBets],
+  );
+  const bookmaker = useMemo(
+    () => byBookmaker(displayBets),
     [displayBets],
   );
   const dow = useMemo(() => byDayOfWeek(displayBets), [displayBets]);
@@ -145,6 +151,10 @@ export default function AnalyticsPage() {
 
                 <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
                   <CompetitionPanel rows={competition} unit={unit} />
+                </div>
+
+                <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
+                  <BookmakerPanel rows={bookmaker} unit={unit} />
                 </div>
 
                 <div className="dense-grid row-2">
@@ -1120,6 +1130,170 @@ function CompetitionPanel({
         <thead>
           <tr>
             <th>Competition</th>
+            <th className="num sortable" onClick={() => onSort("pl")}>
+              P/L {arrow("pl")}
+            </th>
+            <th className="num sortable" onClick={() => onSort("yieldPct")}>
+              Yield {arrow("yieldPct")}
+            </th>
+            <th className="num sortable" onClick={() => onSort("winRate")}>
+              Win rate {arrow("winRate")}
+            </th>
+            <th className="num">Avg odds</th>
+            <th className="num sortable" onClick={() => onSort("bets")}>
+              Bets {arrow("bets")}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((r) => {
+            const plColor =
+              r.pl > 0 ? "num-pos" : r.pl < 0 ? "num-neg" : "num-flat";
+            const yieldColor =
+              r.yieldPct > 0
+                ? "num-pos"
+                : r.yieldPct < 0
+                  ? "num-neg"
+                  : "num-flat";
+            return (
+              <tr key={r.label}>
+                <td>{r.label}</td>
+                <td className={`num ${plColor}`}>
+                  {fmtPL(r.pl, unit)}
+                </td>
+                <td className={`num ${yieldColor}`}>
+                  {r.yieldPct >= 0 ? "+" : "−"}
+                  {Math.abs(r.yieldPct).toFixed(2)}%
+                </td>
+                <td className="num">{r.winRate.toFixed(1)}%</td>
+                <td className="num">{r.avgOdds.toFixed(2)}</td>
+                <td className="num mono" style={{ fontSize: 11 }}>
+                  {r.bets.toLocaleString()}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// BookmakerPanel — same shape/behaviour as CompetitionPanel but for the
+// per-bookmaker breakdown. Duplicated (rather than parameterised) to keep
+// the two panels' copy + column labels independent — a change to one
+// won't leak into the other.
+// ─────────────────────────────────────────────────────────────────────────
+
+type BookmakerSortKey = "pl" | "yieldPct" | "bets" | "winRate";
+
+function BookmakerPanel({
+  rows,
+  unit,
+}: {
+  rows: BookmakerRow[];
+  unit: DisplayUnit;
+}) {
+  const [sortKey, setSortKey] = useState<BookmakerSortKey>("pl");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const sorted = useMemo(() => {
+    const arr = [...rows];
+    arr.sort((a, b) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      return sortDir === "asc" ? av - bv : bv - av;
+    });
+    return arr;
+  }, [rows, sortKey, sortDir]);
+
+  const onSort = (k: BookmakerSortKey) => {
+    if (k === sortKey) setSortDir(sortDir === "asc" ? "desc" : "asc");
+    else {
+      setSortKey(k);
+      setSortDir("desc");
+    }
+  };
+
+  const arrow = (k: BookmakerSortKey) =>
+    sortKey === k ? (
+      <span className="sort-arrow">{sortDir === "asc" ? "↑" : "↓"}</span>
+    ) : null;
+
+  // Best/worst exclude the "Unspecified" bucket — that row is a data-
+  // quality signal, not a bookmaker to celebrate or blame.
+  const nonUnspec = sorted.filter((r) => r.label !== "Unspecified");
+  const best = nonUnspec.length > 0
+    ? [...nonUnspec].sort((a, b) => b.pl - a.pl)[0]
+    : null;
+  const worst = nonUnspec.length > 0
+    ? [...nonUnspec].sort((a, b) => a.pl - b.pl)[0]
+    : null;
+
+  if (rows.length === 0) {
+    return (
+      <div className="card" style={{ marginTop: 14, padding: 0 }}>
+        <div className="card-header">
+          <div>
+            <div className="card-title">By bookmaker</div>
+            <div className="card-meta" style={{ marginTop: 4 }}>
+              <span>
+                P/L split by the book each bet was placed at. Add a
+                bookmaker when logging a bet (paste or manual) and it
+                appears here.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            padding: 24,
+            fontSize: 12,
+            color: "var(--text-faint)",
+            textAlign: "center",
+          }}
+        >
+          No bookmaker has 20+ settled bets yet.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card" style={{ marginTop: 14, padding: 0, overflow: "hidden" }}>
+      <div className="card-header">
+        <div>
+          <div className="card-title">By bookmaker</div>
+          <div className="card-meta" style={{ marginTop: 4 }}>
+            <span>P/L per book the bet was placed at</span>
+            {best && worst && best.label !== worst.label && (
+              <>
+                <span style={{ color: "var(--text-faint)" }}>·</span>
+                <span>
+                  Best:{" "}
+                  <span className="mono" style={{ color: "var(--green)" }}>
+                    {best.label} {fmtPL(best.pl, unit)}
+                  </span>
+                </span>
+                <span style={{ color: "var(--text-faint)" }}>·</span>
+                <span>
+                  Worst:{" "}
+                  <span className="mono" style={{ color: "var(--red)" }}>
+                    {worst.label} {fmtPL(worst.pl, unit)}
+                  </span>
+                </span>
+              </>
+            )}
+            <span style={{ color: "var(--text-faint)" }}>·</span>
+            <span>Sample suppressed below 20</span>
+          </div>
+        </div>
+      </div>
+      <table className="tbl" data-density="dense">
+        <thead>
+          <tr>
+            <th>Bookmaker</th>
             <th className="num sortable" onClick={() => onSort("pl")}>
               P/L {arrow("pl")}
             </th>

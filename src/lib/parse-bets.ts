@@ -53,9 +53,10 @@ Field guidance:
 - stake: number in units. "2 units", "2u", just "2" → 2.
 - status: "(W)" or "(win)" → "won". "(L)" or "(lost)" → "lost". "(P)" or "(push)" → "push". "(half-won)" / "(half-lost)" → "half_won"/"half_lost". If not stated, "pending".
 
+- bookmaker: OPTIONAL. Extract the bookmaker name when the text mentions one ("with Pinnacle", "on Bet365", "DraftKings", "William Hill", "@ Bet365"). Normalise to the canonical brand name in Title Case ("Pinnacle", "Bet365", "DraftKings", "William Hill", "Betfair", "Betfair Exchange", "Smarkets", "Unibet", "Paddy Power", "Ladbrokes", "Coral", "Sky Bet", "888sport", "BetVictor", "FanDuel", "Caesars", "BetMGM", "PointsBet", "Circa", "Hard Rock", "ESPN Bet"). If no bookmaker is mentioned, OMIT the field entirely rather than guessing.
+
 CRITICAL:
 - For multi-leg bets (Double / Treble / Parlay / Accumulator / "leg 1 + leg 2"), output ONE bet with market="parlay" and selection summarising the legs ("Double: <leg 1> + <leg 2>"). The odds apply to the combined parlay.
-- Ignore bookmaker mentions ("Pinnacle", "Bet365", "with Pinnacle") — we don't track them.
 - Be aggressive about extraction even from messy tabular data. Each line/row that has odds + a pick is probably a bet.
 
 Sport classification (read in order, first match wins):
@@ -122,6 +123,11 @@ export const TOOL_DEF = {
               description:
                 "Best-guess sport label. MUST be one of: 'Tennis', 'Soccer', 'Basketball', 'Baseball', 'American Football', 'Ice Hockey', 'Cricket', 'Golf', 'Boxing', 'MMA', 'Horse Racing', 'Rugby', 'Darts', 'Snooker', 'Esports', or 'Other'. Use the FULL NAME — not 'NFL'/'MLB'/'NHL'. Infer from event text and player/team names per the sport classification rules in the system prompt.",
             },
+            bookmaker: {
+              type: "string",
+              description:
+                "OPTIONAL. Bookmaker the bet was placed at (e.g. 'Pinnacle', 'Bet365', 'DraftKings'). Extract only when explicitly mentioned. Omit the field entirely if no bookmaker appears in the source.",
+            },
           },
           required: [
             "kickoff",
@@ -149,6 +155,10 @@ export interface ParsedBet {
   stake: number;
   status: Status;
   sport: string;
+  /** Optional bookmaker the bet was placed at, as extracted from
+   *  the source text (e.g. "Pinnacle", "Bet365"). Omitted when the
+   *  source didn't mention one. */
+  bookmaker?: string;
 }
 
 /**
@@ -215,6 +225,13 @@ export function validateAndClean(
       typeof b.sport === "string" && b.sport.trim().length > 0
         ? b.sport.trim()
         : "Soccer";
+    // Bookmaker: trim, cap length so a runaway model output can't
+    // bloat the row. Empty/whitespace or missing → omitted (undefined),
+    // which persists as NULL and shows as "Unspecified" in analytics.
+    const bookmakerRaw =
+      typeof b.bookmaker === "string" ? b.bookmaker.trim() : "";
+    const bookmaker =
+      bookmakerRaw.length > 0 ? bookmakerRaw.slice(0, 60) : undefined;
     cleaned.push({
       kickoff,
       event: String(b.event).trim(),
@@ -224,6 +241,7 @@ export function validateAndClean(
       stake: Math.round(stake * 100) / 100,
       status,
       sport,
+      ...(bookmaker ? { bookmaker } : {}),
     });
   }
   return { cleaned, issues };

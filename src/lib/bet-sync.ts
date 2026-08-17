@@ -25,6 +25,7 @@ interface BetRow {
   odds: string | number;
   stake: string | number;
   closing_odds: string | number | null;
+  bookmaker: string | null;
   tipster: string | null;
   tags: string[] | null;
   notes: string | null;
@@ -50,6 +51,7 @@ function rowToBet(r: BetRow): ImportedBet {
     odds: Number(r.odds),
     stake: Number(r.stake),
     closingOdds: r.closing_odds != null ? Number(r.closing_odds) : undefined,
+    bookmaker: r.bookmaker ?? undefined,
     tipster: r.tipster ?? undefined,
     tags: r.tags ?? undefined,
     notes: r.notes ?? undefined,
@@ -80,6 +82,7 @@ function betToRow(b: ImportedBet, userId: string) {
     odds: b.odds,
     stake: b.stake,
     closing_odds: b.closingOdds ?? null,
+    bookmaker: b.bookmaker ?? null,
     tipster: b.tipster ?? null,
     tags: b.tags && b.tags.length ? b.tags : null,
     notes: b.notes ?? null,

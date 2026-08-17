@@ -50,8 +50,11 @@ export interface ImportedBet {
   /** Pinnacle closing-line price on the same selection. v1 is manual entry;
    *  SteamWatch integration will auto-populate at kickoff. */
   closingOdds?: number;
-  /** @deprecated bookmaker tracking removed. Kept for backward-compat with
-   *  already-persisted localStorage data; never displayed. */
+  /** Which bookmaker the bet was placed at (Pinnacle, Bet365, etc.).
+   *  Optional — users can log without recording it. The AI parser
+   *  extracts it when the source text mentions one; manual entry
+   *  exposes it as a free-text field. Analytics groups
+   *  case-insensitively so "Pinnacle" and "pinnacle" merge. */
   bookmaker?: string;
   tipster?: string;
   tags?: string[];

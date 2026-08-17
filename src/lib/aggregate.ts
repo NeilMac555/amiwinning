@@ -569,6 +569,44 @@ export function aggregateFromBets(bets: ImportedBet[]): DashboardData {
       bets,
       (b) => classifyCompetition(b) ?? undefined,
     ),
+    // Bookmaker breakdown. Optional field on every bet (users who
+    // don't record it are grouped under "Unspecified" so the row
+    // doesn't disappear). Case-insensitive grouping so "Pinnacle"
+    // and "pinnacle" merge; display uses the first-seen casing.
+    bookmakerBd: computeBookmakerBreakdown(bets),
     weekly: computeWeekly(bets),
   };
+}
+
+// Bookmaker breakdown. Separate helper (not computeBreakdown) so we
+// can (a) group case-insensitively and (b) preserve the first-seen
+// display casing rather than lowercasing the row labels.
+function computeBookmakerBreakdown(bets: ImportedBet[]): BreakdownRow[] {
+  const groups = new Map<
+    string,
+    { display: string; pl: number; stake: number; n: number }
+  >();
+  for (const b of bets) {
+    if (!isSettled(b)) continue;
+    const raw = (b.bookmaker ?? "").trim();
+    const key = raw ? raw.toLowerCase() : "__unspecified__";
+    const display = raw || "Unspecified";
+    const cur =
+      groups.get(key) ?? { display, pl: 0, stake: 0, n: 0 };
+    cur.pl += b.pl;
+    cur.stake += b.stake;
+    cur.n++;
+    groups.set(key, cur);
+  }
+  const rows: BreakdownRow[] = [];
+  for (const g of groups.values()) {
+    if (g.n < 20) continue; // same 20-bet floor as other breakdowns
+    rows.push({
+      label: g.display,
+      yieldPct: g.stake > 0 ? round((g.pl / g.stake) * 100, 2) : 0,
+      sample: g.n,
+    });
+  }
+  rows.sort((a, b) => b.yieldPct - a.yieldPct);
+  return rows;
 }

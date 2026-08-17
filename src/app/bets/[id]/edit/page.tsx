@@ -21,6 +21,7 @@ interface FormState {
   odds: string;
   stake: string;
   closingOdds: string;
+  bookmaker: string;
   status: Status;
   pl: string;
   notes: string;
@@ -135,6 +136,7 @@ export default function EditBetPage() {
         odds: String(b.odds),
         stake: String(b.stake),
         closingOdds: b.closingOdds != null ? String(b.closingOdds) : "",
+        bookmaker: b.bookmaker ?? "",
         status: b.status,
         pl: String(b.pl),
         notes: b.notes ?? "",
@@ -220,6 +222,7 @@ export default function EditBetPage() {
           closingParsed != null
             ? Math.round(closingParsed * 1000) / 1000
             : undefined,
+        bookmaker: f.bookmaker.trim() || undefined,
         status: f.status,
         pl: isFinite(plParsed) ? Math.round(plParsed * 100) / 100 : 0,
         notes: f.notes.trim() || undefined,
@@ -462,6 +465,21 @@ export default function EditBetPage() {
                     </span>
                   </Hint>
                 )}
+              </Field>
+
+              <Field
+                label="Bookmaker"
+                hint="Optional. e.g. Pinnacle, Bet365, DraftKings. Analytics groups your P/L by bookmaker."
+              >
+                <input
+                  type="text"
+                  value={f.bookmaker}
+                  onChange={(e) => update({ bookmaker: e.target.value })}
+                  placeholder="Pinnacle"
+                  autoComplete="off"
+                  style={input}
+                  maxLength={60}
+                />
               </Field>
 
               {showNotes ? (
