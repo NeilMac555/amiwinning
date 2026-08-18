@@ -55,9 +55,23 @@ Field guidance:
 
 - bookmaker: OPTIONAL. Extract the bookmaker name when the text mentions one ("with Pinnacle", "on Bet365", "DraftKings", "William Hill", "@ Bet365"). Normalise to the canonical brand name in Title Case ("Pinnacle", "Bet365", "DraftKings", "William Hill", "Betfair", "Betfair Exchange", "Smarkets", "Unibet", "Paddy Power", "Ladbrokes", "Coral", "Sky Bet", "888sport", "BetVictor", "FanDuel", "Caesars", "BetMGM", "PointsBet", "Circa", "Hard Rock", "ESPN Bet"). If no bookmaker is mentioned, OMIT the field entirely rather than guessing.
 
-CRITICAL:
-- For multi-leg bets (Double / Treble / Parlay / Accumulator / "leg 1 + leg 2"), output ONE bet with market="parlay" and selection summarising the legs ("Double: <leg 1> + <leg 2>"). The odds apply to the combined parlay.
+CRITICAL — multi-leg / parlay handling:
+Multi-leg bets go under market="parlay" as ONE row. The trigger vocabulary is broad — recognise ALL of these as parlays:
+  - UK/EU: Double, Treble, 4-fold, 5-fold, Accumulator, Acca, Yankee, Lucky 15, Lucky 31, Lucky 63
+  - US: Parlay, Same Game Parlay, SGP, SGPx (cross-game SGP), Bet Builder, Same Game Bet Builder, Round Robin, Teaser, Progressive Parlay, PP, "3-leg parlay", "5-leg parlay", "6-team teaser"
+  - Structural signal (any language): two or more picks presented together AND a single combined price at the bottom of the group ("Bet Slip Total", "Combined Odds", "To Win", "Payout", "$X to win $Y"). If you see a group of picks that each have their own individual odds AND there's a total/combined price at the bottom, that group is ONE parlay — the total price is the parlay odds, NOT the sum.
+
+Parlay output rules:
+  - ONE row, market="parlay". selection field summarises the legs, e.g. "3-leg SGP: Lakers ML + LeBron o25.5 pts + Over 224.5" or "Double: Arsenal −0.5 AH + Man City to win". Keep leg text short but recognisable.
+  - odds = the combined/parlay price (NOT the individual leg prices, NOT their product).
+  - stake = the total stake on the parlay (NOT stake per leg).
+  - If the parlay is settled, ONE status covers the whole ticket. A single losing leg loses the whole parlay.
+  - Bet builder / SGP screenshots from DraftKings, FanDuel, BetMGM, Caesars, Fanatics, ESPN Bet almost always show individual leg prices AND a combined price at the bottom — treat as ONE parlay row using the combined price.
+  - Round Robin is a group of parlays (e.g. "3-team round robin" is 3 separate 2-leg parlays covering every pair). Output ONE row per constituent parlay in the round robin if the source lists each with its own price; otherwise output ONE row with selection prefixed "Round Robin: <legs>" and stake = total staked across the round robin.
+  - Teasers use modified point spreads across N legs but pay one combined price — treat as a parlay with selection prefixed "Teaser: ".
+
 - Be aggressive about extraction even from messy tabular data. Each line/row that has odds + a pick is probably a bet.
+- IMPORTANT COUNTER-RULE: A run of picks WITHOUT a combined price is NOT a parlay — it's N separate single bets. Only fold into one parlay row when a combined/total price is present or when the source explicitly calls it a parlay/SGP/bet builder/acca/round robin/teaser.
 
 Sport classification (read in order, first match wins):
 - "Tennis" if the text mentions ATP / WTA / sets / games / known tennis players (Zverev, Sinner, Alcaraz, Djokovic, Sabalenka, Swiatek, Medvedev, Tsitsipas, Rublev, Auger-Aliassime, Monfils, Tien, Michelsen, etc.).
