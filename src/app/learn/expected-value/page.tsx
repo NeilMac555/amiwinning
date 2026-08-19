@@ -14,6 +14,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/expected-value" },
@@ -164,6 +167,7 @@ export default function ExpectedValuePage() {
           <h1 className="learn-title">
             What is Expected Value <span className="learn-abbr">(EV)</span>?
           </h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             Expected Value is the mathematical bedrock of every winning
             bet. CLV estimates it. Yield is its historical residue.
@@ -430,6 +434,14 @@ export default function ExpectedValuePage() {
                 the technique of stripping bookmaker margin out of a
                 price to estimate true probability. Required for honest
                 EV calculation against a sharp reference.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/parlay">Parlay:</Link>
+                </strong>{" "}
+                multi-leg bets where EV compounds — usually in the wrong
+                direction because vig compounds too. The math of why
+                parlays almost always lose.
               </li>
               <li>
                 <strong>

@@ -284,6 +284,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      // Glossary — Parlay. Highest-volume single query in the whole
+      // cluster ("what is a parlay in sports betting" ~15k/mo,
+      // "parlay meaning" ~5k/mo, "parlay calculator" ~8k/mo, "same
+      // game parlay explained" ~2k/mo). Casual-bettor gateway — Kelly
+      // + bankroll are power-user terms, parlay is the front door.
+      // Priority 0.85 — one of the highest.
+      url: `${BASE}/learn/parlay`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       // Tipster partnership landing. Lower priority (0.5) than the
       // marketing / glossary pages because organic search intent is
       // small, but we still want Google + LLMs to know it exists so

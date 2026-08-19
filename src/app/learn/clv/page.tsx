@@ -14,6 +14,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/clv" },
@@ -178,6 +181,7 @@ export default function ClvPage() {
           <h1 className="learn-title">
             What is Closing Line Value <span className="learn-abbr">(CLV)</span>?
           </h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             CLV measures whether you beat the sharp closing odds. It&rsquo;s
             the single best statistical signal that a sports bettor has a

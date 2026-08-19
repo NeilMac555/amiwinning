@@ -13,6 +13,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/positive-ev-betting" },
@@ -155,6 +158,7 @@ export default function PositiveEvPage() {
           <h1 className="learn-title">
             Positive EV betting, in plain English
           </h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             Every profitable sports bettor is a positive-EV bettor whether
             they use that language or not. The strategy is simple to
@@ -368,6 +372,14 @@ export default function PositiveEvPage() {
                 bookmaker&rsquo;s margin from a price to estimate the
                 true implied probability. Required for accurate +EV
                 calculation against a sharp reference.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/parlay">Parlay:</Link>
+                </strong>{" "}
+                multi-leg bets where +EV is theoretically possible but
+                practically rare — vig compounds per leg and eats the
+                edge. The math of the parlay trap.
               </li>
             </ul>
           </section>

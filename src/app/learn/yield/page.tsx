@@ -13,6 +13,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/yield" },
@@ -161,6 +164,7 @@ export default function YieldPage() {
 
           <p className="learn-eyebrow">Betting analytics glossary</p>
           <h1 className="learn-title">What is Yield in Sports Betting?</h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             Yield is the industry-standard headline metric: how much
             profit you make per unit staked. Tipsters quote it, trackers

@@ -12,6 +12,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/bankroll-management" },
@@ -154,6 +157,7 @@ export default function BankrollPage() {
           <h1 className="learn-title">
             Bankroll management for sports betting
           </h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             Bankroll management is the difference between betting like an
             investor and betting like a gambler. The rules are simple, the

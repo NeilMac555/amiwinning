@@ -386,6 +386,42 @@ The full sharp-book +EV loop: pick a sharp reference → devig it → compare ag
 
 ---
 
+## What is a Parlay in Sports Betting? (https://amiup.io/learn/parlay)
+
+### The short definition
+
+A parlay is a single bet that combines two or more separate selections into one ticket. All of them have to win. If any one leg loses, the entire parlay loses. Combined odds in decimal are the product of the leg odds — so 3 × 2.00 legs = 8.00 combined (+700 American), while your true win probability is roughly the product of each leg's probability (12.5% for three fair 50/50s).
+
+The most popular product on every US sportsbook (DraftKings, FanDuel, BetMGM, Caesars, ESPN Bet, Hard Rock) and the one with the biggest house edge.
+
+### Worked example — 4-leg NFL parlay
+
+Four −110 sides (Chiefs −3.5, Bills ML, 49ers −7, Ravens over 44.5). Each leg in decimal is 1.909.
+
+`1.909 × 1.909 × 1.909 × 1.909 = 13.28` (roughly +1228 American).
+
+If each leg is a true 50/50, the probability of hitting all four is 0.5⁴ = 6.25%. Fair odds on 6.25% are +1500 (16.00 decimal). The book pays +1228. That gap is a ~22% house edge on this specific parlay, versus ~4.5% on a single −110 bet. Vig compounds per leg.
+
+### Same game parlays (SGPs)
+
+Combine multiple picks from the SAME game (Lakers ML + LeBron over 25.5 + Over 224.5). Newer product (post-2018) that every US sportsbook pushes heavily. The legs are correlated but the book prices them as independent, then applies parlay math — producing house edges of 30-40% on popular combos. When a book "boosts" a +2500 SGP to +3000, the true fair price was probably +5000.
+
+### Teasers, round robins, progressive parlays
+
+- Teaser: parlay where you move the spread in your favour on every leg for lower payout. Usually negative EV outside a few Wong-teaser spots around NFL key numbers 3 and 7.
+- Round robin: a bundle of smaller parlays covering every combination of your picks. You don't need all legs; total stake is higher; vig math is unchanged.
+- Progressive parlay (PP): pays out at reduced odds even if 1-2 legs miss. Marketing spin on a lower-vol round-robin variant. Still negative EV.
+
+### Are parlays ever a good bet?
+
+Rarely. In principle if every leg is +EV against true probability, the parlay is +EV too. In practice retail bettors don't identify multiple genuine +EV legs at once, parlays compound both edge AND vig (vig usually wins), and sportsbooks close obvious correlated-SGP angles fast. Parlays are entertainment products with lottery payouts. Betting them for fun is fine; building strategy around them at scale loses money.
+
+### How parlays should be logged
+
+ONE row per parlay: market="parlay", selection summarising the legs (e.g. "3-leg SGP: Lakers ML + LeBron o25.5 + Over 224.5"), odds = combined price, stake = total stake, one status covers the whole ticket. Splitting a parlay into separate single-bet rows corrupts your yield and win rate for both categories.
+
+---
+
 ## Am I Up vs bettin.gs (https://amiup.io/compare/bettin-gs)
 
 Bettin.gs is a European bet tracker with strong support for tipster leaderboards and a monthly-fee model. Am I Up positions differently: free, AI-first for input (no more manual data entry), and CLV as the headline metric rather than yield.

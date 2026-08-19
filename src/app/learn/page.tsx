@@ -16,9 +16,9 @@ import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn" },
-  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC, Kelly, +EV, Devig.",
+  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC, Kelly, Parlay, +EV, Devig.",
   description:
-    "Plain-English definitions of the metrics and strategies that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management, positive EV betting, devigging. Formula and worked example on every entry.",
+    "Plain-English definitions of the metrics and strategies that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management, positive EV betting, devigging, parlays. Formula and worked example on every entry.",
   openGraph: {
     title: `${BRAND.name} Betting Analytics Glossary`,
     description:
@@ -97,6 +97,13 @@ const ENTRIES: Entry[] = [
     short:
       "How to strip bookmaker vig out of odds to get a clean no-vig probability. The unglamorous step that makes +EV analysis honest.",
     aka: ["Devig", "No-Vig Odds", "Vig Removal"],
+  },
+  {
+    slug: "parlay",
+    title: "Parlay",
+    short:
+      "The most popular product on every US sportsbook — and the one with the biggest house edge. How parlay odds work, same game parlays, teasers, why they lose long-term.",
+    aka: ["Accumulator", "Acca", "Multi-bet", "SGP", "Bet Builder"],
   },
 ];
 

@@ -13,6 +13,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/kelly-criterion" },
@@ -155,6 +158,7 @@ export default function KellyPage() {
           <h1 className="learn-title">
             The Kelly Criterion for sports betting
           </h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             Kelly is the maths behind &ldquo;how much should I bet?&rdquo;. It
             sizes each stake as a fraction of your bankroll based on your

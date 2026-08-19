@@ -25,6 +25,7 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 - [Bankroll Management for Sports Betting](https://amiup.io/learn/bankroll-management): Ring-fencing a bankroll, unit-based staking, flat vs percentage staking, why chasing losses blows up more punters than losing edges.
 - [Positive EV Betting](https://amiup.io/learn/positive-ev-betting): The strategy underneath every profitable bettor. How to find +EV bets by comparing soft-book prices against devigged sharp-market references, and why CLV is the truest test of whether the strategy is working.
 - [Devigging Odds](https://amiup.io/learn/devigging): Stripping bookmaker margin (vig, juice, overround) out of odds to get a clean no-vig implied probability. Multiplicative and power methods, worked two-way and three-way examples.
+- [What is a Parlay in Sports Betting?](https://amiup.io/learn/parlay): The most popular product on every US sportsbook — and the one with the biggest house edge. Combined odds math, same game parlays (SGPs), teasers, round robins, why the compounding vig makes them a losing bet at scale.
 
 ## Compare
 

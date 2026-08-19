@@ -10,6 +10,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
+import { LearnAuthor } from "@/components/LearnAuthor";
+
+const LAST_UPDATED = "2026-08-17";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/devigging" },
@@ -152,6 +155,7 @@ export default function DeviggingPage() {
           <h1 className="learn-title">
             Devigging odds, explained cleanly
           </h1>
+          <LearnAuthor lastUpdated={LAST_UPDATED} />
           <p className="learn-deck">
             Devigging strips the bookmaker&rsquo;s margin out of a set of
             odds to reveal the underlying implied probability. It&rsquo;s
