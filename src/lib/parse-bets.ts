@@ -56,10 +56,68 @@ Field guidance:
 - bookmaker: OPTIONAL. Extract the bookmaker name when the text mentions one ("with Pinnacle", "on Bet365", "DraftKings", "William Hill", "@ Bet365"). Normalise to the canonical brand name in Title Case ("Pinnacle", "Bet365", "DraftKings", "William Hill", "Betfair", "Betfair Exchange", "Smarkets", "Unibet", "Paddy Power", "Ladbrokes", "Coral", "Sky Bet", "888sport", "BetVictor", "FanDuel", "Caesars", "BetMGM", "PointsBet", "Circa", "Hard Rock", "ESPN Bet"). If no bookmaker is mentioned, OMIT the field entirely rather than guessing.
 
 CRITICAL — multi-leg / parlay handling:
-Multi-leg bets go under market="parlay" as ONE row. The trigger vocabulary is broad — recognise ALL of these as parlays:
-  - UK/EU: Double, Treble, 4-fold, 5-fold, Accumulator, Acca, Yankee, Lucky 15, Lucky 31, Lucky 63
+Multi-leg bets go under market="parlay" as ONE row. Getting this wrong is the single most common failure mode of this parser. Read this section twice.
+
+Trigger vocabulary — recognise ALL of these as parlay signals:
+  - UK/EU: Double, Doubles, Double(s), Treble, Trebles, Treble(s), 4-fold, 5-fold, Accumulator, Acca, Multiple, Yankee, Lucky 15, Lucky 31, Lucky 63
   - US: Parlay, Same Game Parlay, SGP, SGPx (cross-game SGP), Bet Builder, Same Game Bet Builder, Round Robin, Teaser, Progressive Parlay, PP, "3-leg parlay", "5-leg parlay", "6-team teaser"
-  - Structural signal (any language): two or more picks presented together AND a single combined price at the bottom of the group ("Bet Slip Total", "Combined Odds", "To Win", "Payout", "$X to win $Y"). If you see a group of picks that each have their own individual odds AND there's a total/combined price at the bottom, that group is ONE parlay — the total price is the parlay odds, NOT the sum.
+  - Structural signal (any language): two or more picks presented together with a single combined price AND a single ticket-level stake. The combined price can appear ANYWHERE in the visual group — TOP (Bet365 style: "Double(s) £50.00 @2.35" header), BOTTOM (DraftKings/FanDuel style: "Bet Slip Total", "Combined Odds", "$X to win $Y"), or as a labelled row ("Combined:", "Total:", "@"). Do NOT assume the combined price only appears at the bottom.
+
+Reading per-leg outcome marks (VERY IMPORTANT):
+On a parlay bet slip, each leg often has its own ✓ / ✗ / green tick / red X showing whether that individual LEG won or lost. These are informational only — they describe leg outcomes WITHIN one parlay ticket. The ticket itself has ONE overall status determined by the rule "if ANY leg lost, the parlay lost." Do NOT interpret per-leg marks as evidence of separate bets. A parlay with one green tick and one red X is a LOST parlay (single row, status="lost"), not one won-bet and one lost-bet.
+
+WORKED EXAMPLE 1 — Bet365 "Double(s)" bet slip (header-style combined price):
+
+Input:
+    Double(s) £50.00 @2.35
+    Lost
+    [X] Cuiaba v Operario PR
+        Over 1.5 - Match Over/Under 1.5 Goals    1.53
+        Total Goals: 1
+    [✓] Botafogo SP 1-1 Criciuma
+        Over 1.5 - Match Over/Under 1.5 Goals    1.53
+        Total Goals: 2
+    Stake: £50.00   Returned: £0.00
+
+Correct output — ONE row:
+    kickoff:   <resolved date>
+    event:     "Cuiaba v Operario PR + Botafogo SP v Criciuma"
+    selection: "Double: Cuiaba/Operario PR Over 1.5 + Botafogo/Criciuma Over 1.5"
+    market:    "parlay"
+    odds:      2.35                       ← combined price from the header, NOT 1.53
+    stake:     50                          ← total ticket stake, NOT split per leg
+    status:    "lost"                      ← ticket lost because one leg (Cuiaba) lost, even though the other (Botafogo) won
+    sport:     "Soccer"
+
+Wrong output (this is what a naive parser does — DO NOT do this):
+    Two rows, each at 1.53, each at 25 stake, one status=lost and one status=won. That is a corrupted log — the user did NOT place two separate £25 bets, they placed one £50 double.
+
+WORKED EXAMPLE 2 — DraftKings "SGP" bet slip (footer-style combined price):
+
+Input:
+    Same Game Parlay · +450
+    LeBron James - Over 25.5 Points    -110
+    Los Angeles Lakers ML              -140
+    Lakers vs Warriors Over 224.5      -110
+    Stake: $20    To Win: $90
+
+Correct output — ONE row:
+    event:     "Lakers vs Warriors"
+    selection: "3-leg SGP: LeBron o25.5 + Lakers ML + Over 224.5"
+    market:    "parlay"
+    odds:      5.50 (converted from +450)  ← the combined price
+    stake:     20
+    status:    "pending" (no result shown)
+    sport:     "Basketball"
+
+WORKED EXAMPLE 3 — Naked pick list WITHOUT combined price (should stay as singles):
+
+Input:
+    Chiefs -3.5 @ -110, 1u, lost
+    Bills ML @ -110, 1u, won
+    Ravens over 44.5 @ -110, 1u, pending
+
+Correct output — THREE separate rows (no parlay). No combined price, no header, no ticket-level stake — these are singles.
 
 Parlay output rules:
   - ONE row, market="parlay". selection field summarises the legs, e.g. "3-leg SGP: Lakers ML + LeBron o25.5 pts + Over 224.5" or "Double: Arsenal −0.5 AH + Man City to win". Keep leg text short but recognisable.
