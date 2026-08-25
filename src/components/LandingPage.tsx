@@ -221,7 +221,7 @@ export function LandingPage() {
             </div>
             <div className="landing-preview-kpi-row">
               <div className="landing-preview-kpi">
-                <div className="landing-preview-kpi-label">Yield</div>
+                <div className="landing-preview-kpi-label">Yield (ROI)</div>
                 <div className="landing-preview-kpi-value num-pos">+4.1%</div>
                 <Spark
                   d="M0,11 L3,12 L6,9 L9,10 L12,8 L15,9 L18,6 L21,7 L24,5 L27,6 L30,4 L33,5 L36,3 L40,2"

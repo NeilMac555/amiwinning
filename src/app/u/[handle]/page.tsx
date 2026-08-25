@@ -196,7 +196,7 @@ export default async function ProfilePage({ params }: PageProps) {
         {/* KPI grid */}
         {settledCount > 0 && (
           <section className="profile-kpis">
-            <Kpi label="Yield" value={fmtPct(data.kpis.yieldPct)} tone={data.kpis.yieldPct >= 0 ? "pos" : "neg"} />
+            <Kpi label="Yield (ROI)" value={fmtPct(data.kpis.yieldPct)} tone={data.kpis.yieldPct >= 0 ? "pos" : "neg"} />
             <Kpi
               label="ROC"
               value={fmtPct(data.kpis.rocPct)}

@@ -984,7 +984,7 @@ function MarketPanel({
               P/L {arrow("pl")}
             </th>
             <th className="num sortable" onClick={() => onSort("yieldPct")}>
-              Yield {arrow("yieldPct")}
+              Yield (ROI) {arrow("yieldPct")}
             </th>
             <th className="num sortable" onClick={() => onSort("winRate")}>
               Win rate {arrow("winRate")}
@@ -1134,7 +1134,7 @@ function CompetitionPanel({
               P/L {arrow("pl")}
             </th>
             <th className="num sortable" onClick={() => onSort("yieldPct")}>
-              Yield {arrow("yieldPct")}
+              Yield (ROI) {arrow("yieldPct")}
             </th>
             <th className="num sortable" onClick={() => onSort("winRate")}>
               Win rate {arrow("winRate")}
@@ -1298,7 +1298,7 @@ function BookmakerPanel({
               P/L {arrow("pl")}
             </th>
             <th className="num sortable" onClick={() => onSort("yieldPct")}>
-              Yield {arrow("yieldPct")}
+              Yield (ROI) {arrow("yieldPct")}
             </th>
             <th className="num sortable" onClick={() => onSort("winRate")}>
               Win rate {arrow("winRate")}
@@ -1464,7 +1464,7 @@ function DowPanel({ rows, unit }: { rows: DowRow[]; unit: DisplayUnit }) {
         <div>
           <div className="card-title">By day of week</div>
           <div className="card-meta" style={{ marginTop: 4 }}>
-            <span>Yield · sample suppressed below 20</span>
+            <span>Yield (ROI) · sample suppressed below 20</span>
           </div>
         </div>
       </div>

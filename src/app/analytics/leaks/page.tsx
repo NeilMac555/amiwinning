@@ -233,7 +233,7 @@ export default function LeaksPage() {
             </div>
           </div>
           <div className="leaks-card-metric">
-            <div className="leaks-card-metric-label">Yield</div>
+            <div className="leaks-card-metric-label">Yield (ROI)</div>
             <div className={`leaks-card-metric-value leaks-card-metric-value--${leak.yieldPct >= 0 ? "pos" : "neg"}`}>
               {leak.yieldPct >= 0 ? "+" : ""}
               {leak.yieldPct.toFixed(1)}%

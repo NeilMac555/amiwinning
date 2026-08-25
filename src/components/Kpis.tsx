@@ -64,7 +64,7 @@ function buildKpiItems(kpis: KPIs, sparks: Sparks): KpiItem[] {
     },
     {
       id: "yield",
-      label: "Yield",
+      label: "Yield (ROI)",
       value: fmtPct(kpis.yieldPct),
       sign: signClass(kpis.yieldPct),
       delta: isReal ? "" : kpis.yieldPct > 0 ? "+0.03" : "−0.21",

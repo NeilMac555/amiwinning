@@ -102,7 +102,7 @@ function SignUpGate({
   // report, not real metrics. The blur on top makes it impossible
   // to read but easy to see the SHAPE of what's hidden.
   const teaserKpis: Array<{ label: string; value: string }> = [
-    { label: "YIELD", value: "+4.1%" },
+    { label: "YIELD (ROI)", value: "+4.1%" },
     { label: "ROC", value: "+28%" },
     { label: "CLV", value: "+0.8%" },
     { label: "WIN RATE", value: "53%" },
