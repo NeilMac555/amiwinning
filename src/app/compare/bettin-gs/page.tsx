@@ -223,7 +223,7 @@ export default function ComparePage() {
               </li>
               <li>
                 <strong>Public profile is free.</strong> Every account gets a
-                shareable <code>amiup.io/u/yourhandle</code> profile out of
+                shareable <code>amiup.io/yourhandle</code> profile out of
                 the box. Lifetime P/L, equity curve, sample size, KPI grid.
                 Drop the link in your X bio. On bettin.gs the equivalent is
                 a paid-tier feature.
@@ -369,7 +369,7 @@ export default function ComparePage() {
 
           <footer className="compare-foot">
             <Link href="/">Back to Am I Up</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
             <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
             <Link href="/compare/pikkit">vs Pikkit</Link>

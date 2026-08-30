@@ -61,7 +61,7 @@ export function LearnAuthor({ lastUpdated }: Props) {
       <span>
         By{" "}
         <Link
-          href={`/u/${AUTHOR_HANDLE}`}
+          href={`/${AUTHOR_HANDLE}`}
           style={{
             color: "var(--text)",
             textDecoration: "none",

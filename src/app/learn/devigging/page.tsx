@@ -52,7 +52,7 @@ export default function DeviggingPage() {
     author: {
       "@type": "Person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/u/neilmac555",
+      url: "https://amiup.io/neilmac555",
     },
     publisher: {
       "@type": "Organization",
@@ -430,7 +430,7 @@ export default function DeviggingPage() {
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
             <Link href="/learn">Glossary</Link>
-            <Link href="/u/sample">Sample profile</Link>
+            <Link href="/sample">Sample profile</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>

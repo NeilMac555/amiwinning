@@ -1,20 +1,14 @@
-// Per-book public tipster profile — server-rendered. Path is
-// /u/<handle>/<book-slug>, e.g. /u/filthyjabba/ylose-soccer.
+// Public tipster profile — server-rendered. Shows lifetime stats and the
+// equity curve. Individual bets are intentionally NOT rendered: this page
+// has to feel like a credibility card, not a strategy reveal.
 //
-// Same rendering as /u/<handle> but the underlying data is scoped to a
-// SINGLE book identified by its public_slug on the books table. Three
-// gates before any data returns: profile.is_public,
-// book.is_public + slug match, and bets filtered by (user_id, book_id).
-// See getPublicProfileServerByBookSlug in src/lib/profiles.ts.
-//
-// This route intentionally does not share code with /u/<handle> yet;
-// duplicating the render keeps the existing route byte-identical during
-// initial rollout. A follow-up can extract a shared <ProfileBody />.
+// Auth: none. Reads via the public anon Supabase client + the RLS policies
+// in migration 0003 (profiles_select_public + bets_select_public_profile).
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPublicProfileServerByBookSlug } from "@/lib/profiles";
+import { getPublicProfileServer } from "@/lib/profiles";
 import { aggregateFromBets } from "@/lib/aggregate";
 import { monthlyPL } from "@/lib/analytics";
 import { classifySport } from "@/lib/sport-classify";
@@ -22,10 +16,11 @@ import { BRAND } from "@/lib/brand";
 import { GeneratedAvatar } from "@/components/GeneratedAvatar";
 import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
-import { ProfileEquity } from "../ProfileEquity";
-import { ProfileGate } from "../ProfileGate";
+import { ProfileEquity } from "./ProfileEquity";
+import { ProfileGate } from "./ProfileGate";
 import { UtmCapture } from "@/components/UtmCapture";
 import type { ImportedBet } from "@/lib/import/types";
+import { SafeEvent, SafeField } from "@/components/SafeBetField";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
 // so newly-published profiles are reachable without a redeploy.
@@ -33,7 +28,7 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   // Next 16 dynamic params are Promises.
-  params: Promise<{ handle: string; book: string }>;
+  params: Promise<{ handle: string }>;
 }
 
 // ─ Metadata ─────────────────────────────────────────────────────────────
@@ -42,11 +37,8 @@ interface PageProps {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { handle, book: bookSlug } = await params;
-  const { profile, bets } = await getPublicProfileServerByBookSlug(
-    handle,
-    bookSlug,
-  );
+  const { handle } = await params;
+  const { profile, bets } = await getPublicProfileServer(handle);
   if (!profile) {
     return {
       title: "Profile not found",
@@ -58,26 +50,22 @@ export async function generateMetadata({
   const plLabel =
     lifetimePl >= 0 ? `+${lifetimePl.toFixed(1)}u` : `${lifetimePl.toFixed(1)}u`;
   const name = profile.displayName ?? profile.handle;
-  // Include the book slug in the metadata so a shared link's card
-  // makes it obvious which book the numbers came from. e.g.
-  // "filthyjabba • ylose-soccer".
-  const scoped = `${name} · ${bookSlug}`;
   return {
-    title: `${scoped} (${profile.handle})`,
+    title: `${name} (${profile.handle})`,
     description: `${plLabel} across ${settledCount.toLocaleString()} bets · tracked on ${BRAND.name}`,
-    // Self-canonical (see /u/[handle] for the rationale). Each book
-    // is its own resource so its canonical points to itself, even
-    // when the user only has one book.
-    alternates: { canonical: `/u/${handle}/${bookSlug}` },
+    // Self-canonical so Google doesn't merge this into the per-book
+    // URL /u/handle/book (which serves the same content for single-
+    // book users). Fixes GSC "Duplicate without user-selected canonical".
+    alternates: { canonical: `/${handle}` },
     openGraph: {
-      title: `${scoped} · ${plLabel}`,
+      title: `${name} · ${plLabel}`,
       description: `${settledCount.toLocaleString()} bets tracked on ${BRAND.name}`,
       siteName: BRAND.name,
       type: "profile",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${scoped} · ${plLabel}`,
+      title: `${name} · ${plLabel}`,
       description: `${settledCount.toLocaleString()} bets tracked on ${BRAND.name}`,
     },
   };
@@ -112,15 +100,9 @@ function fmtDateRange(bets: { kickoff: string }[]): string {
 // ─ Page ─────────────────────────────────────────────────────────────────
 
 export default async function ProfilePage({ params }: PageProps) {
-  const { handle, book: bookSlug } = await params;
-  const { profile, bets } = await getPublicProfileServerByBookSlug(
-    handle,
-    bookSlug,
-  );
+  const { handle } = await params;
+  const { profile, bets } = await getPublicProfileServer(handle);
 
-  // Any of the three gates in getPublicProfileServerByBookSlug failing
-  // (profile not public / book not public / slug mismatch) resolves to
-  // profile=null here. 404 with no leakage.
   if (!profile) {
     notFound();
   }
@@ -142,7 +124,8 @@ export default async function ProfilePage({ params }: PageProps) {
     <div className="profile-page">
       {/* Capture utm_* on entry so signup attribution fires when the
           viewer clicks through. Profile URLs are Neil's actual marketing
-          links, so this must fire here, not just on / and /sign-in. */}
+          links (X bio, Substack), so this must fire here, not just on /
+          and /sign-in. */}
       <UtmCapture />
       <header className="profile-topbar">
         <Link href="/" className="brand" style={{ textDecoration: "none" }}>
@@ -186,22 +169,6 @@ export default async function ProfilePage({ params }: PageProps) {
             <div>
               <h1 className="profile-name">{name}</h1>
               <div className="profile-handle">@{profile.handle}</div>
-              {/* Book label — makes it obvious to a viewer that this
-                  URL is scoped to one specific book (Ylose Soccer /
-                  Ylose Tennis / etc), not the profile's full history. */}
-              <div
-                className="profile-book-tag"
-                style={{
-                  fontFamily: "var(--mono)",
-                  fontSize: 10.5,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--text-muted)",
-                  marginTop: 4,
-                }}
-              >
-                book: {bookSlug}
-              </div>
               <div className="profile-meta">{fmtDateRange(bets)}</div>
             </div>
           </div>
@@ -224,7 +191,7 @@ export default async function ProfilePage({ params }: PageProps) {
             viewers. ProfileGate is a client component that short-circuits
             to a sign-up CTA if there's no logged-in user. /u/sample is
             exempted inside the gate (always full view). */}
-        <ProfileGate handle={profile.handle} ownerUserId={profile.userId} bookSlug={bookSlug}>
+        <ProfileGate handle={profile.handle} ownerUserId={profile.userId}>
 
         {/* KPI grid */}
         {settledCount > 0 && (
@@ -273,7 +240,11 @@ export default async function ProfilePage({ params }: PageProps) {
               label="Max DD"
               value={fmtPct(-Math.abs(data.kpis.maxDdPct))}
               tone="neg"
-              sub="peak-to-trough"
+              sub={
+                data.kpis.peakDrawdown && data.kpis.peakDrawdown > 0
+                  ? `−${data.kpis.peakDrawdown.toFixed(1)}u peak-to-trough`
+                  : "peak-to-trough"
+              }
             />
             <Kpi
               label="Median odds"
@@ -467,10 +438,12 @@ function MonthlyBars({ bets }: { bets: ImportedBet[] }) {
 }
 
 // ─ SettledBetsTable ───────────────────────────────────────────────────────
-// Every settled bet in this book, newest first. Server-rendered, no
-// interactivity. Pending bets excluded so strangers never see live
-// picks. No hard cap on rows — see the same component in the sibling
-// /u/[handle]/page.tsx for the full rationale.
+// Every settled bet, newest first. Server-rendered, no interactivity.
+// Pending bets excluded so strangers never see live picks. No hard cap
+// on rows — deliberate product call in 2026-08: a shared profile is a
+// receipt, and receipts don't hide anything. If a user has thousands
+// of bets and the table gets heavy, we'll add virtualization or a
+// "show more" chunk, but not by capping the visible history.
 
 function RecentSettledTable({
   bets,
@@ -530,10 +503,12 @@ function RecentSettledTable({
                   </td>
                   <td className="event">
                     <span className="league">{sport}</span>
-                    {b.event}
+                    <SafeEvent value={b.event} />
                   </td>
                   <td className="selection">
-                    <span className="sel-main">{b.selection}</span>
+                    <span className="sel-main">
+                      <SafeField value={b.selection} label="selection" />
+                    </span>
                   </td>
                   <td className="num mono">{b.odds.toFixed(2)}</td>
                   <td className="num mono">{b.stake.toFixed(1)}u</td>

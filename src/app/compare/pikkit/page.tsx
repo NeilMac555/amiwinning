@@ -64,7 +64,7 @@ const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Does Pikkit have a public profile feature like Am I Up?",
-    a: "Pikkit added social/sharing features in their paid tiers. Am I Up gives every user a free public profile at amiup.io/u/yourhandle showing lifetime P/L, equity curve, sample size, and KPI grid — included in the free tier.",
+    a: "Pikkit added social/sharing features in their paid tiers. Am I Up gives every user a free public profile at amiup.io/yourhandle showing lifetime P/L, equity curve, sample size, and KPI grid — included in the free tier.",
   },
 ];
 
@@ -253,7 +253,7 @@ export default function ComparePage() {
               </li>
               <li>
                 <strong>You want a free public profile.</strong> Every Am
-                I Up account gets <code>amiup.io/u/yourhandle</code> in
+                I Up account gets <code>amiup.io/yourhandle</code> in
                 the free tier — lifetime P/L, equity curve, KPI grid,
                 shareable URL. Pikkit&rsquo;s comparable social features
                 are paid.
@@ -402,7 +402,7 @@ export default function ComparePage() {
 
           <footer className="compare-foot">
             <Link href="/">Back to Am I Up</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
             <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>

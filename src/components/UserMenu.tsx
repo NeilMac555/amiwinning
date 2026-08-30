@@ -194,7 +194,7 @@ export function UserMenu() {
     .slice(0, 2)
     .toUpperCase() || "·";
   const shareUrl =
-    profile && profile.isPublic ? `https://${SITE}/u/${profile.handle}` : null;
+    profile && profile.isPublic ? `https://${SITE}/${profile.handle}` : null;
 
   const nameDirty = (profile?.displayName ?? "") !== name;
   const bioDirty = (profile?.bio ?? "") !== bio;

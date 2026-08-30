@@ -53,7 +53,7 @@ async function fetchPublicProfileEntries(): Promise<MetadataRoute.Sitemap> {
   if (error || !data) return [];
 
   return (data as ProfileRow[]).map((p) => ({
-    url: `${BASE}/u/${p.handle}`,
+    url: `${BASE}/${p.handle}`,
     lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.6,
@@ -101,7 +101,7 @@ async function fetchPublicBookEntries(): Promise<MetadataRoute.Sitemap> {
     const handle = handleByUser.get(b.user_id);
     if (!handle) continue; // profile not public → don't leak URL
     out.push({
-      url: `${BASE}/u/${handle}/${b.public_slug}`,
+      url: `${BASE}/${handle}/${b.public_slug}`,
       lastModified: b.updated_at ? new Date(b.updated_at) : new Date(),
       changeFrequency: "weekly",
       priority: 0.65,
@@ -291,6 +291,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // + bankroll are power-user terms, parlay is the front door.
       // Priority 0.85 — one of the highest.
       url: `${BASE}/learn/parlay`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      // Glossary — Moneyline. Highest single-page volume in the whole
+      // education cluster ("what is a moneyline bet" ~40k/mo,
+      // "moneyline meaning" ~15k/mo, "how does moneyline work" ~8k/mo,
+      // "+150 meaning" ~5k/mo, "-110 meaning" ~4k/mo). First search
+      // every new US sportsbook user makes. Priority 0.9 — the
+      // highest of any /learn page.
+      url: `${BASE}/learn/moneyline`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      // Glossary — Point Spread. Second-highest US gateway query
+      // ("what is a point spread" ~25k/mo, "point spread meaning"
+      // ~10k/mo, "cover the spread" ~5k/mo). Dominant bet type in
+      // the NFL and NBA, the reason casual bettors first see −110.
+      url: `${BASE}/learn/point-spread`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      // Glossary — Over/Under Betting (totals). Third of the trio
+      // of main game bets ("what is over under in betting" ~15k/mo,
+      // "totals betting explained" ~4k/mo). Completes the casual
+      // US bettor onboarding set with moneyline + point-spread.
+      url: `${BASE}/learn/over-under-betting`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,

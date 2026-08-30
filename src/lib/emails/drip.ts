@@ -142,7 +142,7 @@ function renderDay7(ctx: RenderContext): DripEmail {
 
 function renderDay14(ctx: RenderContext): DripEmail {
   const subject = "See what real edge looks like";
-  const sampleUrl = `${ctx.siteUrl}/u/sample`;
+  const sampleUrl = `${ctx.siteUrl}/sample`;
   const dashUrl = ctx.siteUrl;
   const text = [
     `Hi @${ctx.handle},`,
@@ -160,7 +160,7 @@ function renderDay14(ctx: RenderContext): DripEmail {
     `- Breakdown by sport, market, and odds range — where the profit came from`,
     `- Every bet logged, sortable, exportable`,
     ``,
-    `You get the same. Your profile at /u/${ctx.handle} becomes real receipts`,
+    `You get the same. Your profile at /${ctx.handle} becomes real receipts`,
     `you can share on X, in tipster group chats, wherever it matters. Real`,
     `numbers you tracked yourself. Nothing to fake.`,
     ``,
@@ -182,7 +182,7 @@ function renderDay14(ctx: RenderContext): DripEmail {
       `Breakdown by sport, market, and odds range — where the profit came from`,
       `Every bet logged, sortable, exportable`,
     ],
-    postBullets: `You get the same. Your profile at <code style="color:#F5A623">/u/${escapeHtml(ctx.handle)}</code> becomes real receipts you can share on X, in tipster group chats, wherever it matters. Real numbers you tracked yourself. Nothing to fake.`,
+    postBullets: `You get the same. Your profile at <code style="color:#F5A623">/${escapeHtml(ctx.handle)}</code> becomes real receipts you can share on X, in tipster group chats, wherever it matters. Real numbers you tracked yourself. Nothing to fake.`,
     primaryCta: { href: sampleUrl, label: "See a sample profile →" },
     secondaryCta: { href: dashUrl, label: "Track yours" },
   });

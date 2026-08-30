@@ -42,6 +42,8 @@ function rowToProfile(r: ProfileRow): Profile {
 
 // Handle constraint enforced by the DB check; we mirror it here for
 // fast client-side validation feedback.
+import { isReservedHandle } from "./reserved-handles";
+
 const HANDLE_RE = /^[a-z0-9_]{2,32}$/;
 
 export function validateHandle(handle: string): string | null {
@@ -50,6 +52,12 @@ export function validateHandle(handle: string): string | null {
   if (handle.length > 32) return "Maximum 32 characters.";
   if (!HANDLE_RE.test(handle))
     return "Only lowercase letters, digits, and underscores.";
+  // As of 2026-08-17 the profile URL is /{handle} — so a handle that
+  // collides with a top-level route (learn, compare, settings, etc.)
+  // would produce a profile page unreachable by URL. Reject before
+  // the sign-up completes.
+  if (isReservedHandle(handle))
+    return "That handle is reserved by the site — please choose a different one.";
   return null;
 }
 

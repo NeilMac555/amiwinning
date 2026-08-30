@@ -16,9 +16,9 @@ import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn" },
-  title: "Betting Analytics Glossary. CLV, Yield, EV, ROI, ROC, Kelly, Parlay, +EV, Devig.",
+  title: "Sports Betting Glossary. Moneyline, Spread, O/U, Parlay, CLV, +EV.",
   description:
-    "Plain-English definitions of the metrics and strategies that actually matter in sports betting analytics. Closing line value, yield, expected value, ROI, ROC, Kelly criterion, bankroll management, positive EV betting, devigging, parlays. Formula and worked example on every entry.",
+    "Plain-English definitions of every sports betting term that matters. Moneyline, point spread, over/under, parlay, SGP, CLV, yield, ROI, ROC, expected value, Kelly criterion, bankroll management, devigging. Formula, worked example, and FAQ on every entry.",
   openGraph: {
     title: `${BRAND.name} Betting Analytics Glossary`,
     description:
@@ -104,6 +104,27 @@ const ENTRIES: Entry[] = [
     short:
       "The most popular product on every US sportsbook — and the one with the biggest house edge. How parlay odds work, same game parlays, teasers, why they lose long-term.",
     aka: ["Accumulator", "Acca", "Multi-bet", "SGP", "Bet Builder"],
+  },
+  {
+    slug: "moneyline",
+    title: "Moneyline",
+    short:
+      "The simplest bet on any sportsbook — pick the winner, no spread. American odds explained, +150 vs −140, break-even math, when to take a moneyline instead of a spread.",
+    aka: ["ML", "Match Odds", "Match Winner", "1X2"],
+  },
+  {
+    slug: "point-spread",
+    title: "Point Spread",
+    short:
+      "The handicap that levels lopsided games. Covering, pushing, the hook (.5), key numbers 3 and 7 in the NFL, why spreads are almost always priced at −110.",
+    aka: ["Spread", "Handicap", "Line", "ATS"],
+  },
+  {
+    slug: "over-under-betting",
+    title: "Over/Under (Totals)",
+    short:
+      "Bet whether the combined score goes above or below a number the sportsbook set. Same concept in every sport — points, goals, runs, games. Team totals, first-half totals, why the line moves.",
+    aka: ["Over/Under", "O/U", "Totals", "Match Total"],
   },
 ];
 
@@ -310,7 +331,7 @@ export default function LearnHubPage() {
 
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
             <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>

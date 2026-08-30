@@ -116,7 +116,7 @@ export default function PartnersPage() {
               {" "}{BRAND.name} is early. We would rather pay real tipsters
               cash to migrate their record onto our public-profile system
               than spend the same money on ads. If your followers see your
-              track record on amiup.io/u/&lt;yourhandle&gt; and a fraction
+              track record on amiup.io/&lt;yourhandle&gt; and a fraction
               sign up to compete, we win. So do you.
             </p>
             <p>
@@ -149,7 +149,7 @@ export default function PartnersPage() {
               </li>
               <li>
                 <strong>A short, memorable public URL</strong>{" "}
-                (amiup.io/u/&lt;yourhandle&gt;). Yours to keep even after
+                (amiup.io/&lt;yourhandle&gt;). Yours to keep even after
                 the partnership ends. You control the handle; we do not
                 take it back.
               </li>
@@ -172,7 +172,7 @@ export default function PartnersPage() {
                 <strong>Post one monthly summary at end of month.</strong>{" "}
                 A single X post (or Substack note, or Telegram broadcast,
                 whichever is your main channel) linking your{" "}
-                amiup.io/u/&lt;yourhandle&gt; profile with your month&rsquo;s
+                amiup.io/&lt;yourhandle&gt; profile with your month&rsquo;s
                 P/L and a call to click through. Content wording is yours;
                 the link and the honest number are non-negotiable.
               </li>
@@ -187,7 +187,7 @@ export default function PartnersPage() {
           <section className="learn-section">
             <h2 className="learn-h2">The public-profile reality</h2>
             <p>
-              Your public profile at amiup.io/u/&lt;yourhandle&gt; shows
+              Your public profile at amiup.io/&lt;yourhandle&gt; shows
               lifetime P/L, equity curve, KPI grid, and the last 30
               settled bets. It is honest. If you lose money in a month,
               viewers see it. If you win, they see it. There is no way to
@@ -293,7 +293,7 @@ export default function PartnersPage() {
 
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/learn/clv">What is CLV?</Link>
             <Link href="/learn/yield">What is Yield?</Link>
             <Link href="/learn/roi">What is ROI?</Link>

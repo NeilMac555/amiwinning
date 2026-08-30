@@ -94,7 +94,7 @@ export default function PrivacyPage() {
             authenticated users can&rsquo;t see your private books or bets.
             Only public-profile data (aggregate stats, last 30 settled bets
             from your chosen public book) is visible at your{" "}
-            <Link href="/">/u/your-handle</Link> URL, and only if you have
+            <Link href="/">/your-handle</Link> URL, and only if you have
             the public-profile toggle on.
           </p>
         </section>

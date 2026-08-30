@@ -4,7 +4,7 @@
 //  - flip their profile public/private (default public — see migration 0003)
 //  - pick a custom handle (auto-generated from email on signup, editable)
 //  - set a display name + bio
-//  - copy the shareable amiup.io/u/<handle> link
+//  - copy the shareable amiup.io/<handle> link
 //
 // The actual profile row lives in Supabase. Reads + writes go through
 // src/lib/profiles.ts.
@@ -186,7 +186,7 @@ export function ProfilePanel() {
   };
 
   const shareUrl =
-    profile && profile.isPublic ? `https://${SITE}/u/${profile.handle}` : null;
+    profile && profile.isPublic ? `https://${SITE}/${profile.handle}` : null;
 
   const onCopy = async () => {
     if (!shareUrl) return;
@@ -385,7 +385,7 @@ export function ProfilePanel() {
       {/* Handle */}
       <Field
         label="Handle"
-        hint={`The end of your shareable URL: ${SITE}/u/<handle>. Lowercase letters, digits, underscores. 2–32 chars.`}
+        hint={`The end of your shareable URL: ${SITE}/<handle>. Lowercase letters, digits, underscores. 2–32 chars.`}
       >
         <div
           style={{
@@ -410,7 +410,7 @@ export function ProfilePanel() {
               borderRight: "var(--border-w) solid var(--border)",
             }}
           >
-            {SITE}/u/
+            {SITE}/
           </span>
           <input
             value={handle}

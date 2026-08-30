@@ -77,7 +77,7 @@ export function BookShareRow({ book, handle, profileIsPublic, onSaved }: Props) 
   };
 
   const previewUrl = isPublicDraft && slugDraft && !inlineSlugError
-    ? `amiup.io/u/${handle}/${slugDraft}`
+    ? `amiup.io/${handle}/${slugDraft}`
     : null;
 
   return (
@@ -125,7 +125,7 @@ export function BookShareRow({ book, handle, profileIsPublic, onSaved }: Props) 
                 color: "var(--text-faint)",
               }}
             >
-              amiup.io/u/{handle}/
+              amiup.io/{handle}/
             </span>
             <input
               type="text"

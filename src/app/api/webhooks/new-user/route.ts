@@ -124,7 +124,7 @@ export async function POST(req: Request) {
   // auth.users which webhooks can't see). The handle is auto-generated
   // from the email-local-part on signup though, so it's already a strong
   // hint about who joined.
-  const profileUrl = is_public ? `https://amiup.io/u/${handle}` : null;
+  const profileUrl = is_public ? `https://amiup.io/${handle}` : null;
   const joinedAt = created_at ? new Date(created_at).toUTCString() : "just now";
   const displayLine = display_name ? ` (${display_name})` : "";
 

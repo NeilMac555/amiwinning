@@ -56,7 +56,7 @@ export default function RoiPage() {
     author: {
       "@type": "Person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/u/neilmac555",
+      url: "https://amiup.io/neilmac555",
     },
     publisher: {
       "@type": "Organization",
@@ -469,7 +469,7 @@ export default function RoiPage() {
 
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/learn/clv">What is CLV?</Link>
             <Link href="/learn/yield">What is Yield?</Link>
             <Link href="/learn/expected-value">What is EV?</Link>

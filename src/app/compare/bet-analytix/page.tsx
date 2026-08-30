@@ -48,7 +48,7 @@ const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "What can Am I Up do that Bet Analytix cannot?",
-    a: "Three big things. First, AI paste — you can drop a screenshot, an X post, a Telegram tip, or a bookmaker bet slip in and the AI extracts every bet automatically. Bet Analytix is 100% manual entry. Second, a public shareable profile URL at amiup.io/u/yourhandle that you can drop in your X bio as receipts of your edge. Bet Analytix's community feature is in-app follow only. Third, closing-line value (CLV) vs Pinnacle is a first-class metric on every bet, every profile, every KPI card.",
+    a: "Three big things. First, AI paste — you can drop a screenshot, an X post, a Telegram tip, or a bookmaker bet slip in and the AI extracts every bet automatically. Bet Analytix is 100% manual entry. Second, a public shareable profile URL at amiup.io/yourhandle that you can drop in your X bio as receipts of your edge. Bet Analytix's community feature is in-app follow only. Third, closing-line value (CLV) vs Pinnacle is a first-class metric on every bet, every profile, every KPI card.",
   },
   {
     q: "What does Bet Analytix do better?",
@@ -247,7 +247,7 @@ export default function ComparePage() {
               <li>
                 <strong>Public profile is one clickable URL.</strong>{" "}
                 Every account gets a shareable{" "}
-                <code>amiup.io/u/yourhandle</code> profile. Lifetime P/L,
+                <code>amiup.io/yourhandle</code> profile. Lifetime P/L,
                 equity curve, sample size, KPI grid. Drop it in your X
                 bio and prove your edge with receipts. Bet Analytix has
                 an in-app follow feature, but no public URL to share
@@ -411,7 +411,7 @@ export default function ComparePage() {
 
           <footer className="compare-foot">
             <Link href="/">Back to Am I Up</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
             <Link href="/compare/pikkit">vs Pikkit</Link>

@@ -62,7 +62,7 @@ export function EmptyDashboard({ displayName }: Props) {
       <footer className="empty-dashboard-foot">
         <span>
           Curious what a populated profile looks like?{" "}
-          <Link href="/u/neilmac555" style={{ color: "var(--blue)" }}>
+          <Link href="/neilmac555" style={{ color: "var(--blue)" }}>
             See a sample
           </Link>
           .

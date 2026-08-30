@@ -61,7 +61,7 @@ export default function ParlayPage() {
     author: {
       "@type": "Person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/u/neilmac555",
+      url: "https://amiup.io/neilmac555",
     },
     publisher: {
       "@type": "Organization",
@@ -372,6 +372,27 @@ export default function ParlayPage() {
             <ul className="learn-list learn-list--related">
               <li>
                 <strong>
+                  <Link href="/learn/moneyline">Moneyline:</Link>
+                </strong>{" "}
+                the most common parlay leg — pick who wins outright.
+                Combine multiple into one ticket for the parlay payout.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/point-spread">Point spread:</Link>
+                </strong>{" "}
+                the other common parlay leg. Each spread leg must cover,
+                not just pick the right side.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/learn/over-under-betting">Over/under:</Link>
+                </strong>{" "}
+                totals legs are common in same-game parlays — team win +
+                over is a correlated SGP pair every book pushes.
+              </li>
+              <li>
+                <strong>
                   <Link href="/learn/expected-value">Expected Value (EV):</Link>
                 </strong>{" "}
                 the average per-bet profit given the true probabilities.
@@ -482,7 +503,7 @@ export default function ParlayPage() {
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
             <Link href="/learn">Glossary</Link>
-            <Link href="/u/sample">Sample profile</Link>
+            <Link href="/sample">Sample profile</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>

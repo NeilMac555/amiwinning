@@ -4,14 +4,14 @@
 
 Am I Up is a free web app at amiup.io that helps sports bettors track their real edge instead of guessing. The wedge is the paste-and-parse feature: users paste unstructured text (screenshots of bet slips, X posts, group-chat tips, bookmaker copy-paste) and Claude Haiku extracts each bet into a structured record with kickoff date, event, selection, market, decimal odds, stake in units, and settled status. Bets are stored per-user in a Supabase Postgres database with row-level security and daily backups.
 
-Every user gets a public profile at amiup.io/u/<handle> that shows lifetime P/L, equity curve, KPI grid (yield, ROC, CLV, win rate, max drawdown, median odds), sport / market / odds-range breakdowns, monthly bars, CLV distribution, and the last 30 settled bets. Users with multiple books (Personal, competition-specific like "Ylose Soccer" or "Ylose Tennis") can publish each book independently at amiup.io/u/<handle>/<book-slug>.
+Every user gets a public profile at amiup.io/<handle> that shows lifetime P/L, equity curve, KPI grid (yield, ROC, CLV, win rate, max drawdown, median odds), sport / market / odds-range breakdowns, monthly bars, CLV distribution, and the last 30 settled bets. Users with multiple books (Personal, competition-specific like "Ylose Soccer" or "Ylose Tennis") can publish each book independently at amiup.io/<handle>/<book-slug>.
 
 Built and maintained by Neil Macdonald, an independent sports betting analyst.
 
 ## Core
 
 - [Landing](https://amiup.io/): What Am I Up does, live paste-and-parse demo, sample profile card.
-- [Sample public profile](https://amiup.io/u/sample): Fully-featured example profile so visitors can see every metric before signing up.
+- [Sample public profile](https://amiup.io/sample): Fully-featured example profile so visitors can see every metric before signing up.
 
 ## Learn (glossary)
 
@@ -26,6 +26,9 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 - [Positive EV Betting](https://amiup.io/learn/positive-ev-betting): The strategy underneath every profitable bettor. How to find +EV bets by comparing soft-book prices against devigged sharp-market references, and why CLV is the truest test of whether the strategy is working.
 - [Devigging Odds](https://amiup.io/learn/devigging): Stripping bookmaker margin (vig, juice, overround) out of odds to get a clean no-vig implied probability. Multiplicative and power methods, worked two-way and three-way examples.
 - [What is a Parlay in Sports Betting?](https://amiup.io/learn/parlay): The most popular product on every US sportsbook — and the one with the biggest house edge. Combined odds math, same game parlays (SGPs), teasers, round robins, why the compounding vig makes them a losing bet at scale.
+- [What is a Moneyline Bet?](https://amiup.io/learn/moneyline): The simplest bet on any sportsbook. American odds explained (+150 vs −140), how to calculate payouts, favorites vs underdogs, break-even math, when to take a moneyline instead of a spread.
+- [What is a Point Spread?](https://amiup.io/learn/point-spread): The handicap that levels lopsided games. Covering, pushing, the hook (.5), key numbers 3 and 7 in the NFL, why spreads are almost always priced at −110.
+- [What is Over/Under (Totals) Betting?](https://amiup.io/learn/over-under-betting): Bet whether the combined score goes above or below a number. Same concept in every sport — points, goals, runs, games. Team totals, first-half totals, why the line moves.
 
 ## Compare
 

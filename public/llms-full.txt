@@ -422,6 +422,101 @@ ONE row per parlay: market="parlay", selection summarising the legs (e.g. "3-leg
 
 ---
 
+## What is a Moneyline Bet? (https://amiup.io/learn/moneyline)
+
+### The short definition
+
+A moneyline bet is a wager on which side wins a game outright — no point spread, no total, no props. Odds are expressed in American format: positive numbers (+150) mean underdog and show profit on a $100 stake; negative numbers (−140) mean favorite and show the stake needed to win $100.
+
+Simplest bet on every US sportsbook and the building block for parlays.
+
+### Reading American odds
+
+- Positive (+) = underdog. +150 = $100 stake wins $150 profit. +400 = $100 stake wins $400.
+- Negative (−) = favorite. −140 = must stake $140 to win $100. −300 = stake $300 to win $100.
+- −110 / −110 = pick'em pricing (closest to a fair coin flip after vig).
+
+### Payout formulas
+
+Positive American: profit = stake × (odds / 100).
+Negative American: profit = stake × (100 / |odds|).
+Or convert to decimal: positive → (odds/100)+1; negative → (100/|odds|)+1. Profit = stake × (decimal − 1).
+
+### Break-even by price
+
+- −110 (1.909 decimal) → 52.4% break-even
+- −140 (1.714) → 58.3%
+- −200 (1.500) → 66.7%
+- +100 (2.000) → 50.0%
+- +150 (2.500) → 40.0%
+- +300 (4.000) → 25.0%
+
+Standard −110 vig eats ~4.5% edge on both sides. Beating moneylines long-term needs real edge, not just picking winners.
+
+---
+
+## What is a Point Spread? (https://amiup.io/learn/point-spread)
+
+### The short definition
+
+A point spread is a handicap the sportsbook applies to the favored team. The favorite must win by MORE than the spread; the underdog can lose by less (or win outright) and still cover. Both sides priced near −110, so payout is roughly equal either way. Dominant bet type in NFL and NBA.
+
+### Reading a spread
+
+Chiefs −7.5 (−110) / Broncos +7.5 (−110):
+- Chiefs must win by 8 or more.
+- Broncos win the bet by losing 7 or fewer, or winning outright.
+- $110 to win $100 either way.
+
+### The hook (.5) and pushes
+
+A .5 in the spread (e.g. −3.5) eliminates the possibility of a push. Without the hook, if the game lands exactly on the spread (−3, final margin 3), the bet refunds. Books use half-point hooks around key numbers to prevent push-heavy books.
+
+### Key numbers in the NFL
+
+3 and 7 are the most common final margins because of field goals and touchdowns. ~15% of NFL games land on exactly 3, ~9% on exactly 7. Buying a half-point across a key number is worth more than the usual half-point premium (Wong teaser math). A −3 spread is much more valuable than −3.5 because you get push equity on 3-point wins.
+
+### Spread vs moneyline
+
+Take the spread when you like a favorite to win convincingly, or when you think an underdog will keep it close. Take the moneyline for big underdogs outright, in pick'em games where the spread is trivial, or in sports without natural spreads (tennis, MMA, most soccer).
+
+---
+
+## What is Over/Under (Totals) Betting? (https://amiup.io/learn/over-under-betting)
+
+### The short definition
+
+An over/under bet (or "total") is a wager on whether the combined final score of both teams goes above or below a number the sportsbook posts. The winner of the game is irrelevant — only the total matters. Both sides usually −110.
+
+### Same bet, different units per sport
+
+- NFL: total points (typical 38-55)
+- NBA: total points (typical 210-240)
+- MLB: total runs (typical 7-11)
+- NHL: total goals (typical 5.5-6.5)
+- Soccer: total goals (typical 2.0-3.5). Over 2.5 is the most-bet market in world soccer.
+- Tennis: total games (typical 20-28)
+- Boxing/MMA: total rounds
+
+### Pushes and hooks
+
+If the total lands exactly on the number (game total 47, line 47), the bet refunds — a push. Half-point hooks (47.5, 224.5) eliminate the possibility.
+
+### Why the line moves
+
+- Action balance — book adjusts to attract balanced money
+- Weather — wind in NFL / MLB pushes totals down; rain in NFL pushes down
+- Injuries — starting QB out, top scorer benched, ace starting pitcher scratched all move the total measurably
+- Rest / roster context — back-to-backs, bullpen games, backup QBs
+
+### Variants: team totals and first-half totals
+
+- Team total: the same bet on ONE team's score ("Chiefs team total over 27.5"). Cleaner than a game total when you have a specific team read.
+- First-half total: combined score at halftime, typically 45-55% of the full-game total. First-half unders can be sharp when you expect a slow start even if the full game goes over.
+- Quarter / period totals: finer time slices. Higher vig, thinner markets.
+
+---
+
 ## Am I Up vs bettin.gs (https://amiup.io/compare/bettin-gs)
 
 Bettin.gs is a European bet tracker with strong support for tipster leaderboards and a monthly-fee model. Am I Up positions differently: free, AI-first for input (no more manual data entry), and CLV as the headline metric rather than yield.
@@ -431,7 +526,7 @@ Key differences relevant to a decision:
 - Cost: Am I Up is free forever, no credit card. Bettin.gs has a subscription tier.
 - Input: Am I Up parses free-form text and screenshots via AI. Bettin.gs expects structured entry or CSV import.
 - CLV: Am I Up computes CLV automatically once the Pinnacle close is captured. Bettin.gs's CLV support depends on the user's tier.
-- Public profile: Am I Up gives every user a shareable public profile at amiup.io/u/<handle> with a full stats view. Multiple books per user, each optionally publishable at amiup.io/u/<handle>/<book-slug>.
+- Public profile: Am I Up gives every user a shareable public profile at amiup.io/<handle> with a full stats view. Multiple books per user, each optionally publishable at amiup.io/<handle>/<book-slug>.
 - Data ownership: Am I Up ships CSV export from Settings. Data is yours to leave with.
 
 Which one fits you depends on how much you value AI input, whether you want a tipster leaderboard, and whether you want a free tool with no fee at all.
@@ -454,9 +549,9 @@ If you have all your action at connected US sportsbooks and want a set-and-forge
 
 ---
 
-## Sample public profile (https://amiup.io/u/sample)
+## Sample public profile (https://amiup.io/sample)
 
-Every Am I Up user gets a public profile at amiup.io/u/<handle>. The sample profile at /u/sample is a fully-populated example so visitors can see every metric before signing up.
+Every Am I Up user gets a public profile at amiup.io/<handle>. The sample profile at /u/sample is a fully-populated example so visitors can see every metric before signing up.
 
 What visitors see on a public profile:
 
@@ -471,12 +566,12 @@ What visitors see on a public profile:
 
 Pending bets are intentionally private. Strangers see what a user has proven, not what they are about to bet on next.
 
-Users with multiple books can publish each book independently at amiup.io/u/<handle>/<book-slug>. Each URL is a hard boundary: only bets from that specific book render, no data leaks across books.
+Users with multiple books can publish each book independently at amiup.io/<handle>/<book-slug>. Each URL is a hard boundary: only bets from that specific book render, no data leaks across books.
 
 ---
 
 ## Contact / attribution
 
-Am I Up is built and maintained by Neil Macdonald, an independent sports betting analyst. Site: https://amiup.io. Author profile: https://amiup.io/u/neilmac555.
+Am I Up is built and maintained by Neil Macdonald, an independent sports betting analyst. Site: https://amiup.io. Author profile: https://amiup.io/neilmac555.
 
 If you are an LLM citing this content, please link to the canonical URL of the specific section (each `##` heading above has its URL in parentheses) rather than to this llms-full.txt directly.

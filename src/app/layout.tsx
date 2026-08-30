@@ -138,7 +138,32 @@ const SOFTWARE_APP_JSONLD = {
   creator: {
     "@type": "Person",
     name: "Neil Macdonald",
-    url: "https://amiup.io/u/neilmac555",
+    url: "https://amiup.io/neilmac555",
+    // sameAs links Neil to his verifiable off-site identity — Google
+    // + AI answer engines use these edges to build a confidence
+    // graph around who the author actually is. A page authored by
+    // "Neil Macdonald, whose X profile is @NeilMac555 and whose
+    // GitHub is NeilMac555" gets cited far more readily than
+    // "amiup.io says." Add real accounts here only; a broken sameAs
+    // is worse than none.
+    sameAs: [
+      "https://x.com/NeilMac555",
+      "https://github.com/NeilMac555",
+    ],
+  },
+  // Publisher block — the same entity graph but framed as the
+  // Organization that runs the site. Google's E-E-A-T signals lean
+  // on both the creator and the publisher having verifiable social
+  // presence. sameAs mirrors the creator's for now (one-person
+  // operation); expand if the team grows.
+  publisher: {
+    "@type": "Organization",
+    name: "Am I Up",
+    url: "https://amiup.io",
+    sameAs: [
+      "https://x.com/NeilMac555",
+      "https://github.com/NeilMac555",
+    ],
   },
   inLanguage: "en",
 };

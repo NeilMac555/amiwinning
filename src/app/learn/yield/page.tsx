@@ -55,7 +55,7 @@ export default function YieldPage() {
     author: {
       "@type": "Person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/u/neilmac555",
+      url: "https://amiup.io/neilmac555",
     },
     publisher: {
       "@type": "Organization",
@@ -475,7 +475,7 @@ export default function YieldPage() {
 
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/learn/clv">What is CLV?</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
             <Link href="/compare/pikkit">vs Pikkit</Link>

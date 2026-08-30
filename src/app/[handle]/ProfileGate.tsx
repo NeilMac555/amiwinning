@@ -94,7 +94,7 @@ function SignUpGate({
   // on the per-book route, include the slug so the viewer lands back
   // on the same book, not on whichever book the bare handle happens
   // to resolve to for that user.
-  const returnPath = bookSlug ? `/u/${handle}/${bookSlug}` : `/u/${handle}`;
+  const returnPath = bookSlug ? `/${handle}/${bookSlug}` : `/${handle}`;
   const signUpHref = `/sign-in?returnTo=${encodeURIComponent(returnPath)}`;
 
   // The visible-but-blurred KPI teaser. Numbers are deliberately

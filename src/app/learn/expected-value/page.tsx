@@ -56,7 +56,7 @@ export default function ExpectedValuePage() {
     author: {
       "@type": "Person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/u/neilmac555",
+      url: "https://amiup.io/neilmac555",
     },
     publisher: {
       "@type": "Organization",
@@ -516,7 +516,7 @@ export default function ExpectedValuePage() {
 
           <footer className="learn-foot">
             <Link href="/">Back to {BRAND.name}</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/learn/clv">What is CLV?</Link>
             <Link href="/learn/yield">What is Yield?</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>

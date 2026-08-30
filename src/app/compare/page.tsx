@@ -242,7 +242,7 @@ export default function CompareHubPage() {
 
           <footer className="compare-foot">
             <Link href="/">Back to Am I Up</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/learn">Glossary</Link>
             <Link href="/learn/clv">What is CLV?</Link>
             <Link href="/learn/yield">What is Yield?</Link>

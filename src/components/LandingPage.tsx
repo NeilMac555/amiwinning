@@ -132,7 +132,7 @@ export function LandingPage() {
                 Start tracking. Free.
               </Link>
               <Link
-                href={`/u/${SAMPLE_HANDLE}`}
+                href={`/${SAMPLE_HANDLE}`}
                 className="btn-ghost"
                 style={{
                   padding: "11px 22px",
@@ -249,7 +249,7 @@ export function LandingPage() {
               </div>
             </div>
             <Link
-              href={`/u/${SAMPLE_HANDLE}`}
+              href={`/${SAMPLE_HANDLE}`}
               className="landing-preview-view-link"
             >
               View the full sample profile
@@ -266,7 +266,7 @@ export function LandingPage() {
         <div className="landing-foot-links">
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
-          <Link href={`/u/${SAMPLE_HANDLE}`}>Sample profile</Link>
+          <Link href={`/${SAMPLE_HANDLE}`}>Sample profile</Link>
           <Link href="/compare/bettin-gs">vs bettin.gs</Link>
           <Link href="/compare/pikkit">vs Pikkit</Link>
           <Link href="/learn/clv">What is CLV?</Link>

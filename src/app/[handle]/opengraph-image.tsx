@@ -176,9 +176,9 @@ export default async function Image({ params }: OgProps) {
             {/* Satori requires single-child text nodes on plain divs.
                 Interpolating `${handle}` inside a template literal
                 keeps this a single React child; the naked form
-                "amiup.io/u/{handle}" is two children and crashes with
+                "amiup.io/{handle}" is two children and crashes with
                 "Expected <div> to have explicit display: flex". */}
-            {`amiup.io/u/${profile.handle}`}
+            {`amiup.io/${profile.handle}`}
           </div>
         </div>
 

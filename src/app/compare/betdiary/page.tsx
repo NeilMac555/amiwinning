@@ -226,7 +226,7 @@ export default function ComparePage() {
               <li>
                 <strong>Public profile is free.</strong> Every account
                 gets a shareable{" "}
-                <code>amiup.io/u/yourhandle</code> profile. Lifetime P/L,
+                <code>amiup.io/yourhandle</code> profile. Lifetime P/L,
                 equity curve, sample size, KPI grid. Drop the link in
                 your X bio and have receipts. Bet Diary does not offer a
                 shareable public profile.
@@ -364,7 +364,7 @@ export default function ComparePage() {
 
           <footer className="compare-foot">
             <Link href="/">Back to Am I Up</Link>
-            <Link href="/u/sample">See a sample profile</Link>
+            <Link href="/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
             <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
