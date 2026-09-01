@@ -328,6 +328,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
+      // Author entity page. Not high on search intent volume, but a
+      // discoverable /author URL is important structurally — every
+      // /learn Article JSON-LD's author.@id resolves here, so Google
+      // and AI answer engines need to be able to crawl and index the
+      // canonical Person entity that all our glossary articles cite.
+      url: `${BASE}/author/neil-macdonald`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       // Tipster partnership landing. Lower priority (0.5) than the
       // marketing / glossary pages because organic search intent is
       // small, but we still want Google + LLMs to know it exists so

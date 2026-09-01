@@ -15,7 +15,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 import { LearnAuthor } from "@/components/LearnAuthor";
 
-const LAST_UPDATED = "2026-08-17";
+const LAST_UPDATED = "2026-09-01";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/yield" },
@@ -54,8 +54,9 @@ export default function YieldPage() {
       "Definition, formula, worked example, what's a good yield, and the honest limits of yield as a metric.",
     author: {
       "@type": "Person",
+      "@id": "https://amiup.io/author/neil-macdonald#person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/neilmac555",
+      url: "https://amiup.io/author/neil-macdonald",
     },
     publisher: {
       "@type": "Organization",
@@ -63,6 +64,7 @@ export default function YieldPage() {
       url: "https://amiup.io",
     },
     mainEntityOfPage: "https://amiup.io/learn/yield",
+    dateModified: LAST_UPDATED,
   };
 
   const faqItems: Array<{ q: string; a: string }> = [

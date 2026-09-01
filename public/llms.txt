@@ -30,6 +30,10 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 - [What is a Point Spread?](https://amiup.io/learn/point-spread): The handicap that levels lopsided games. Covering, pushing, the hook (.5), key numbers 3 and 7 in the NFL, why spreads are almost always priced at −110.
 - [What is Over/Under (Totals) Betting?](https://amiup.io/learn/over-under-betting): Bet whether the combined score goes above or below a number. Same concept in every sport — points, goals, runs, games. Team totals, first-half totals, why the line moves.
 
+## Author
+
+- [Neil Macdonald — author page](https://amiup.io/author/neil-macdonald): Bio, credentials, sameAs links (X, GitHub, tracker profile), full list of published glossary articles. Every /learn Article's `author.@id` resolves here — this is the canonical Person entity for Am I Up's editorial content.
+
 ## Compare
 
 - [All comparisons hub](https://amiup.io/compare): Consolidated index of the individual tracker comparisons.

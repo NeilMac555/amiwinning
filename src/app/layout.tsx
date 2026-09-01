@@ -137,8 +137,13 @@ const SOFTWARE_APP_JSONLD = {
   ],
   creator: {
     "@type": "Person",
+    // @id resolves to the Person entity defined on /author/neil-
+    // macdonald. Every /learn Article JSON-LD uses the same @id, so
+    // Google + AI answer engines see one coherent Person node
+    // authored by us across the whole site (E-E-A-T entity graph).
+    "@id": "https://amiup.io/author/neil-macdonald#person",
     name: "Neil Macdonald",
-    url: "https://amiup.io/neilmac555",
+    url: "https://amiup.io/author/neil-macdonald",
     // sameAs links Neil to his verifiable off-site identity — Google
     // + AI answer engines use these edges to build a confidence
     // graph around who the author actually is. A page authored by
@@ -149,6 +154,7 @@ const SOFTWARE_APP_JSONLD = {
     sameAs: [
       "https://x.com/NeilMac555",
       "https://github.com/NeilMac555",
+      "https://amiup.io/neilmac555",
     ],
   },
   // Publisher block — the same entity graph but framed as the

@@ -32,7 +32,11 @@ interface Props {
   lastUpdated: string; // ISO YYYY-MM-DD
 }
 
-const AUTHOR_HANDLE = "neilmac555";
+// Byline link points at the canonical author entity page
+// (/author/neil-macdonald) rather than Neil's bettor profile. Every
+// /learn Article JSON-LD references the same Person entity via its
+// @id, so search + AI engines see one coherent author graph.
+const AUTHOR_URL = "/author/neil-macdonald";
 const AUTHOR_NAME = "Neil Macdonald";
 const AUTHOR_CRED = "Independent sports betting analyst";
 
@@ -61,7 +65,7 @@ export function LearnAuthor({ lastUpdated }: Props) {
       <span>
         By{" "}
         <Link
-          href={`/${AUTHOR_HANDLE}`}
+          href={AUTHOR_URL}
           style={{
             color: "var(--text)",
             textDecoration: "none",

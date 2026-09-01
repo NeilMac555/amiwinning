@@ -12,7 +12,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 import { LearnAuthor } from "@/components/LearnAuthor";
 
-const LAST_UPDATED = "2026-08-17";
+const LAST_UPDATED = "2026-09-01";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/devigging" },
@@ -51,8 +51,9 @@ export default function DeviggingPage() {
       "How to strip bookmaker vig from odds, calculate no-vig implied probability, and use it for accurate +EV betting decisions.",
     author: {
       "@type": "Person",
+      "@id": "https://amiup.io/author/neil-macdonald#person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/neilmac555",
+      url: "https://amiup.io/author/neil-macdonald",
     },
     publisher: {
       "@type": "Organization",
@@ -60,6 +61,7 @@ export default function DeviggingPage() {
       url: "https://amiup.io",
     },
     mainEntityOfPage: "https://amiup.io/learn/devigging",
+    dateModified: LAST_UPDATED,
   };
 
   const faqItems: Array<{ q: string; a: string }> = [

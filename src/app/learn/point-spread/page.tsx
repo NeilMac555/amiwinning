@@ -11,7 +11,7 @@ import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 import { LearnAuthor } from "@/components/LearnAuthor";
 
-const LAST_UPDATED = "2026-08-17";
+const LAST_UPDATED = "2026-09-01";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/learn/point-spread" },
@@ -50,8 +50,9 @@ export default function PointSpreadPage() {
       "Covering the spread, pushes, the hook (.5), key numbers in the NFL and NBA, why point spreads sit at −110.",
     author: {
       "@type": "Person",
+      "@id": "https://amiup.io/author/neil-macdonald#person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/neilmac555",
+      url: "https://amiup.io/author/neil-macdonald",
     },
     publisher: {
       "@type": "Organization",

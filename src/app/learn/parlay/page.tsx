@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "2026-08-17";
+const LAST_UPDATED = "2026-09-01";
 
 export default function ParlayPage() {
   const definedTermJsonLd = {
@@ -60,8 +60,9 @@ export default function ParlayPage() {
       "How parlays work, the math against you, same game parlays, teasers, round robins.",
     author: {
       "@type": "Person",
+      "@id": "https://amiup.io/author/neil-macdonald#person",
       name: "Neil Macdonald",
-      url: "https://amiup.io/neilmac555",
+      url: "https://amiup.io/author/neil-macdonald",
     },
     publisher: {
       "@type": "Organization",
