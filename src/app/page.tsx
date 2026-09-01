@@ -28,6 +28,13 @@ import { WinRateGauge } from "@/components/WinRateGauge";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
 import { BRAND } from "@/lib/brand";
 import { filterByRange, rangeLabel, type Range } from "@/lib/range";
+
+// The dashboard exposes a slimmed-down subset of the full RANGES list:
+// four buckets the user asked for, ordered from most-recent to widest. All
+// downstream sections (KPIs, equity curve, breakdowns) share the same
+// `range` state, so this control filters the whole page — it just sits
+// directly above the KPI strip where the user can actually see it.
+const DASHBOARD_RANGES: Range[] = ["1M", "3M", "12M", "All"];
 import type { ImportedBet } from "@/lib/import/types";
 import { applyTheme, applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
@@ -219,9 +226,6 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            {allBets.length > 0 && (
-              <RangeTabs value={range} onChange={setRange} />
-            )}
           </div>
 
           {!user && allBets.length > 0 && <SampleDataBanner />}
@@ -285,6 +289,36 @@ export default function Dashboard() {
 
           {source === "mock" && <MockBanner />}
           {source === "imported" && <ImportedBanner count={importedCount} />}
+
+          {source === "imported" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                marginTop: 14,
+                marginBottom: 6,
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--text-faint)",
+                }}
+              >
+                Metrics · {rangeLabel(range, now)}
+              </div>
+              <RangeTabs
+                value={range}
+                onChange={setRange}
+                options={DASHBOARD_RANGES}
+              />
+            </div>
+          )}
 
           <KpiStripCompact kpis={data.kpis} sparks={data.sparks} />
           <SecondaryStats s={data.secondary} />
