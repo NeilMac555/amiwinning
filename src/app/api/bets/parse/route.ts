@@ -180,6 +180,64 @@ export async function POST(req: Request): Promise<Response> {
   const client = new Anthropic({ apiKey });
   const aggregatedBets: ParsedBet[] = [];
   const chunkErrors: string[] = [];
+  // Whether ANY chunk hit an Anthropic overload / 5xx during its
+  // retries. If every chunk fails and this flag is set, we return a
+  // dedicated `overloaded` error code so the client renders "Claude's
+  // servers are busy" rather than the raw stack trace.
+  let sawOverload = false;
+
+  // Retryable HTTP statuses from Anthropic's API:
+  //   529 — overloaded (their explicit "traffic spike, back off" code)
+  //   503 — service unavailable
+  //   502, 504 — transient upstream errors
+  //   500 — occasional server error, worth one retry
+  // 429 (rate limit) is NOT retried here — that requires respecting
+  // Retry-After and is usually a real hard cap, not a transient blip.
+  const RETRYABLE_STATUSES = new Set([500, 502, 503, 504, 529]);
+  // Two retries with jittered exponential backoff. Anthropic 529s
+  // typically clear within 2-5 seconds, so 1s + 3s covers the common
+  // case while keeping p99 latency bounded.
+  const RETRY_DELAYS_MS = [1000, 3000];
+
+  async function callClaudeWithRetry(
+    userContent: Anthropic.Messages.MessageParam["content"],
+  ): Promise<Anthropic.Messages.Message> {
+    let lastErr: unknown = null;
+    for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+      try {
+        return await client.messages.create({
+          model: "claude-haiku-4-5",
+          max_tokens: 4000,
+          system: [
+            {
+              type: "text",
+              text: SYSTEM_PROMPT,
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+          tools: [TOOL_DEF],
+          tool_choice: { type: "tool", name: "submit_bets" },
+          messages: [{ role: "user", content: userContent }],
+        });
+      } catch (err) {
+        lastErr = err;
+        const status =
+          err instanceof Anthropic.APIError ? err.status : undefined;
+        const retryable = status !== undefined && RETRYABLE_STATUSES.has(status);
+        if (retryable) sawOverload = true;
+        // If it's a non-retryable error, or we've used all attempts,
+        // rethrow. Otherwise pause with backoff (plus jitter to avoid
+        // thundering-herd retries stacking on top of Anthropic's
+        // recovery).
+        if (!retryable || attempt === RETRY_DELAYS_MS.length) throw err;
+        const jitter = Math.floor(Math.random() * 250);
+        await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt] + jitter));
+      }
+    }
+    // Unreachable — the loop above either returns or throws — but TS
+    // needs an exhaustive return.
+    throw lastErr;
+  }
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
@@ -216,20 +274,7 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     try {
-      const resp = await client.messages.create({
-        model: "claude-haiku-4-5",
-        max_tokens: 4000,
-        system: [
-          {
-            type: "text",
-            text: SYSTEM_PROMPT,
-            cache_control: { type: "ephemeral" },
-          },
-        ],
-        tools: [TOOL_DEF],
-        tool_choice: { type: "tool", name: "submit_bets" },
-        messages: [{ role: "user", content: userContent }],
-      });
+      const resp = await callClaudeWithRetry(userContent);
       const toolBlock = resp.content.find((c) => c.type === "tool_use");
       if (!toolBlock || toolBlock.type !== "tool_use") {
         chunkErrors.push(`Chunk ${i + 1}: no tool_use returned`);
@@ -251,6 +296,21 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   if (aggregatedBets.length === 0 && chunkErrors.length > 0) {
+    // If any chunk exhausted its retries on an Anthropic overload /
+    // 5xx, surface a distinct `errorCode` so the client renders a
+    // "servers are busy" message rather than dumping the raw JSON
+    // error. Status 503 (service unavailable) matches semantics —
+    // it's transient, retry later.
+    if (sawOverload) {
+      return NextResponse.json(
+        {
+          error:
+            "Claude's servers are overloaded right now. Give it a minute and try again — your paste is still in the box.",
+          errorCode: "overloaded",
+        },
+        { status: 503 },
+      );
+    }
     return NextResponse.json(
       { error: `All chunks failed: ${chunkErrors.join("; ")}` },
       { status: 502 },

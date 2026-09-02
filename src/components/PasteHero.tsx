@@ -263,7 +263,12 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
       // client with a raw SyntaxError. We try to JSON-parse only
       // after we know we have the text in hand.
       const raw = await res.text();
-      let body: { bets?: unknown[]; issues?: unknown[]; error?: string } = {};
+      let body: {
+        bets?: unknown[];
+        issues?: unknown[];
+        error?: string;
+        errorCode?: string;
+      } = {};
       try {
         body = raw ? JSON.parse(raw) : {};
       } catch {
@@ -279,7 +284,24 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
         return;
       }
       if (!res.ok) {
-        setError(body.error ?? `HTTP ${res.status}`);
+        // Detect Anthropic overload responses — the server may return
+        // errorCode:"overloaded" (new format) or leak the raw error
+        // JSON if something upstream changes. Match both so users see
+        // a friendly message either way. Text stays gentle; paste box
+        // isn't cleared so they can just retry.
+        const raw = (body.error ?? "").toLowerCase();
+        const isOverload =
+          body.errorCode === "overloaded" ||
+          res.status === 529 ||
+          raw.includes("overloaded") ||
+          raw.includes("529");
+        if (isOverload) {
+          setError(
+            "Claude's servers are busy right now. Give it a minute and try again — your paste is still here.",
+          );
+        } else {
+          setError(body.error ?? `HTTP ${res.status}`);
+        }
         return;
       }
       const parsed: ParsedBet[] = (body.bets ?? []) as ParsedBet[];
