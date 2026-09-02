@@ -133,7 +133,7 @@ export function BookShareRow({ book, handle, profileIsPublic, onSaved }: Props) 
               onChange={(e) =>
                 setSlugDraft(e.target.value.toLowerCase().trimStart())
               }
-              placeholder="ylose-soccer"
+              placeholder="tennis-2026"
               maxLength={32}
               style={{
                 padding: "4px 8px",

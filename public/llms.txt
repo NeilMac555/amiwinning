@@ -4,7 +4,7 @@
 
 Am I Up is a free web app at amiup.io that helps sports bettors track their real edge instead of guessing. The wedge is the paste-and-parse feature: users paste unstructured text (screenshots of bet slips, X posts, group-chat tips, bookmaker copy-paste) and Claude Haiku extracts each bet into a structured record with kickoff date, event, selection, market, decimal odds, stake in units, and settled status. Bets are stored per-user in a Supabase Postgres database with row-level security and daily backups.
 
-Every user gets a public profile at amiup.io/<handle> that shows lifetime P/L, equity curve, KPI grid (yield, ROC, CLV, win rate, max drawdown, median odds), sport / market / odds-range breakdowns, monthly bars, CLV distribution, and the last 30 settled bets. Users with multiple books (Personal, competition-specific like "Ylose Soccer" or "Ylose Tennis") can publish each book independently at amiup.io/<handle>/<book-slug>.
+Every user gets a public profile at amiup.io/<handle> that shows lifetime P/L, equity curve, KPI grid (yield, ROC, CLV, win rate, max drawdown, median odds), sport / market / odds-range breakdowns, monthly bars, CLV distribution, and the last 30 settled bets. Users with multiple books (for example a personal book and a separate book per competition or sport) can publish each book independently at amiup.io/<handle>/<book-slug>.
 
 Built and maintained by Neil Macdonald, an independent sports betting analyst.
 

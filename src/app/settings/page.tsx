@@ -328,7 +328,7 @@ export default function SettingsPage() {
                   >
                     <input
                       type="text"
-                      placeholder="New book name (e.g. Ylose Tennis)"
+                      placeholder="New book name (e.g. Tennis 2026)"
                       value={newBookName}
                       onChange={(e) => setNewBookName(e.target.value)}
                       onKeyDown={(e) => {
