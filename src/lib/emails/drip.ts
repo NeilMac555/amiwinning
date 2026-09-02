@@ -191,7 +191,10 @@ function renderDay14(ctx: RenderContext): DripEmail {
 
 // ─ Shared HTML shell ─────────────────────────────────────────────────────
 
-interface WrapArgs extends RenderContext {
+// Exported so other transactional emails (weekly Sharp Report) reuse the
+// exact same shell, palette, and unsubscribe footer instead of forking
+// 30 lines of inline-styled HTML.
+export interface WrapArgs extends RenderContext {
   eyebrow: string;
   headline: string;
   body: string[];
@@ -202,7 +205,7 @@ interface WrapArgs extends RenderContext {
   footerLine?: string;
 }
 
-function wrapHtml(a: WrapArgs): string {
+export function wrapHtml(a: WrapArgs): string {
   const unsubUrl = `${a.siteUrl}/api/unsubscribe/${mintUnsubscribeToken(a.userId)}`;
   const bulletsHtml = a.bullets
     ? `<ul style="margin: 16px 0 20px; padding-left: 20px; color: #E6EDF3; line-height: 1.6; font-size: 15px;">${a.bullets
@@ -234,7 +237,7 @@ function wrapHtml(a: WrapArgs): string {
   </div>`;
 }
 
-function escapeHtml(s: string): string {
+export function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

@@ -11,6 +11,9 @@
 
 import { notFound } from "next/navigation";
 import { renderDrip, DRIP_KEYS, DAYS_FOR_KEY, type DripKey } from "@/lib/emails/drip";
+import { renderWeeklyReport } from "@/lib/emails/weekly-report";
+import type { WeeklyReport } from "@/lib/weekly-report/ai";
+import type { WeeklyReportInput } from "@/lib/weekly-report/data";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +23,51 @@ const SAMPLE_CTX = {
   siteUrl: "http://localhost:3020",
 };
 
+// Fixture for the weekly Sharp Report so the layout can be eyeballed
+// without a model call. Numbers are illustrative only.
+const SAMPLE_WEEKLY_INPUT: WeeklyReportInput = {
+  handle: "yourhandle",
+  week: { start: "2026-08-24", end: "2026-08-31" },
+  lifetime: { settled: 412, pl: 27.4, yieldPct: 4.1, clvPct: 1.9, clvSample: 288, maxDdPct: -22.5, peakDrawdownUnits: 31 },
+  thisWeek: { settled: 14, pending: 3, pl: 3.4, yieldPct: 11.2, wins: 8, losses: 6, pushes: 0 },
+  leaks: [],
+  strengths: [],
+  competitions: [],
+  markets: [],
+  oddsBands: [],
+  sports: [],
+};
+const SAMPLE_WEEKLY_REPORT: WeeklyReport = {
+  headline: "A +3.4u week, but Premier League handicaps are still your biggest hole.",
+  bullets: [
+    { kind: "leak", segment: "Premier League", text: "-9.2u on 58 settled bets, -7.8% yield. Moderate sample. Your Asian handicap picks here are the whole loss. Stop until the Serie A edge below is funding it." },
+    { kind: "edge", segment: "Serie A", text: "+11.6u on 71 settled, +9.3% yield at an average price of 1.92. Moderate sample and a positive CLV. Keep going and consider 1.5u instead of 1u." },
+    { kind: "edge", segment: "Mid odds (1.7 to 2.5)", text: "+18.1u across 203 bets. Strong sample. This is where your edge lives. Nearly every profitable segment sits in this band." },
+    { kind: "leak", segment: "Big longshots (4.0+)", text: "-6.4u on 19 bets. Early signal only, but the pattern is consistent with the rest of your data. Wait for more before drawing a conclusion." },
+    { kind: "note", segment: "Closing odds", text: "CLV is logged on 288 of 412 bets. The 124 without it are invisible to the edge test. Log the close when you can." },
+  ],
+  closing: "Skip Premier League handicaps this week and put the stake into Serie A at mid odds.",
+};
+
 export default async function PreviewPage() {
   if (process.env.NODE_ENV === "production") notFound();
 
-  const emails = DRIP_KEYS.map((key) => ({
-    key,
-    days: DAYS_FOR_KEY[key],
-    email: renderDrip(key, SAMPLE_CTX),
-  }));
+  const weekly = renderWeeklyReport(SAMPLE_CTX, SAMPLE_WEEKLY_REPORT, SAMPLE_WEEKLY_INPUT);
+
+  const emails = [
+    {
+      key: "weekly" as DripKey | "weekly",
+      days: 0,
+      label: "weekly · Sharp Report · every Monday",
+      email: weekly,
+    },
+    ...DRIP_KEYS.map((key) => ({
+      key: key as DripKey | "weekly",
+      days: DAYS_FOR_KEY[key],
+      label: `${key} · day ${DAYS_FOR_KEY[key]}`,
+      email: renderDrip(key, SAMPLE_CTX),
+    })),
+  ];
 
   return (
     <div
@@ -83,15 +123,15 @@ export default async function PreviewPage() {
                     fontWeight: 600,
                   }}
                 >
-                  {e.key} · day {e.days}
+                  {e.label}
                 </div>
                 <div style={{ fontSize: 16, marginTop: 4, fontWeight: 500 }}>
                   Subject: {e.email.subject}
                 </div>
               </div>
               <div style={{ fontSize: 12, color: "#8B949E" }}>
-                From: hi@amiup.io &nbsp;·&nbsp; sent day{" "}
-                {e.days} after signup
+                From: hi@amiup.io &nbsp;·&nbsp;{" "}
+                {e.days > 0 ? `sent day ${e.days} after signup` : "sent Monday morning to active users"}
               </div>
             </div>
             <iframe
