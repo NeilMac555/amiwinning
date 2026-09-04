@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, fmtPL, fmtStake } from "@/components/UnitContext";
-import { consumeSeed, deleteBet, loadBets } from "@/lib/import/store";
+import { consumeSeed, deleteBet, loadBets, updateBet } from "@/lib/import/store";
 import type { ImportedBet, Status } from "@/lib/import/types";
+import { autoPl, plMatchesStatus, statusLabel } from "@/lib/bet-math";
+import { StatusMenu } from "@/components/StatusMenu";
 import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { formatOdds } from "@/lib/format-odds";
@@ -26,6 +28,18 @@ export default function BetsPage() {
   const ALL = "__aiw_all__";
   const [bets, setBets] = useState<ImportedBet[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  // Last inline status change, held for 30s so it can be reversed from a
+  // toast. `kept` is true when the bet had a hand-typed P/L that we
+  // deliberately left alone.
+  const [undo, setUndo] = useState<{
+    id: string;
+    prevStatus: Status;
+    prevPl: number;
+    nextStatus: Status;
+    nextPl: number;
+    kept: boolean;
+  } | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<Status | typeof ALL>(ALL);
   const [marketFilter, setMarketFilter] = useState<string>(ALL);
@@ -66,6 +80,51 @@ export default function BetsPage() {
     }
     router.push(`/bets/${id}/edit`);
   };
+
+  // Inline status change from the row's status badge. P/L follows the new
+  // status automatically UNLESS the bet already carried a hand-typed P/L
+  // (cash-out, partial payout) — then the P/L is left alone and the toast
+  // says so, with a link to the edit page.
+  const onStatusChange = (b: ImportedBet, next: Status) => {
+    if (next === b.status) return;
+    const derive = b.status === "pending" || plMatchesStatus(b);
+    const nextPl = derive ? autoPl(next, b.odds, b.stake) : b.pl;
+    const updated = updateBet(b.id, { status: next, pl: nextPl });
+    setBets(
+      activeBook
+        ? updated.filter((x) => !x.bookId || x.bookId === activeBook.id)
+        : updated,
+    );
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setUndo({
+      id: b.id,
+      prevStatus: b.status,
+      prevPl: b.pl,
+      nextStatus: next,
+      nextPl,
+      kept: !derive,
+    });
+    undoTimer.current = setTimeout(() => setUndo(null), 30_000);
+  };
+
+  const undoStatusChange = () => {
+    if (!undo) return;
+    const updated = updateBet(undo.id, { status: undo.prevStatus, pl: undo.prevPl });
+    setBets(
+      activeBook
+        ? updated.filter((x) => !x.bookId || x.bookId === activeBook.id)
+        : updated,
+    );
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setUndo(null);
+  };
+
+  // Don't leave a timer running after the page unmounts.
+  useEffect(() => {
+    return () => {
+      if (undoTimer.current) clearTimeout(undoTimer.current);
+    };
+  }, []);
 
   const marketOptions = useMemo(() => {
     const set = new Set<string>();
@@ -423,18 +482,15 @@ export default function BetsPage() {
                               </>
                             )}
                           </td>
-                          <td>
-                            <span
-                              className={`badge ${
-                                b.status === "won" || b.status === "half_won"
-                                  ? "win"
-                                  : b.status === "lost" || b.status === "half_lost"
-                                    ? "loss"
-                                    : "void"
-                              }`}
-                            >
-                              {b.status.replace("_", "-")}
-                            </span>
+                          {/* Status is editable in place. The cell swallows
+                              clicks so the row's navigate-to-edit handler
+                              doesn't fire when the menu is used. */}
+                          <td onClick={(e) => e.stopPropagation()} style={{ cursor: "default" }}>
+                            <StatusMenu
+                              value={b.status}
+                              label={b.selection}
+                              onChange={(s) => onStatusChange(b, s)}
+                            />
                           </td>
                           <td
                             className={`num ${b.pl > 0 ? "num-pos" : b.pl < 0 ? "num-neg" : "num-flat"}`}
@@ -559,6 +615,32 @@ export default function BetsPage() {
           </div>
         </div>
       </div>
+
+      {undo && (
+        <div className="undo-toast" role="status" aria-live="polite">
+          <span>
+            Marked{" "}
+            <strong className={undo.nextPl > 0 ? "num-pos" : undo.nextPl < 0 ? "num-neg" : ""}>
+              {statusLabel(undo.nextStatus).toLowerCase()}
+            </strong>
+            {" · "}
+            <span className={`mono ${undo.nextPl > 0 ? "num-pos" : undo.nextPl < 0 ? "num-neg" : "num-flat"}`}>
+              {fmtPL(undo.nextPl, unit)}
+            </span>
+            {undo.kept && (
+              <span style={{ color: "var(--text-muted)" }}>
+                {" "}· P/L left as entered by hand.{" "}
+                <Link href={`/bets/${undo.id}/edit`} style={{ color: "var(--blue)" }}>
+                  Edit
+                </Link>
+              </span>
+            )}
+          </span>
+          <button type="button" className="btn-ghost" onClick={undoStatusChange} style={{ padding: "4px 10px", fontSize: 12 }}>
+            Undo
+          </button>
+        </div>
+      )}
     </UnitProvider>
   );
 }

@@ -899,6 +899,69 @@ a.sb-item { cursor: pointer; }
 
 .tbl[data-density="dense"] .badge { padding: 0 6px 1px; font-size: 10px; }
 
+/* Inline status control on the bet log (StatusMenu). The pill is the
+   normal badge made clickable; the menu is position: fixed so it escapes
+   the table card's overflow clipping. */
+.status-pill { cursor: pointer; }
+.status-pill::after {
+  content: "▾";
+  font-size: 8px;
+  opacity: 0.55;
+  margin-left: 1px;
+}
+.status-pill:hover { border-color: var(--text-muted); }
+.status-menu {
+  position: fixed;
+  z-index: 60;
+  min-width: 136px;
+  padding: 4px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+.status-menu button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+}
+.status-menu button:hover,
+.status-menu button[data-active="true"] { background: var(--bg); }
+.status-menu .dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+.status-menu .dot.win { background: var(--green); }
+.status-menu .dot.loss { background: var(--red); }
+.status-menu .dot.void { background: var(--text-faint); }
+
+/* Undo toast after an inline status change. */
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  font-size: 12.5px;
+  color: var(--text);
+  max-width: calc(100vw - 32px);
+}
+
 .tbl td.actions { width: 1px; }
 .row-actions {
   display: flex;

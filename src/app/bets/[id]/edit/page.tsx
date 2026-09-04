@@ -1,5 +1,9 @@
 "use client";
 
+// autoPl lives in lib/bet-math so the bet log's inline status control and
+// this form agree on how a status maps to a P/L.
+import { autoPl } from "@/lib/bet-math";
+
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -81,23 +85,6 @@ function parseOddsInput(raw: string): number | null {
   return null;
 }
 
-function autoPl(status: Status, odds: number, stake: number): number {
-  switch (status) {
-    case "won":
-      return Math.round(stake * (odds - 1) * 100) / 100;
-    case "lost":
-      return -stake;
-    case "half_won":
-      return Math.round((stake * (odds - 1)) / 2 * 100) / 100;
-    case "half_lost":
-      return -stake / 2;
-    case "push":
-    case "void":
-    case "pending":
-    default:
-      return 0;
-  }
-}
 
 export default function EditBetPage() {
   const router = useRouter();
