@@ -9,18 +9,13 @@
 
 import type { CSSProperties } from "react";
 
-// Eight palettes — each a [bg-start, bg-end, accent, text] tuple. Picked
-// to be tasteful: muted, low-saturation, avoiding day-glo. The text color
-// is always contrasty enough against the gradient to read at small sizes.
+// Muted amber variations with high-contrast charcoal initials.
+// Handle-based variation stays subtle so every fallback fits the same theme.
 const PALETTES: Array<[string, string, string, string]> = [
-  ["#2D4A3E", "#5A7B6B", "#E8D9A7", "#F5F2EA"], // forest → sage, cream text
-  ["#7A3F2B", "#B5402E", "#F0D5B8", "#F5F2EA"], // burnt sienna → terracotta
-  ["#3E4A6E", "#6B7BA5", "#D9E0F0", "#F5F2EA"], // navy → slate, pale text
-  ["#5F3D6B", "#8B6BA0", "#E8D5E5", "#F5F2EA"], // plum → mauve
-  ["#1E5F4F", "#3FA083", "#E0F0D9", "#F5F2EA"], // teal → mint
-  ["#6B5230", "#A88A4F", "#F0E8D5", "#F5F2EA"], // bronze → tan
-  ["#2D3D4F", "#5F7589", "#D5E5F0", "#F5F2EA"], // graphite → blue-gray
-  ["#5A3030", "#8B5252", "#F0D5D5", "#F5F2EA"], // wine → blush
+  ["#DFA13C", "#BE812C", "#FFE0A0", "#171A20"],
+  ["#E5AE53", "#C58C36", "#FFE0A0", "#171A20"],
+  ["#DBA247", "#BC8534", "#FFE0A0", "#171A20"],
+  ["#E1AA4E", "#C18A38", "#FFE0A0", "#171A20"],
 ];
 
 // Simple deterministic hash for picking a palette. Doesn't need to be a
@@ -71,7 +66,7 @@ export function GeneratedAvatar({
   ];
 
   const gradId = `grad-${hash.toString(36)}`;
-  const fontSize = size * 0.36;
+  const fontSize = 36;
 
   return (
     <svg
@@ -89,7 +84,7 @@ export function GeneratedAvatar({
         </linearGradient>
       </defs>
       <rect width="100" height="100" fill={`url(#${gradId})`} />
-      <path d={accents[variant]} fill={accent} opacity="0.7" />
+      <path d={accents[variant]} fill={accent} opacity="0.3" />
       <text
         x="50"
         y="50"

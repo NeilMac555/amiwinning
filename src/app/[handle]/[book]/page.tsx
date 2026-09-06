@@ -19,6 +19,7 @@ import { aggregateFromBets } from "@/lib/aggregate";
 import { monthlyPL } from "@/lib/analytics";
 import { classifySport } from "@/lib/sport-classify";
 import { BRAND } from "@/lib/brand";
+import { TrackingBadge } from "@/components/TrackingBadge";
 import { GeneratedAvatar } from "@/components/GeneratedAvatar";
 import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
@@ -184,7 +185,7 @@ export default async function ProfilePage({ params }: PageProps) {
               )}
             </div>
             <div>
-              <h1 className="profile-name">{name}</h1>
+              <div className="profile-name-row"><h1 className="profile-name">{name}</h1><TrackingBadge count={settledCount} sample={handle === "sample"} /></div>
               <div className="profile-handle">@{profile.handle}</div>
               {/* Book label — makes it obvious to a viewer that this
                   URL is scoped to one specific book (Ylose Soccer /

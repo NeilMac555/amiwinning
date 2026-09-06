@@ -6569,3 +6569,11 @@ a.sb-item { cursor: pointer; }
 .sample-metric-help summary { color:var(--text-muted); }
 .sample-metric-help p { margin:8px 0 0; }
 .sample-history-toggle summary:focus-visible, .sample-metric-help summary:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+
+.profile-name-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.tracking-badge { position:relative; font-size:12px; font-weight:500; }
+.tracking-badge summary { display:flex; align-items:center; gap:6px; padding:5px 9px; min-height:32px; border:1px solid rgba(245,166,35,.35); border-radius:6px; color:var(--accent); background:rgba(245,166,35,.08); cursor:pointer; list-style:none; }
+.tracking-badge summary::-webkit-details-marker { display:none; }
+.tracking-badge summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.tracking-badge p { max-width:320px; margin:10px 0; font-size:12px; line-height:1.6; color:var(--text-muted); }
+.tracking-badge-sample { font-size:10px; color:var(--text-muted); border-left:1px solid var(--border-strong); padding-left:6px; }
