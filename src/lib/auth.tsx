@@ -31,6 +31,8 @@ import {
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  /** Presentation state for the initial account pull, scoped to its owner. */
+  accountStatus: "loading" | "ready" | "error";
   configured: boolean;
   migration: MigrationResult | null;
   /** Result of the one-shot data cleanup pass (sport reclassification +
@@ -56,6 +58,7 @@ const noop = async () => {};
 const Ctx = createContext<AuthContextValue>({
   user: null,
   loading: true,
+  accountStatus: "loading",
   configured: false,
   migration: null,
   cleanup: null,
@@ -73,6 +76,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // If Supabase isn't configured, there's no async work to wait for — start
   // out of the loading state so the UI doesn't sit on a spinner forever.
   const [loading, setLoading] = useState(() => Boolean(supabase));
+  const [accountLoad, setAccountLoad] = useState<{
+    userId: string;
+    failed: boolean;
+  } | null>(null);
+  const accountStatus = accountLoad?.userId !== user?.id
+    ? "loading"
+    : accountLoad?.failed ? "error" : "ready";
   const [migration, setMigration] = useState<MigrationResult | null>(null);
   const [cleanup, setCleanup] = useState<CleanupResult | null>(null);
   const [betsVersion, setBetsVersion] = useState(0);
@@ -141,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) {
       queueMicrotask(() => {
+        setAccountLoad(null);
         setBooks([]);
         setActiveBookIdState(null);
       });
@@ -178,6 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 4. Pull canonical state back into the local cache.
       const pulled = await pullFromSupabase();
       if (cancelled) return;
+      setAccountLoad({ userId: user.id, failed: pulled < 0 });
       if (pulled >= 0) {
 
         console.info(`[aiw] pulled ${pulled} bets from Supabase`);
@@ -203,7 +215,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
          
         console.error("[aiw] cleanup failed:", cleanupResult.error);
       }
-    })();
+    })().catch((error: unknown) => {
+      if (cancelled) return;
+      console.error("[aiw] account loading failed:", error);
+      // A later cleanup failure must not hide an already loaded dashboard.
+      setAccountLoad((current) => current?.userId === user.id
+        ? current
+        : { userId: user.id, failed: true });
+    });
     return () => {
       cancelled = true;
     };
@@ -278,6 +297,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       loading,
+      accountStatus,
       configured: isSupabaseConfigured,
       migration,
       cleanup,
@@ -292,6 +312,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [
       user,
       loading,
+      accountStatus,
       migration,
       cleanup,
       betsVersion,

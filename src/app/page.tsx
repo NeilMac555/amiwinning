@@ -39,13 +39,26 @@ import type { ImportedBet } from "@/lib/import/types";
 import { applyTheme, applyThemeForSignedIn, useSettings } from "@/lib/settings";
 import { useAuth } from "@/lib/auth";
 import { LandingPage } from "@/components/LandingPage";
+import { DashboardLoading } from "@/components/DashboardLoading";
+import { HomeStartup } from "@/components/HomeStartup";
 
 type Source = "mock" | "imported";
 
 export default function Dashboard() {
+  const { user, loading, accountStatus, activeBook } = useAuth();
+  if (loading) return <HomeStartup />;
+  if (!user) return <LandingPage />;
+  if (accountStatus !== "ready") {
+    return <DashboardLoading failed={accountStatus === "error"} />;
+  }
+  return <AccountDashboard key={`${user.id}:${activeBook?.id ?? "none"}`} />;
+}
+
+function AccountDashboard() {
   // First render: mock data so SSR/client hydration match. After mount, we
   // check localStorage and swap to imported aggregates when present.
   const [source, setSource] = useState<Source>("mock");
+  const [cacheLoaded, setCacheLoaded] = useState(false);
   const [allBets, setAllBets] = useState<ImportedBet[]>([]);
   const [now, setNow] = useState<number>(NOW);
   // Default to All time so the dashboard stats reflect a user's full
@@ -84,6 +97,7 @@ export default function Dashboard() {
     // effect's call stack (React 19 set-state-in-effect rule). Runs before
     // paint, so no visible flash of stale state.
     queueMicrotask(() => {
+      setCacheLoaded(true);
       if (scoped.length > 0) {
         setSource("imported");
         setAllBets(scoped);
@@ -195,7 +209,7 @@ export default function Dashboard() {
   // Signed-out visitors see the marketing landing page instead of the
   // sample dashboard. They came here from an X share, an OG card link,
   // or word of mouth — not to look at someone else's seed bets.
-  if (!user) return <LandingPage />;
+  if (!cacheLoaded) return <DashboardLoading />;
 
   return (
     <UnitProvider unit={unit}>

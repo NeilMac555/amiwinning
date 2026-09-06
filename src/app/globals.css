@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Account startup: stable placeholders while session and book data resolve. */
+.homepage-initial-account { display: none; }
+html[data-account-startup] .homepage-initial-landing { display: none; }
+html[data-account-startup] .homepage-initial-account { display: block; }
+.dashboard-loading { display: flex; min-height: 100dvh; background: var(--bg); }
+.dashboard-loading-sidebar { width: 212px; flex-shrink: 0; padding: 28px 24px; border-right: 1px solid var(--border); }
+.dashboard-loading-brand { font-size: 22px; font-weight: 600; margin-bottom: 48px; }
+.dashboard-loading-line { height: 12px; margin-bottom: 28px; border-radius: 4px; background: var(--surface-2); }
+.dashboard-loading-line:nth-child(even) { width: 75%; }
+.dashboard-loading-main { flex: 1; min-width: 0; }
+.dashboard-loading-top { height: 64px; padding: 20px 32px; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+.dashboard-loading-body { padding: 32px; max-width: 1600px; margin: auto; }
+.dashboard-loading-body h1 { margin: 0 0 8px; font-size: 28px; font-weight: 600; }
+.dashboard-loading-body p { margin: 0 0 28px; color: var(--text-muted); font-size: 13px; }
+.dashboard-loading-paste, .dashboard-loading-chart, .dashboard-loading-kpis > div { border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
+.dashboard-loading-paste { height: 160px; }
+.dashboard-loading-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0; }
+.dashboard-loading-kpis > div { height: 100px; }
+.dashboard-loading-chart { height: 300px; }
+@media (max-width: 900px) {
+  .dashboard-loading-sidebar { display: none; }
+  .dashboard-loading-body { padding: 24px 16px; }
+  .dashboard-loading-top { padding-inline: 16px; }
+  .dashboard-loading-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    Am I Up — design tokens (ported verbatim from prototype styles.css)
    ───────────────────────────────────────────────────────────────────────── */
