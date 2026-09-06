@@ -476,7 +476,7 @@ export default function YieldPage() {
           </section>
 
           <footer className="learn-foot">
-            <Link href="/">Back to {BRAND.name}</Link>
+            <Link href="/">Track your bets free with {BRAND.name}</Link>
             <Link href="/sample">See a sample profile</Link>
             <Link href="/learn/clv">What is CLV?</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>

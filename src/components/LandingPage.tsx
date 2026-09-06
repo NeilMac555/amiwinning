@@ -111,13 +111,12 @@ export function LandingPage() {
         <section className="landing-hero">
           <div className="landing-hero-text">
             <h1 className="landing-headline">
-              The terminal for serious punters.
+              Free bet tracker. Paste your bets. Know where you stand.
             </h1>
             <p className="landing-sub">
-              Stop entering bets by hand. Paste any source: screenshots,
-              X posts, group chats. AI extracts every bet. Then track
-              your real edge with CLV, equity curves, and a shareable
-              profile.
+              Turn screenshots, bookmaker text and tips into a betting
+              record. Track profit and loss, yield and performance.
+              All free, with no credit card required.
             </p>
             <div className="landing-cta-row">
               <Link
@@ -151,17 +150,42 @@ export function LandingPage() {
           <DemoPasteBox />
         </section>
 
+        <section className="landing-explainer" aria-labelledby="tracker-how">
+          <h2 id="tracker-how">How to track your bets with Am I Up</h2>
+          <ol className="landing-steps">
+            <li>
+              <span className="landing-step-number" aria-hidden="true">01</span>
+              <h3>Paste or import</h3>
+              <p>Paste bookmaker text, X posts or group-chat tips. In your account,
+                upload a screenshot or import a CSV or Excel betting spreadsheet.</p>
+            </li>
+            <li>
+              <span className="landing-step-number" aria-hidden="true">02</span>
+              <h3>Review and save</h3>
+              <p>Check the selection, odds, stake and result before saving.
+                You can also enter bets manually and update results when they settle.</p>
+            </li>
+            <li>
+              <span className="landing-step-number" aria-hidden="true">03</span>
+              <h3>See your performance</h3>
+              <p>Follow your profit and loss, <Link href="/learn/yield">yield</Link> and
+                equity curve. Compare sports and markets to understand where
+                your results are coming from.</p>
+            </li>
+          </ol>
+        </section>
+
         {/* Merged proof + CTA. Left column: heading, supporting copy,
             sign-up button. Right column: Johnny Bets sample profile
             card. One section replaces the old orphaned card + lopsided
             final-CTA blocks. */}
         <section className="landing-proof">
           <div className="landing-proof-copy">
-            <h2 className="landing-proof-title">Proof, not promises.</h2>
+            <h2 className="landing-proof-title">Your betting record, clearly explained.</h2>
             <p className="landing-proof-body">
-              Every claim gets receipts. Your public profile shows
-              lifetime P/L, equity curve, and KPI grid, drawn from your
-              actual bet log. Nothing to fake.
+              See lifetime profit and loss, an equity curve and performance
+              breakdowns drawn from the bets you record. The sample profile
+              shows how those figures look before you create an account.
             </p>
             <p className="landing-proof-body">
               Free. No credit card. Your data is yours: exportable as
@@ -183,7 +207,7 @@ export function LandingPage() {
               <div className="landing-preview-avatar">JB</div>
               <div>
                 <div className="landing-preview-name">Johnny Bets</div>
-                <div className="landing-preview-handle">@johnnybets</div>
+                <div className="landing-preview-handle">Sample data · @johnnybets</div>
               </div>
             </div>
             <div className="landing-preview-label">Lifetime P/L</div>
@@ -255,6 +279,52 @@ export function LandingPage() {
               View the full sample profile
             </Link>
           </div>
+        </section>
+
+        <section className="landing-explainer landing-free" aria-labelledby="tracker-free">
+          <div>
+            <h2 id="tracker-free">What’s included in the free bet tracker?</h2>
+            <p>Bet logging, your dashboard and CSV exports are free to use.
+              Create an account with your email to save your record and access
+              it across devices. No credit card required.</p>
+            <p>Daily limits apply to AI parsing and automatic spreadsheet mapping.
+              You can still log bets manually when you reach an AI limit.</p>
+            <Link href="/sign-in" className="btn-primary landing-proof-cta">Start tracking for free</Link>
+          </div>
+          <ul className="landing-included">
+            <li>Text and screenshot imports, plus manual bet entry</li>
+            <li>CSV and Excel spreadsheet imports</li>
+            <li>Profit and loss, yield, win rate and equity curves</li>
+            <li>Performance breakdowns by sport and market</li>
+            <li>Separate books and optional public profiles</li>
+            <li>CSV export of your betting record</li>
+          </ul>
+        </section>
+
+        <section className="landing-explainer landing-faq" aria-labelledby="tracker-questions">
+          <h2 id="tracker-questions">Questions about tracking your bets</h2>
+          <details>
+            <summary>Do I need to connect my bookmaker account?</summary>
+            <p>No. Am I Up works with the text, screenshots and spreadsheets
+              you provide. You don’t need to share a bookmaker login.</p>
+          </details>
+          <details>
+            <summary>Can I move from a betting spreadsheet?</summary>
+            <p>Yes. Import a CSV or Excel file and review how its columns map
+              to your bet records. You can export your bets as CSV later.</p>
+          </details>
+          <details>
+            <summary>Does the tracker calculate closing line value?</summary>
+            <p>Yes, when you supply the closing odds for a bet. Am I Up compares
+              those with the odds you took; it does not automatically fetch
+              a bookmaker’s closing prices. <Link href="/learn/clv">Learn how CLV works</Link>.</p>
+          </details>
+          <details>
+            <summary>Will a bet tracker tell me what to bet on?</summary>
+            <p>Am I Up records and analyses your bets. It doesn’t place bets
+              or guarantee a profit. Its purpose is to help you understand
+              your results over time.</p>
+          </details>
         </section>
       </main>
 

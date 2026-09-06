@@ -7,7 +7,6 @@ import { aggregateFromBets } from "@/lib/aggregate";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { Ticker } from "@/components/Ticker";
 import { KpiStripCompact } from "@/components/Kpis";
 import { SecondaryStats } from "@/components/SecondaryStats";
 // Note: RecentSettled and ClvDistribution were removed from the dashboard
@@ -231,11 +230,6 @@ function AccountDashboard() {
       <Sidebar />
       <div className="main-col">
         <TopBar />
-        {/* Hide the recent-bets ticker for empty users — otherwise they
-            see mock fixtures scrolling at the top of a brand-new
-            dashboard, which is exactly what we just removed from the
-            body. */}
-        {allBets.length > 0 && <Ticker items={data.ticker} />}
 
         <div className="page" data-screen-label="Dashboard">
           <div className="page-header">

@@ -40,9 +40,9 @@ const ibmPlex = IBM_Plex_Sans({
 // same reason, packed with the wedge ("paste anything"), the
 // surface (screenshots, X posts), and the value props (CLV, equity,
 // profile, free).
-const SEO_TITLE = "Am I Up · Free AI Bet Tracker. Paste anything, log nothing.";
+const SEO_TITLE = "Free Bet Tracker – Track Bets with AI | Am I Up";
 const SEO_DESCRIPTION =
-  "Free AI bet tracker. Paste screenshots, X posts, bookmaker text. AI extracts every bet. CLV, equity curve, public profile. No credit card.";
+  "Track your bets for free with Am I Up. Import screenshots, bookmaker text or spreadsheets. See profit, loss and yield. No credit card required.";
 
 export const metadata: Metadata = {
   // metadataBase lets Next.js resolve relative OG image paths (the
@@ -64,8 +64,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: SEO_TITLE,
-    description:
-      "Free AI bet tracker. Paste anything, log nothing. CLV, equity curve, public profile.",
+    description: SEO_DESCRIPTION,
   },
   // Search-console / webmaster verification. Next emits this as
   // <meta name="google-site-verification" content="..."> inside <head>.
@@ -133,7 +132,7 @@ const SOFTWARE_APP_JSONLD = {
     "Public profile with shareable URL",
     "CSV export of all bets",
     "Multi-book support",
-    "Six editorial themes",
+    "CSV and Excel bet imports",
   ],
   creator: {
     "@type": "Person",

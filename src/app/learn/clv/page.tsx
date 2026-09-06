@@ -464,7 +464,7 @@ export default function ClvPage() {
           </section>
 
           <footer className="learn-foot">
-            <Link href="/">Back to {BRAND.name}</Link>
+            <Link href="/">Free bet tracker by {BRAND.name}</Link>
             <Link href="/sample">See a sample profile</Link>
             <Link href="/compare/bettin-gs">vs bettin.gs</Link>
             <Link href="/compare/pikkit">vs Pikkit</Link>

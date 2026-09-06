@@ -368,7 +368,7 @@ export default function ComparePage() {
           </section>
 
           <footer className="compare-foot">
-            <Link href="/">Back to Am I Up</Link>
+            <Link href="/">Am I Up free bet tracker</Link>
             <Link href="/sample">See a sample profile</Link>
             <Link href="/compare">All comparisons</Link>
             <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
