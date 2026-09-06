@@ -18,6 +18,7 @@ import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
 import { SampleBetsBanner } from "@/components/SampleBetsBanner";
+import { ThirtyDaySnapshot } from "@/components/ThirtyDaySnapshot";
 import { TrackingBadge } from "@/components/TrackingBadge";
 import { DemoBetImportBanner } from "@/components/DemoBetImportBanner";
 import { GhostPreview } from "@/components/GhostPreview";
@@ -264,11 +265,14 @@ function AccountDashboard() {
           {/* PasteHero always renders — it's the primary action for both
               zero-bet and populated dashboards. `firstRun` controls the
               sample-tip pre-fill + pulse (Task A behaviour, preserved). */}
+          <div className={!isFirstRun && realBetCount > 0 ? "dashboard-capture-row" : undefined}>
           <PasteHero
             onCommitted={() => setLocalBump((n) => n + 1)}
             firstRun={isFirstRun}
             compact={!isFirstRun && realBetCount > 0}
           />
+          {!isFirstRun && realBetCount > 0 && <ThirtyDaySnapshot bets={allBets} now={now} bookName={activeBook?.name ?? "Current book"} />}
+          </div>
 
           {/* Top-level conditional per spec:
               - totalCommittedBets === 0 → GhostPreview (presentational
