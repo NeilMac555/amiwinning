@@ -303,12 +303,9 @@ export function LandingPage() {
 
         <section className="landing-explainer landing-faq" aria-labelledby="tracker-questions">
           <h2 id="tracker-questions">Questions about tracking your bets</h2>
-          <details open>
+          <details>
             <summary>Why is Am I Up free?</summary>
-            <p>“I’ve been lucky enough to make a good living from professional
-              gambling, my newsletter and other ventures. This is my way of
-              giving back to the community which has given me so much.”</p>
-            <p>— <Link href="/author/neil-macdonald">Neil Macdonald, founder of Am I Up</Link></p>
+            <p>Free, as a way of giving back to the betting community.</p>
           </details>
           <details>
             <summary>Do I need to connect my bookmaker account?</summary>
