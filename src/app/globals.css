@@ -6602,3 +6602,11 @@ a.sb-item { cursor: pointer; }
 .snapshot-note { font-size:11px; line-height:1.6; color:var(--text-muted); margin:12px 0 0; }
 .snapshot-empty { color:var(--text-muted); margin:28px 0; font-size:14px; }
 @media(max-width:1100px) { .dashboard-capture-row { grid-template-columns:minmax(0,1fr); } }
+
+.import-demo-video { margin:24px 0 32px; max-width:960px; }
+.import-demo-player { position:relative; overflow:hidden; border:1px solid var(--border-strong); border-radius:14px; background:var(--surface); }
+.import-demo-player video { display:block; width:100%; height:auto; aspect-ratio:16/9; }
+.import-demo-play { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:max-content; max-width:90%; padding:16px 24px; border:0; border-radius:10px; background:var(--accent); color:#0A0C10; font:inherit; font-weight:600; cursor:pointer; box-shadow:0 4px 32px #0009; }
+.import-demo-play:focus-visible { outline:3px solid var(--text); outline-offset:4px; }
+.import-demo-video figcaption { margin-top:12px; color:var(--text-muted); font-size:13px; line-height:1.6; }
+@media(max-width:480px) { .import-demo-play { padding:12px; font-size:13px; } }

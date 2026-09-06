@@ -18,6 +18,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { DemoPasteBox } from "@/components/DemoPasteBox";
 import { UtmCapture } from "@/components/UtmCapture";
+import { ImportDemoVideo } from "@/components/ImportDemoVideo";
 
 const SAMPLE_HANDLE = "sample";
 
@@ -152,6 +153,7 @@ export function LandingPage() {
 
         <section className="landing-explainer" aria-labelledby="tracker-how">
           <h2 id="tracker-how">How to track your bets with Am I Up</h2>
+          <ImportDemoVideo />
           <ol className="landing-steps">
             <li>
               <span className="landing-step-number" aria-hidden="true">01</span>
