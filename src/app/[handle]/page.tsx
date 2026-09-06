@@ -16,6 +16,7 @@ import { BRAND } from "@/lib/brand";
 import { GeneratedAvatar } from "@/components/GeneratedAvatar";
 import { Breakdown } from "@/components/Breakdown";
 import { ClvDistribution } from "@/components/ClvDistribution";
+import { recentSampleBets } from "@/lib/sample-profile";
 import { ProfileEquity } from "./ProfileEquity";
 import { ProfileGate } from "./ProfileGate";
 import { UtmCapture } from "@/components/UtmCapture";
@@ -101,24 +102,24 @@ function fmtDateRange(bets: { kickoff: string }[]): string {
 
 export default async function ProfilePage({ params }: PageProps) {
   const { handle } = await params;
-  const { profile, bets } = await getPublicProfileServer(handle);
+  const { profile, bets: sourceBets } = await getPublicProfileServer(handle);
 
   if (!profile) {
     notFound();
   }
 
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
+  const bets = handle === "sample" ? recentSampleBets(sourceBets, nowMs) : sourceBets;
+
   // Reuse the same aggregation the dashboard uses — keeps the public
   // numbers identical to what the owner sees.
+  const isSample = handle === "sample";
   const data = aggregateFromBets(bets);
   const settledCount = bets.filter((b) => b.status !== "pending").length;
   const lifetimePl = bets.reduce((s, b) => s + b.pl, 0);
   const lifetime = fmtPl(lifetimePl);
   const name = profile.displayName ?? profile.handle;
-  // Capture once before render — passed down to children that need it
-  // for recency sorts. This is an async server component (one render per
-  // request) so Date.now() is safe; the React purity rule can't tell.
-  // eslint-disable-next-line react-hooks/purity
-  const nowMs = Date.now();
 
   return (
     <div className="profile-page">
@@ -173,7 +174,21 @@ export default async function ProfilePage({ params }: PageProps) {
             </div>
           </div>
           {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+          {isSample && <p><Link href="/learn/import-bet-screenshots">See how to import your bets →</Link></p>}
         </section>
+
+        {/* Equity curve */}
+        {isSample && settledCount > 0 && (
+          <section className="profile-chart card">
+            <div className="profile-chart-head">
+              <h2 className="profile-chart-title">All-time P/L</h2>
+              <div className="profile-chart-sub">
+                cumulative · {settledCount.toLocaleString()} bets
+              </div>
+            </div>
+            <ProfileEquity equity={data.equity} weekly={data.weekly} isSample />
+          </section>
+        )}
 
         {/* Lifetime number */}
         <section className="profile-pl">
@@ -196,15 +211,17 @@ export default async function ProfilePage({ params }: PageProps) {
         {/* KPI grid */}
         {settledCount > 0 && (
           <section className="profile-kpis">
-            <Kpi label="Yield (ROI)" value={fmtPct(data.kpis.yieldPct)} tone={data.kpis.yieldPct >= 0 ? "pos" : "neg"} />
+            <Kpi explanation={isSample ? "Profit divided by the total amount staked." : undefined} label="Yield (ROI)" value={fmtPct(data.kpis.yieldPct)} tone={data.kpis.yieldPct >= 0 ? "pos" : "neg"} />
             <Kpi
               label="ROC"
+              explanation={isSample ? "Return on capital. This tracker estimates the capital needed from the betting record." : undefined}
               value={fmtPct(data.kpis.rocPct)}
               tone={data.kpis.rocPct >= 0 ? "pos" : "neg"}
               sub={data.kpis.rocAnnualised ? "annualised" : "period"}
             />
             <Kpi
               label="CLV"
+              explanation={isSample ? "Closing line value: how your odds compare with the closing odds you entered." : undefined}
               value={
                 data.kpis.clvPct === 0
                   ? "—"
@@ -225,6 +242,7 @@ export default async function ProfilePage({ params }: PageProps) {
             />
             <Kpi
               label="Win rate"
+              explanation={isSample ? "The percentage of settled bets recorded as wins." : undefined}
               // secondary.winRate is already a percentage (e.g. 55.5), not a
               // decimal — don't multiply by 100 again. Break-even is
               // computed off MEDIAN odds because that's the headline below.
@@ -238,6 +256,7 @@ export default async function ProfilePage({ params }: PageProps) {
             />
             <Kpi
               label="Max DD"
+              explanation={isSample ? "Maximum drawdown: the largest drop from a previous peak in cumulative profit." : undefined}
               value={fmtPct(-Math.abs(data.kpis.maxDdPct))}
               tone="neg"
               sub={
@@ -248,6 +267,7 @@ export default async function ProfilePage({ params }: PageProps) {
             />
             <Kpi
               label="Median odds"
+              explanation={isSample ? "The middle odds value when bets are ordered by price." : undefined}
               // Median is robust to longshot skew. Mean shown as fineprint
               // for transparency — a sceptical viewer can verify we're
               // not gaming the headline number.
@@ -261,7 +281,7 @@ export default async function ProfilePage({ params }: PageProps) {
         )}
 
         {/* Equity curve */}
-        {settledCount > 0 && (
+        {!isSample && settledCount > 0 && (
           <section className="profile-chart card">
             <div className="profile-chart-head">
               <h2 className="profile-chart-title">All-time P/L</h2>
@@ -316,7 +336,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
         {/* Recent 30 settled */}
         {settledCount > 0 && (
-          <RecentSettledTable bets={bets} nowMs={nowMs} />
+          <RecentSettledTable bets={bets} nowMs={nowMs} isSample={isSample} />
         )}
 
         {settledCount === 0 && (
@@ -357,17 +377,20 @@ function Kpi({
   value,
   tone,
   sub,
+  explanation,
 }: {
   label: string;
   value: string;
   tone: "pos" | "neg" | "flat";
   sub?: string;
+  explanation?: string;
 }) {
   return (
     <div className="profile-kpi">
       <div className="profile-kpi-label">{label}</div>
       <div className={`profile-kpi-value num-${tone}`}>{value}</div>
       {sub && <div className="profile-kpi-sub">{sub}</div>}
+      {explanation && <details className="sample-metric-help"><summary>What does this mean?</summary><p>{explanation}</p></details>}
     </div>
   );
 }
@@ -448,9 +471,11 @@ function MonthlyBars({ bets }: { bets: ImportedBet[] }) {
 function RecentSettledTable({
   bets,
   nowMs,
+  isSample = false,
 }: {
   bets: ImportedBet[];
   nowMs: number;
+  isSample?: boolean;
 }) {
   const isSettled = (s: string) =>
     s === "won" || s === "lost" || s === "push" || s === "half_won" || s === "half_lost";
@@ -465,13 +490,16 @@ function RecentSettledTable({
   if (settled.length === 0) return null;
 
   return (
-    <section className="card profile-bets-card">
+    <section className={`card profile-bets-card${isSample ? " sample-history" : ""}`}>
       <div className="profile-chart-head">
         <h2 className="profile-chart-title">Bet history</h2>
         <div className="profile-chart-sub">
-          all {settled.length.toLocaleString()} settled bets · pending stays private
+          {isSample ? "Sample record" : "All"} · {settled.length.toLocaleString()} settled bets · pending stays private
         </div>
       </div>
+      {isSample && settled.length > 20 && (
+        <details className="sample-history-toggle"><summary><span className="sample-show-all">Show all {settled.length} bets</span><span className="sample-show-less">Show fewer bets</span></summary><p>Full sample history shown below.</p></details>
+      )}
       <div style={{ overflowX: "auto" }}>
         <table className="tbl" data-density="dense">
           <thead>

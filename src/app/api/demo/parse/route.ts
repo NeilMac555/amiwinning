@@ -83,7 +83,7 @@ export async function POST(req: Request): Promise<Response> {
   if (text.length > MAX_TEXT) {
     return NextResponse.json(
       {
-        error: `Demo paste is limited to ${MAX_TEXT.toLocaleString()} characters. Sign up for unlimited parsing.`,
+        error: `Demo paste is limited to ${MAX_TEXT.toLocaleString()} characters. Create a free account to keep tracking. Daily AI limits apply.`,
       },
       { status: 413 },
     );
@@ -99,7 +99,7 @@ export async function POST(req: Request): Promise<Response> {
   if (currentCount >= DAILY_CAP) {
     return NextResponse.json(
       {
-        error: "Demo limit reached. Sign up for unlimited parsing.",
+        error: "Demo limit reached. Create a free account to keep tracking. Daily AI limits apply.",
         rateLimited: true,
         limit: DAILY_CAP,
       },

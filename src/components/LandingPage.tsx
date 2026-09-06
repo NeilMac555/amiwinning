@@ -139,7 +139,7 @@ export function LandingPage() {
                   textDecoration: "none",
                 }}
               >
-                See a sample profile
+                Explore a sample profile
               </Link>
             </div>
             <p className="landing-fine">
@@ -161,8 +161,8 @@ export function LandingPage() {
             </li>
             <li>
               <span className="landing-step-number" aria-hidden="true">02</span>
-              <h3>Review and save</h3>
-              <p>Check the selection, odds, stake and result before saving.
+              <h3>Parse and check</h3>
+              <p>Screenshot and text parsing logs bets automatically. Check the saved details; Undo is available for 30 seconds.
                 You can also enter bets manually and update results when they settle.</p>
             </li>
             <li>
@@ -173,6 +173,7 @@ export function LandingPage() {
                 your results are coming from.</p>
             </li>
           </ol>
+          <p><Link href="/learn/import-bet-screenshots">See how Telegram tips, social posts and screenshots become bets →</Link></p>
         </section>
 
         {/* Merged proof + CTA. Left column: heading, supporting copy,

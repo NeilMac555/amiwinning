@@ -222,6 +222,7 @@ export default function LearnHubPage() {
           </p>
 
           <section className="learn-section">
+            <p><Link href="/learn/import-bet-screenshots">How to log bets from Telegram, social posts and screenshots →</Link></p>
             <ul
               className="learn-list learn-list--related"
               style={{ listStyle: "none", padding: 0 }}

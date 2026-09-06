@@ -8,7 +8,7 @@ const comparison = {
   "name": "bettin.gs",
   "title": "Free bettin.gs Alternative: AI Bet Tracker",
   "description": "Looking for a free bettin.gs alternative? Compare AI screenshot and text imports, analytics and CSV migration with Am I Up. No credit card required.",
-  "intro": "Already using bettin.gs and looking for an easier way to record bets? Am I Up is a free bet tracker that turns screenshots and bookmaker text into records you can review before saving.",
+  "intro": "Already using bettin.gs and looking for an easier way to record bets? Am I Up is a free bet tracker that turns screenshots and bookmaker text into records you can check after parsing.",
   "rows": [
     [
       "Bet entry",
@@ -72,9 +72,9 @@ export default function ComparePage() {
         </section>
         <section className="compare-section">
           <h2 className="compare-h2">Choose Am I Up for screenshot and text imports</h2>
-          <p>Paste bookmaker text or upload a bet-slip screenshot, review the extracted bets, then save. You do not need to connect a bookmaker account. AI can make mistakes, so the review step matters.</p>
+          <p>Paste bookmaker text or upload a bet-slip screenshot, parse the bets, then check the saved records. You do not need to connect a bookmaker account. Parsing logs bets automatically, with Undo available for 30 seconds. AI can make mistakes, so check the saved details.</p>
           <p>The <Link href="/">free bet tracker</Link> includes your dashboard, separate books and CSV export. Daily limits apply to AI parsing and automatic spreadsheet mapping; manual entry remains available when you reach an AI limit. No credit card is required.</p>
-          <p><Link href="/sample">Explore a sample profile</Link> to see the charts and betting record before creating an account.</p>
+          <p><Link href="/learn/import-bet-screenshots">See the screenshot import walkthrough</Link> or <Link href="/sample">explore a sample profile</Link> to see the charts and betting record before creating an account.</p>
         </section>
         <section className="compare-section"><h2 className="compare-h2">When {comparison.name} may suit you better</h2><p>{comparison.strengths}</p></section>
         <section className="compare-section"><h2 className="compare-h2">Bringing your existing betting history</h2><p>{comparison.migration}</p><p>Trying a tracker does not require deleting your old account or original files. Start with a small export to check that the workflow fits.</p></section>
@@ -88,7 +88,7 @@ export default function ComparePage() {
           </div>
         </section>
         <section className="compare-section"><h2 className="compare-h2">Sources and scope</h2><p>This comparison covers the workflows described above, rather than every feature or subscription option. Check the provider for current terms.</p><ul className="compare-list">{comparison.sources.map(([label, url]) => <li key={url}><a href={url}>{label}</a></li>)}</ul></section>
-        <section className="compare-cta"><div><div className="compare-cta-title">Try your next bet slip in Am I Up</div><div className="compare-cta-sub">Free bet tracking. Review before saving. No credit card.</div></div><Link href="/sign-in" className="btn-primary" style={{ padding: "12px 22px", fontSize: 15, textDecoration: "none" }}>Start tracking free →</Link></section>
+        <section className="compare-cta"><div><div className="compare-cta-title">Try your next bet slip in Am I Up</div><div className="compare-cta-sub">Free bet tracking. No credit card.</div></div><Link href="/sign-in" className="btn-primary" style={{ padding: "12px 22px", fontSize: 15, textDecoration: "none" }}>Start tracking free →</Link></section>
         <footer className="compare-foot"><Link href="/">Free bet tracker</Link><Link href="/compare">All comparisons</Link><Link href="/sample">Sample profile</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></footer>
       </main>
     </div>

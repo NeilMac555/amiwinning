@@ -182,3 +182,17 @@ function generate(): ImportedBet[] {
 }
 
 export const SAMPLE_BETS: ImportedBet[] = generate();
+
+// Re-date copies for the public demo only. Preserve every result and amount.
+export function recentSampleBets(bets: ImportedBet[], nowMs: number): ImportedBet[] {
+  if (bets.length === 0) return [];
+  const dayMs = 86_400_000;
+  const latest = Math.max(...bets.map((bet) => Date.parse(bet.kickoff)));
+  const yesterday = Math.floor(nowMs / dayMs) * dayMs - dayMs;
+  const offset = yesterday - latest;
+  return bets.map((bet) => ({
+    ...bet,
+    kickoff: new Date(Date.parse(bet.kickoff) + offset).toISOString().slice(0, 10),
+    importedAt: new Date(Date.parse(bet.importedAt) + offset).toISOString(),
+  }));
+}

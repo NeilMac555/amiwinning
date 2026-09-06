@@ -12,9 +12,10 @@ import type { EquityData } from "@/lib/data";
 interface Props {
   equity: EquityData;
   weekly: number[];
+  isSample?: boolean;
 }
 
-export function ProfileEquity({ equity, weekly }: Props) {
+export function ProfileEquity({ equity, weekly, isSample = false }: Props) {
   return (
     // Public profiles always render in unit-mode (u) — we don't know the
     // viewer's preferred currency, and units are the bet-tracking universal.
@@ -23,6 +24,7 @@ export function ProfileEquity({ equity, weekly }: Props) {
         data={equity}
         weekly={weekly}
         mode="cumulative"
+        statusLabel={isSample ? "Illustrative sample data" : undefined}
       />
     </UnitProvider>
   );

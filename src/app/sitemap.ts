@@ -115,6 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     fetchPublicBookEntries(),
   ]);
   const staticEntries: MetadataRoute.Sitemap = [
+    { url: `${BASE}/learn/import-bet-screenshots`, lastModified: "2026-09-06", changeFrequency: "monthly", priority: 0.7 },
     {
       url: `${BASE}/`,
       changeFrequency: "weekly",

@@ -12,6 +12,7 @@ interface EquityCurveProps {
   data: EquityData;
   weekly: number[];
   lastBetAgo?: string;
+  statusLabel?: string;
   /** "cumulative": Y axis is cumulative P/L starting at 0 (real imported data).
    *  "bankroll": Y axis is a running bankroll balance (mock demo data). */
   mode?: "cumulative" | "bankroll";
@@ -24,6 +25,7 @@ export function EquityCurve({
   data,
   weekly,
   lastBetAgo,
+  statusLabel,
   mode = "bankroll",
   range,
 }: EquityCurveProps) {
@@ -111,8 +113,7 @@ export function EquityCurve({
           </div>
           <div className="card-meta" style={{ marginTop: 4 }}>
             <span>
-              <span className="dot-live"></span>Live · last bet{" "}
-              {lastBetAgo ?? "12m ago"}
+              {statusLabel ?? <><span className="dot-live"></span>Live · last bet{" "}{lastBetAgo ?? "12m ago"}</>}
             </span>
           </div>
         </div>
