@@ -135,7 +135,7 @@ export function KpiStripCompact({ kpis, sparks }: KpiProps) {
           <div className="kpi-foot">
             <div className="kpi-meta">
               <span className={`kpi-delta mono ${k.deltaSign}`}>{k.delta}</span>
-              <span style={{ color: "var(--text-faint)" }}>{k.deltaLabel}</span>
+              <span style={{ color: "var(--text-muted)" }}>{k.deltaLabel}</span>
             </div>
             <div className="kpi-spark" style={{ color: k.sparkColor }}>
               <Sparkline
@@ -163,7 +163,7 @@ export function KpiFeatured({ kpis, sparks }: KpiProps) {
           <div className={`kpi-value mono ${k.sign}`}>{k.value}</div>
           <div className="kpi-meta">
             <span className={`kpi-delta mono ${k.deltaSign}`}>{k.delta}</span>
-            <span style={{ color: "var(--text-faint)" }}>{k.deltaLabel}</span>
+            <span style={{ color: "var(--text-muted)" }}>{k.deltaLabel}</span>
           </div>
           <div className="kpi-spark" style={{ color: k.sparkColor }}>
             <Sparkline

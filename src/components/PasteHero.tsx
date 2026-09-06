@@ -49,6 +49,7 @@ interface Props {
   // textarea before parsing clears the sample flag and reverts to a
   // normal parse.
   firstRun?: boolean;
+  compact?: boolean;
 }
 
 function uid(): string {
@@ -116,7 +117,7 @@ async function fileToDataUrl(file: File | Blob): Promise<string> {
   });
 }
 
-export function PasteHero({ onCommitted, firstRun = false }: Props) {
+export function PasteHero({ onCommitted, firstRun = false, compact = false }: Props) {
   const { activeBook } = useAuth();
   // Initialise the textarea with the sample tip only when we're mounting
   // into first-run mode. useState's initial-value function runs once, so
@@ -541,7 +542,7 @@ export function PasteHero({ onCommitted, firstRun = false }: Props) {
   // textarea's native paste handling.
 
   return (
-    <div className="paste-hero paste-hero--input" onPaste={onHeroPaste}>
+    <div className={`paste-hero paste-hero--input${compact ? " paste-hero--compact" : ""}${text.trim() || images.length ? " paste-hero--has-content" : ""}`} onPaste={onHeroPaste}>
       {eyebrow}
 
       <h2 className="paste-hero-title">

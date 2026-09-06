@@ -6577,3 +6577,14 @@ a.sb-item { cursor: pointer; }
 .tracking-badge summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .tracking-badge p { max-width:320px; margin:10px 0; font-size:12px; line-height:1.6; color:var(--text-muted); }
 .tracking-badge-sample { font-size:10px; color:var(--text-muted); border-left:1px solid var(--border-strong); padding-left:6px; }
+
+/* Populated dashboard: keep capture handy and give results more room. */
+.dashboard-book-milestone { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:8px 0; font-size:13px; color:var(--text-muted); }
+.paste-hero--compact { padding:18px 22px; }
+.paste-hero--compact .paste-hero-title { font-size:22px; margin:10px 0; }
+.paste-hero--compact .paste-hero-subtitle { display:none; }
+.paste-hero--compact .paste-hero-textarea { min-height:64px; height:64px; margin-top:8px; }
+.paste-hero--compact:focus-within .paste-hero-textarea, .paste-hero--compact.paste-hero--has-content .paste-hero-textarea { min-height:120px; height:120px; }
+[data-screen-label="Dashboard"] .page-subtitle, [data-screen-label="Dashboard"] .paste-hero-commit-status { color:var(--text-muted); }
+[data-screen-label="Dashboard"] .kpi-label { color:var(--text-muted); }
+@media(max-width:640px) { .paste-hero--compact { padding:16px; } }

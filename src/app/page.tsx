@@ -241,6 +241,9 @@ function AccountDashboard() {
           <div className="page-header">
             <div>
               <h1 className="page-title">Dashboard</h1>
+              {user && activeBook && accountStatus === "ready" && milestoneCount >= 100 && (
+                <div className="dashboard-book-milestone"><span>{activeBook.name}</span><TrackingBadge count={milestoneCount} /></div>
+              )}
               {/* No subtitle / no range tabs when the user is empty:
                   shows the mock subtitle "Soccer (EPL, UCL) · Pinnacle"
                   otherwise, which is misleading on a fresh signup. */}
@@ -249,7 +252,7 @@ function AccountDashboard() {
                   <span className="dot-live"></span>
                   Updated {updatedAt} ·{" "}
                   {source === "imported"
-                    ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${rangeLabel(range, now)} · CLV pending`
+                    ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${rangeLabel(range, now)}`
                     : "Soccer (EPL, UCL) · Pinnacle & 4 others"}
                 </div>
               )}
@@ -264,6 +267,7 @@ function AccountDashboard() {
           <PasteHero
             onCommitted={() => setLocalBump((n) => n + 1)}
             firstRun={isFirstRun}
+            compact={!isFirstRun && realBetCount > 0}
           />
 
           {/* Top-level conditional per spec:
@@ -316,7 +320,7 @@ function AccountDashboard() {
             )}
 
           {source === "mock" && <MockBanner />}
-          {source === "imported" && <ImportedBanner count={importedCount} milestoneCount={user && accountStatus === "ready" ? milestoneCount : 0} />}
+          {source === "imported" && <ImportedBanner count={importedCount} />}
 
           {source === "imported" && (
             <div
@@ -558,7 +562,7 @@ function CleanupBanner({
   );
 }
 
-function ImportedBanner({ count, milestoneCount }: { count: number; milestoneCount: number }) {
+function ImportedBanner({ count }: { count: number }) {
   return (
     <div
       style={{
@@ -580,9 +584,8 @@ function ImportedBanner({ count, milestoneCount }: { count: number; milestoneCou
         <span style={{ fontWeight: 600, color: "var(--green)" }}>
           {count.toLocaleString()} bets tracked.
         </span>{" "}
-        Synced to your account · daily cloud backups · access from any device. CLV starts populating once you log bets pre-kickoff.
+
       </span>
-      <TrackingBadge count={milestoneCount} />
       <Link
         href="/import"
         className="btn-ghost"
