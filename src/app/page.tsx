@@ -18,6 +18,7 @@ import { Heatmap } from "@/components/Heatmap";
 import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
 import { SampleBetsBanner } from "@/components/SampleBetsBanner";
+import { TrackingBadge } from "@/components/TrackingBadge";
 import { DemoBetImportBanner } from "@/components/DemoBetImportBanner";
 import { GhostPreview } from "@/components/GhostPreview";
 import { SAMPLE_SOURCE_TAG } from "@/lib/sample-tip";
@@ -147,6 +148,11 @@ function AccountDashboard() {
   }, [allBets, range, source, now]);
 
   const importedCount = allBets.length;
+  const milestoneCount = allBets.filter((bet) =>
+    bet.status !== "pending" && !bet._pendingDelete &&
+    bet.source !== SAMPLE_SOURCE_TAG && !bet.id.startsWith("seed-") &&
+    !!activeBook && bet.bookId === activeBook.id
+  ).length;
 
   // Sample-vs-real bet split. The first-run PasteHero pre-fills with a
   // demo tip and tags any bets parsed from that untouched pre-fill with
@@ -310,7 +316,7 @@ function AccountDashboard() {
             )}
 
           {source === "mock" && <MockBanner />}
-          {source === "imported" && <ImportedBanner count={importedCount} />}
+          {source === "imported" && <ImportedBanner count={importedCount} milestoneCount={user && accountStatus === "ready" ? milestoneCount : 0} />}
 
           {source === "imported" && (
             <div
@@ -552,7 +558,7 @@ function CleanupBanner({
   );
 }
 
-function ImportedBanner({ count }: { count: number }) {
+function ImportedBanner({ count, milestoneCount }: { count: number; milestoneCount: number }) {
   return (
     <div
       style={{
@@ -564,6 +570,7 @@ function ImportedBanner({ count }: { count: number }) {
         fontSize: 12,
         color: "var(--text-muted)",
         display: "flex",
+        flexWrap: "wrap",
         alignItems: "center",
         justifyContent: "space-between",
         gap: 12,
@@ -575,6 +582,7 @@ function ImportedBanner({ count }: { count: number }) {
         </span>{" "}
         Synced to your account · daily cloud backups · access from any device. CLV starts populating once you log bets pre-kickoff.
       </span>
+      <TrackingBadge count={milestoneCount} />
       <Link
         href="/import"
         className="btn-ghost"
