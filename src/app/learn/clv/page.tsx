@@ -328,6 +328,16 @@ export default function ClvPage() {
           </section>
 
           <section className="learn-section">
+            <h2 className="learn-h2">Explore football closing lines</h2>
+            <p>For real market examples, the <a href="https://www.steamwatch.io/closing-lines">SteamWatch
+              Pinnacle closing-lines archive</a> shows opening and closing football odds
+              across match winner, Asian handicap and totals markets. Compare the same
+              selection and line when reviewing a price, and account for bookmaker margin.</p>
+            <p>SteamWatch is also built by Neil Macdonald, the founder of Am I Up.
+              SteamWatch helps you research market prices; Am I Up tracks your own betting record.</p>
+          </section>
+
+          <section className="learn-section">
             <h2 className="learn-h2">Related terms</h2>
             <ul className="learn-list learn-list--related">
               <li>

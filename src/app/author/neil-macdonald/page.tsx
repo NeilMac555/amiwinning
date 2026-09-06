@@ -33,9 +33,9 @@ const AUTHOR_URL = "https://amiup.io/author/neil-macdonald";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/author/neil-macdonald" },
-  title: "Neil Macdonald — Sports betting analyst · Founder, Am I Up",
+  title: "Neil Macdonald — Founder of Am I Up and SteamWatch",
   description:
-    "Independent sports betting analyst. Founder of Am I Up, a free AI bet tracker. Writes on closing line value, positive EV, bankroll management, and the math behind sharp betting.",
+    "Neil Macdonald builds Am I Up, a free bet tracker, and SteamWatch, a football odds movement and market analysis tool. Read about the founder and both products.",
   openGraph: {
     title: "Neil Macdonald — Sports betting analyst",
     description:
@@ -112,6 +112,7 @@ export default function AuthorPage() {
     // than none — Google downweights an entity that points at 404s
     // or claimed accounts it can't verify.
     sameAs: [
+      "https://www.steamwatch.io/about",
       "https://x.com/NeilMac555",
       "https://github.com/NeilMac555",
       "https://amiup.io/neilmac555",
@@ -126,7 +127,7 @@ export default function AuthorPage() {
     mainEntity: { "@id": AUTHOR_ID },
     url: AUTHOR_URL,
     name: "Neil Macdonald — Sports betting analyst",
-    dateModified: "2026-09-01",
+    dateModified: "2026-09-06",
   };
 
   const breadcrumbJsonLd = buildBreadcrumbList([
@@ -202,6 +203,18 @@ export default function AuthorPage() {
               tipster hard-sells, no promises about turning $100 into
               $10,000.
             </p>
+          </section>
+
+          <section className="learn-section">
+            <h2 className="learn-h2">The tools I build</h2>
+            <p>I built Am I Up and <a href="https://www.steamwatch.io/">SteamWatch</a>
+              {" "}to support different parts of a bettor&rsquo;s workflow. Am I Up records
+              your bets and measures your results. SteamWatch tracks Pinnacle football
+              odds movement, with market analysis, closing lines and Telegram alerts.</p>
+            <p>Use SteamWatch to investigate how a market is moving, then log the bets
+              you choose to place in Am I Up. They are separate products from the same
+              founder; a SteamWatch alert is not an automatically synced bet.</p>
+            <p><a href="https://www.steamwatch.io/about">Read about Neil Mac and SteamWatch →</a></p>
           </section>
 
           <section className="learn-section">

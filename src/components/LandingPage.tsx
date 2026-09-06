@@ -333,6 +333,25 @@ export function LandingPage() {
               your results over time.</p>
           </details>
         </section>
+        <section className="landing-ecosystem" aria-labelledby="steamwatch-title">
+          <div>
+            <p className="landing-ecosystem-eyebrow">Also built by Neil Macdonald</p>
+            <h2 id="steamwatch-title">SteamWatch: football odds movement and market analysis</h2>
+            <p>SteamWatch tracks changes in Pinnacle football odds, highlights steam moves,
+              and provides closing-line analysis and Telegram alerts. Use it to research
+              the market, then use Am I Up to record the bets you choose to place and
+              measure your own results.</p>
+            <a className="btn-primary" href="https://www.steamwatch.io/">Explore SteamWatch →</a>
+          </div>
+          <div className="landing-ecosystem-resources">
+            <h3>Research the market. Track your record.</h3>
+            <a href="https://www.steamwatch.io/closing-lines">Pinnacle opening and closing football odds →</a>
+            <a href="https://www.steamwatch.io/steam-results">Steam move results and historical performance →</a>
+            <p>Two complementary tools from the same founder. Am I Up works independently;
+              using SteamWatch does not automatically place or sync bets.</p>
+            <Link href="/author/neil-macdonald">Meet the founder →</Link>
+          </div>
+        </section>
       </main>
 
       <footer className="landing-foot">
@@ -341,6 +360,7 @@ export function LandingPage() {
           <span style={{ fontWeight: 600 }}>{BRAND.name}</span>
         </div>
         <div className="landing-foot-links">
+          <a href="https://www.steamwatch.io/">SteamWatch</a>
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href={`/${SAMPLE_HANDLE}`}>Sample profile</Link>

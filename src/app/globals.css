@@ -6610,3 +6610,13 @@ a.sb-item { cursor: pointer; }
 .import-demo-play:focus-visible { outline:3px solid var(--text); outline-offset:4px; }
 .import-demo-video figcaption { margin-top:12px; color:var(--text-muted); font-size:13px; line-height:1.6; }
 @media(max-width:480px) { .import-demo-play { padding:12px; font-size:13px; } }
+
+.landing-ecosystem { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:36px; margin:48px 0; padding:32px; background:var(--surface); border:1px solid var(--border-strong); border-radius:16px; }
+.landing-ecosystem h2 { font-size:26px; line-height:1.25; margin:8px 0 16px; }
+.landing-ecosystem p { color:var(--text-muted); line-height:1.7; font-size:14px; }
+.landing-ecosystem .landing-ecosystem-eyebrow { color:var(--accent); font-size:12px; margin:0; }
+.landing-ecosystem .btn-primary { display:inline-block; margin-top:12px; text-decoration:none; }
+.landing-ecosystem-resources { border-left:1px solid var(--border-strong); padding-left:28px; }
+.landing-ecosystem-resources h3 { font-size:18px; margin:0 0 18px; }
+.landing-ecosystem-resources a { display:block; font-size:14px; margin:14px 0; line-height:1.5; }
+@media(max-width:700px) { .landing-ecosystem { grid-template-columns:1fr; padding:22px; gap:24px; } .landing-ecosystem-resources { border-left:0; border-top:1px solid var(--border-strong); padding:24px 0 0; } }
