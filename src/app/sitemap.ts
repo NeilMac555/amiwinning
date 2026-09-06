@@ -54,7 +54,6 @@ async function fetchPublicProfileEntries(): Promise<MetadataRoute.Sitemap> {
 
   return (data as ProfileRow[]).map((p) => ({
     url: `${BASE}/${p.handle}`,
-    lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
@@ -102,7 +101,6 @@ async function fetchPublicBookEntries(): Promise<MetadataRoute.Sitemap> {
     if (!handle) continue; // profile not public → don't leak URL
     out.push({
       url: `${BASE}/${handle}/${b.public_slug}`,
-      lastModified: b.updated_at ? new Date(b.updated_at) : new Date(),
       changeFrequency: "weekly",
       priority: 0.65,
     });
@@ -111,7 +109,7 @@ async function fetchPublicBookEntries(): Promise<MetadataRoute.Sitemap> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
+  // Omit lastModified until reliable page-content modification dates are available.
   const [profileEntries, bookEntries] = await Promise.all([
     fetchPublicProfileEntries(),
     fetchPublicBookEntries(),
@@ -119,19 +117,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     {
       url: `${BASE}/`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${BASE}/terms`,
-      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${BASE}/privacy`,
-      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
@@ -140,7 +135,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // of our deliberate long-tail keyword targets ("bettin.gs
       // alternative", "bet tracker comparison").
       url: `${BASE}/compare/bettin-gs`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -148,17 +142,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Pikkit comparison — second SEO target in the /compare/* series,
       // catching "Pikkit alternative" / "Pikkit vs Am I Up" searches.
       url: `${BASE}/compare/pikkit`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       // Bet Diary comparison — third /compare page. Catches
       // "bet diary alternative" / "betdiary vs" searches. Bet Diary
-      // is UK-focused with a horse-racing lineage; page positions
-      // Am I Up as the AI-first multi-sport alternative.
+      // comparison covers input workflows and closing odds.
       url: `${BASE}/compare/betdiary`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -171,7 +162,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // AI paste as the wedge. Bumped to 0.85 priority — this is a
       // more real competitor than Pikkit or Bet Diary today.
       url: `${BASE}/compare/bet-analytix`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -181,7 +171,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // comparison" style queries, gives Google a topical-authority
       // signal.
       url: `${BASE}/compare`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,
     },
@@ -190,7 +179,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // used to 404, now it's a DefinedTermSet index of the five
       // glossary entries.
       url: `${BASE}/learn`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,
     },
@@ -199,7 +187,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // "what is CLV in betting" + "closing line value" long-tail
       // searches. More pages in this series shipping daily.
       url: `${BASE}/learn/clv`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -207,7 +194,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Glossary day 2 — Yield. Targets "what is yield in betting" +
       // "what is a good yield betting" + "yield vs ROI betting".
       url: `${BASE}/learn/yield`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -216,7 +202,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // volume of the cluster (~2k/mo "what is EV in sports betting"
       // alone) so priority is bumped to 0.75.
       url: `${BASE}/learn/expected-value`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,
     },
@@ -225,7 +210,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // ("what is ROI in betting") and cited from the yield / ROC
       // pages so it accumulates internal PageRank fast.
       url: `${BASE}/learn/roi`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -235,7 +219,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // gets the same 0.7 priority. Together with /learn/roi it
       // resolves the yield-vs-ROI-vs-ROC confusion on Google + LLMs.
       url: `${BASE}/learn/roc`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -246,7 +229,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Bumped to 0.75 for the volume; internal-linked from
       // bankroll-management and expected-value.
       url: `${BASE}/learn/kelly-criterion`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,
     },
@@ -257,7 +239,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // education intent, feeds into kelly + yield + ROC. Bumped
       // to 0.8.
       url: `${BASE}/learn/bankroll-management`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -268,7 +249,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Highest commercial intent in the cluster — searchers here are
       // actively hunting for a tool.
       url: `${BASE}/learn/positive-ev-betting`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
@@ -279,7 +259,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // pages but highest match intent — searchers know exactly what
       // they want.
       url: `${BASE}/learn/devigging`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -291,7 +270,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // + bankroll are power-user terms, parlay is the front door.
       // Priority 0.85 — one of the highest.
       url: `${BASE}/learn/parlay`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -303,7 +281,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // every new US sportsbook user makes. Priority 0.9 — the
       // highest of any /learn page.
       url: `${BASE}/learn/moneyline`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
     },
@@ -313,7 +290,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // ~10k/mo, "cover the spread" ~5k/mo). Dominant bet type in
       // the NFL and NBA, the reason casual bettors first see −110.
       url: `${BASE}/learn/point-spread`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -323,7 +299,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // "totals betting explained" ~4k/mo). Completes the casual
       // US bettor onboarding set with moneyline + point-spread.
       url: `${BASE}/learn/over-under-betting`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -334,7 +309,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // and AI answer engines need to be able to crawl and index the
       // canonical Person entity that all our glossary articles cite.
       url: `${BASE}/author/neil-macdonald`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.6,
     },
@@ -344,7 +318,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // small, but we still want Google + LLMs to know it exists so
       // "am i up partners" resolves cleanly.
       url: `${BASE}/partners`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.5,
     },

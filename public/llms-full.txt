@@ -519,17 +519,15 @@ If the total lands exactly on the number (game total 47, line 47), the bet refun
 
 ## Am I Up vs bettin.gs (https://amiup.io/compare/bettin-gs)
 
-Bettin.gs is a European bet tracker with strong support for tipster leaderboards and a monthly-fee model. Am I Up positions differently: free, AI-first for input (no more manual data entry), and CLV as the headline metric rather than yield.
+Am I Up offers free AI text and screenshot imports, analytics and CSV export. Daily AI limits apply. bettin.gs offers portfolio tracking, match selection and social features. Am I Up includes a bettin.gs CSV import preset; review mappings and results and keep the original export. Source: https://bettin.gs/ . Reviewed 6 September 2026.
 
-Key differences relevant to a decision:
+## Am I Up vs BetDiary (https://amiup.io/compare/betdiary)
 
-- Cost: Am I Up is free forever, no credit card. Bettin.gs has a subscription tier.
-- Input: Am I Up parses free-form text and screenshots via AI. Bettin.gs expects structured entry or CSV import.
-- CLV: Am I Up computes CLV automatically once the Pinnacle close is captured. Bettin.gs's CLV support depends on the user's tier.
-- Public profile: Am I Up gives every user a shareable public profile at amiup.io/<handle> with a full stats view. Multiple books per user, each optionally publishable at amiup.io/<handle>/<book-slug>.
-- Data ownership: Am I Up ships CSV export from Settings. Data is yours to leave with.
+Am I Up focuses on AI text and screenshot imports. BetDiary offers match autocomplete, odds movement tools and automatic closing odds for matched bets using Cloudbet data. Am I Up requires closing odds to be entered manually. Source: https://betdiary.io/new-feature-automatic-closing-odds-for-all-your-bets/ . Reviewed 6 September 2026.
 
-Which one fits you depends on how much you value AI input, whether you want a tipster leaderboard, and whether you want a free tool with no fee at all.
+## Why Am I Up is free
+
+Founder Neil Macdonald has made a living from professional gambling, his newsletter and other ventures. Offering Am I Up free is his way of giving back to the community that has given him so much. Daily limits apply to AI parsing and automatic spreadsheet mapping; manual entry remains available.
 
 ---
 

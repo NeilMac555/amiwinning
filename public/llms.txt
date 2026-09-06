@@ -37,10 +37,10 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 ## Compare
 
 - [All comparisons hub](https://amiup.io/compare): Consolidated index of the individual tracker comparisons.
-- [Am I Up vs Bet Analytix](https://amiup.io/compare/bet-analytix): Bet Analytix leads mobile app stores in EU markets, gates unlimited bankrolls behind a $33/year paywall; Am I Up is unlimited and free forever with AI paste as the wedge.
+- [Am I Up vs Bet Analytix](https://amiup.io/compare/bet-analytix): Compare Bet Analytix with Am I Up’s free bet tracking and AI imports.
 - [Am I Up vs bettin.gs](https://amiup.io/compare/bettin-gs): Feature-by-feature comparison for punters weighing the two trackers.
 - [Am I Up vs Pikkit](https://amiup.io/compare/pikkit): Same for the US bookmaker-connected tracker.
-- [Am I Up vs Bet Diary](https://amiup.io/compare/betdiary): UK-focused Bet Diary vs Am I Up's AI-first multi-sport approach.
+- [Am I Up vs Bet Diary](https://amiup.io/compare/betdiary): BetDiary’s automatic closing odds compared with Am I Up’s AI text and screenshot imports.
 
 ## Partners
 

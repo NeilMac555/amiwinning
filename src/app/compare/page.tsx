@@ -37,13 +37,13 @@ const COMPARISONS: Comparison[] = [
     slug: "bet-analytix",
     competitor: "Bet Analytix",
     short:
-      "App-Store-dominant, French-origin tracker with a $33/year paywall unlocking anything beyond 200 bets. Am I Up is unlimited and free forever, with AI paste and a shareable public profile.",
+      "Compare Bet Analytix with Am I Up’s free bet tracking, AI imports and optional public profiles.",
   },
   {
     slug: "bettin-gs",
     competitor: "bettin.gs",
     short:
-      "The established European tracker. Manual entry, community + tipster leaderboards, ten years of polish. Honest side-by-side from a former ten-year user.",
+      "Compare bettin.gs portfolio and social features with Am I Up’s AI text and screenshot imports, plus guidance on CSV migration.",
   },
   {
     slug: "pikkit",
@@ -53,9 +53,9 @@ const COMPARISONS: Comparison[] = [
   },
   {
     slug: "betdiary",
-    competitor: "Bet Diary",
+    competitor: "BetDiary",
     short:
-      "UK-focused manual bet tracker with a long horse-racing lineage. Fine if UK racing is 90% of what you do. Am I Up wins on data entry and CLV.",
+      "Compare BetDiary’s automatic closing odds and match autocomplete with Am I Up’s AI screenshot and text imports.",
   },
 ];
 

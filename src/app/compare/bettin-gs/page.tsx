@@ -1,384 +1,96 @@
-// /compare/bettin-gs — head-to-head comparison page targeting the
-// "bettin.gs alternative" and "bet tracker comparison" search intent.
-//
-// SEO strategy: long-tail keyword targeting that bettin.gs themselves
-// don't rank for ("bettin.gs alternative" type queries). Comparison
-// pages are high-conversion-intent: someone searching this is already
-// deep in the consideration funnel.
-//
-// Tone: honest. We acknowledge bettin.gs strengths (a real product
-// Neil personally used for a decade) and don't pretend Am I Up is
-// strictly superior. Trust > marketing. Readers who decide bettin.gs
-// is right for them should still trust amiup.io enough to share or
-// come back later.
-//
-// Structure: TL;DR table → where each wins → side-by-side feature
-// table → decision tree → FAQ (with JSON-LD FAQ schema).
-
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/compare/bettin-gs" },
-  title: "Am I Up vs bettin.gs — honest bet tracker comparison",
-  description:
-    "I used bettin.gs for a decade before building Am I Up. Honest side-by-side of both bet trackers: where each one wins, who should pick which, what's actually different.",
-  openGraph: {
-    title: "Am I Up vs bettin.gs — bet tracker comparison",
-    description:
-      "Honest side-by-side from a former bettin.gs user of 10+ years.",
-    type: "article",
-  },
+const comparison = {
+  "slug": "bettin-gs",
+  "name": "bettin.gs",
+  "title": "Free bettin.gs Alternative: AI Bet Tracker",
+  "description": "Looking for a free bettin.gs alternative? Compare AI screenshot and text imports, analytics and CSV migration with Am I Up. No credit card required.",
+  "intro": "Already using bettin.gs and looking for an easier way to record bets? Am I Up is a free bet tracker that turns screenshots and bookmaker text into records you can review before saving.",
+  "rows": [
+    [
+      "Bet entry",
+      "AI text and screenshot imports; manual entry also available",
+      "Bet registration with match selection"
+    ],
+    [
+      "Analysis",
+      "Profit and loss, yield, equity curve and sport / market breakdowns",
+      "Portfolio analysis and betting statistics"
+    ],
+    [
+      "Community",
+      "Optional public profiles and separate books",
+      "Expert discovery and social features"
+    ]
+  ],
+  "strengths": "bettin.gs combines portfolio tracking with discovering and following other bettors. If those social features are central to how you use a tracker, keep them in your decision. Changing tools also means learning a new workflow.",
+  "migration": "Am I Up includes an import preset for bettin.gs CSV exports. Keep an untouched copy of your original export, then review the column mapping and preview before saving. Check dates, odds, stakes and settlement results against the original; formatting differences can need adjustment.",
+  "sources": [
+    [
+      "bettin.gs product overview",
+      "https://bettin.gs/"
+    ]
+  ]
 };
 
-// FAQ schema markup — Google + AI search engines render these as rich
-// snippets. Each Q/A becomes a citable chunk for AI retrieval.
-const FAQ_ITEMS: Array<{ q: string; a: string }> = [
-  {
-    q: "Is Am I Up free?",
-    a: "Yes, fully free with no credit card required. Every feature on the site is included in the free tier today. Paid tiers may come later for advanced features (auto-settlement, Pinnacle CLV auto-capture) but the core tracking and analytics will stay free.",
-  },
-  {
-    q: "Can I import my existing bettin.gs history?",
-    a: "Yes. Export your bets from bettin.gs as a CSV, then drop the file into Am I Up's import page. The AI will read the columns and map them onto our schema. Most users get their entire history in within 5 minutes.",
-  },
-  {
-    q: "Does Am I Up support tipster following / a community?",
-    a: "Not yet. bettin.gs has an established community with tipster leaderboards. Am I Up is focused on personal tracking first; community features are on the roadmap but not present today.",
-  },
-  {
-    q: "Which sports does Am I Up support?",
-    a: "Soccer, tennis, basketball, baseball, and horse racing are first-class right now (deepest market parsing, sport classification including NBA player props, MLB strikeout / total-base props, and horse racing markets like each-way / NR / Rule 4 / forecast / tricast plus famous race + jockey + trainer recognition, CLV against Pinnacle close). Other sports work but the AI parsing is less precise. NFL is next on the rollout, then NHL, MMA, cricket, golf, boxing, and esports.",
-  },
-  {
-    q: "Is my data private?",
-    a: "Yes. Individual bets are never shown publicly. Your public profile (if you turn it on) shows aggregate stats only — lifetime P/L, equity curve, win rate, sample size. Strangers cannot see what you're betting on next.",
-  },
-  {
-    q: "What about CLV tracking against the Pinnacle close?",
-    a: "Both Am I Up and bettin.gs require you to enter the closing line manually for v1. Pinnacle auto-capture is on the Am I Up roadmap and is being scoped now. It will be the next major feature shipped.",
-  },
-];
+export const metadata: Metadata = {
+  title: comparison.title,
+  description: comparison.description,
+  alternates: { canonical: "/compare/bettin-gs" },
+  openGraph: { title: comparison.title + " | Am I Up", description: comparison.description, type: "article" },
+  twitter: { card: "summary_large_image", title: comparison.title + " | Am I Up", description: comparison.description },
+};
 
 export default function ComparePage() {
-  // JSON-LD for FAQ — drops into <head>, gets parsed by Google for
-  // rich snippets and by AI crawlers for retrieval citations.
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ_ITEMS.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.a,
-      },
-    })),
-  };
-
-  const breadcrumbJsonLd = buildBreadcrumbList([
+  const breadcrumb = buildBreadcrumbList([
     { name: BRAND.name, url: "https://amiup.io" },
     { name: "Compare", url: "https://amiup.io/compare" },
-    { name: "bettin.gs", url: "https://amiup.io/compare/bettin-gs" },
+    { name: comparison.name, url: "https://amiup.io/compare/bettin-gs" },
   ]);
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbJsonLd),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(faqJsonLd),
-        }}
-      />
-
-      <div className="compare-page">
-        <header className="legal-topbar">
-          <Link href="/" className="brand" style={{ textDecoration: "none" }}>
-            <div className="brand-mark" aria-hidden="true"></div>
-            <span>{BRAND.name}</span>
-          </Link>
-          <Link
-            href="/sign-in"
-            className="btn-primary"
-            style={{
-              padding: "7px 16px",
-              fontSize: 13,
-              textDecoration: "none",
-            }}
-          >
-            Try Am I Up free →
-          </Link>
-        </header>
-
-        <main className="compare-main">
-          <p className="compare-eyebrow">Bet tracker comparison</p>
-          <h1 className="compare-title">
-            Am I Up <span className="compare-vs">vs</span> bettin.gs
-          </h1>
-          <p className="compare-deck">
-            An honest side-by-side from someone who used bettin.gs for
-            10+ years before building Am I Up. Where each one wins, who
-            should pick which, and what&rsquo;s genuinely different.
-          </p>
-
-          {/* TL;DR table — what most readers actually want */}
-          <section className="compare-section">
-            <h2 className="compare-h2">TL;DR</h2>
-            <p>
-              Both are bet trackers. bettin.gs is an established platform
-              with a community and a decade of polish. Am I Up is brand
-              new and built around one wedge: you stop typing bets by
-              hand.
-            </p>
-            <div className="compare-table-wrap">
-              <table className="compare-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Am I Up</th>
-                    <th>bettin.gs</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Data entry</td>
-                    <td className="compare-win">
-                      AI paste (text + screenshots)
-                    </td>
-                    <td>Manual typing</td>
-                  </tr>
-                  <tr>
-                    <td>Analytics depth</td>
-                    <td>
-                      Equity, yield, ROC, CLV, max DD, breakdowns
-                    </td>
-                    <td>
-                      Equity, yield, ROI, breakdowns
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Public profile</td>
-                    <td className="compare-win">
-                      Free, shareable URL with OG card
-                    </td>
-                    <td>Paid tier feature</td>
-                  </tr>
-                  <tr>
-                    <td>Community / tipsters</td>
-                    <td>Not yet</td>
-                    <td className="compare-win">Established</td>
-                  </tr>
-                  <tr>
-                    <td>Mobile app</td>
-                    <td>Responsive web</td>
-                    <td className="compare-win">Native iOS / Android</td>
-                  </tr>
-                  <tr>
-                    <td>Price</td>
-                    <td className="compare-win">Free, no card</td>
-                    <td>Free tier + paid</td>
-                  </tr>
-                  <tr>
-                    <td>Age / maturity</td>
-                    <td>Brand new (June 2026)</td>
-                    <td className="compare-win">10+ years</td>
-                  </tr>
-                  <tr>
-                    <td>Sports parsed deeply</td>
-                    <td>Soccer + tennis (expanding)</td>
-                    <td className="compare-win">All major sports</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="compare-fine">
-              &ldquo;Win&rdquo; shading just means that&rsquo;s where the
-              advantage sits today. It doesn&rsquo;t make either product
-              better overall &mdash; that depends on which features matter to
-              you. See below.
-            </p>
-          </section>
-
-          {/* Where Am I Up wins */}
-          <section className="compare-section">
-            <h2 className="compare-h2">Where Am I Up wins</h2>
-            <ul className="compare-list">
-              <li>
-                <strong>You stop typing bets in.</strong> The single biggest
-                friction point of every bet tracker is the data-entry tax.
-                Am I Up&rsquo;s AI reads text, X posts, Telegram screenshots,
-                bookmaker bet slips, even pictures from your phone. Drop
-                anything in, it extracts every bet, you click once to
-                commit. Across 8,800-plus bets the founder typed every
-                single one into bettin.gs by hand &mdash; that&rsquo;s the
-                exact wedge that motivated this product.
-              </li>
-              <li>
-                <strong>Public profile is free.</strong> Every account gets a
-                shareable <code>amiup.io/yourhandle</code> profile out of
-                the box. Lifetime P/L, equity curve, sample size, KPI grid.
-                Drop the link in your X bio. On bettin.gs the equivalent is
-                a paid-tier feature.
-              </li>
-              <li>
-                <strong>Closing-line value vs Pinnacle is treated as
-                first-class.</strong> CLV is a core stat on every chart and
-                every profile, not an afterthought. The product is being
-                built around the assumption that punters care about the
-                edge they earn against the closing line, not just the win
-                rate.
-              </li>
-              <li>
-                <strong>Editorial design.</strong> Six themes (Light, Dark,
-                Terminal, Newspaper, Solar, Slate). Fraunces serif for
-                headlines, JetBrains Mono for numbers. It looks like a
-                Bloomberg terminal rather than a Saas marketing site.
-                Subjective, but most users notice the difference.
-              </li>
-              <li>
-                <strong>Screenshot input is real.</strong> Take a picture of
-                your bet slip with your phone. Drop it into the paste box.
-                Done. Most trackers don&rsquo;t accept image input at all;
-                Am I Up does because Claude Haiku 4.5 handles vision
-                natively.
-              </li>
-            </ul>
-          </section>
-
-          {/* Where bettin.gs wins */}
-          <section className="compare-section">
-            <h2 className="compare-h2">Where bettin.gs wins</h2>
-            <ul className="compare-list">
-              <li>
-                <strong>Established community.</strong> bettin.gs has years
-                of tipsters with verified track records, leaderboards, and
-                a real community that talks about picks together. Am I Up
-                doesn&rsquo;t have any of that yet.
-              </li>
-              <li>
-                <strong>Native mobile apps.</strong> bettin.gs ships iOS and
-                Android apps. Am I Up is responsive web only &mdash; works
-                fine on phones, but it&rsquo;s not a native app.
-              </li>
-              <li>
-                <strong>Coverage breadth.</strong> bettin.gs handles every
-                major sport (horse racing, golf, NFL, NBA, cricket, darts,
-                snooker) with mature parsing. Am I Up&rsquo;s deepest
-                parsing is in soccer, tennis, basketball, baseball, and
-                horse racing right now, with NFL up next. Other sports
-                work but with less precision today.
-              </li>
-              <li>
-                <strong>Decade of polish.</strong> A platform that&rsquo;s
-                been running for 10+ years has handled every edge case
-                you can think of. Am I Up is one day into its public life
-                and will hit edge cases as users find them.
-              </li>
-            </ul>
-          </section>
-
-          {/* Decision tree */}
-          <section className="compare-section">
-            <h2 className="compare-h2">Who should pick which</h2>
-            <div className="compare-decision">
-              <div className="compare-decision-card">
-                <div className="compare-decision-label">Pick Am I Up if</div>
-                <ul>
-                  <li>You bet 5-10+ times a week and hate the data entry</li>
-                  <li>You bet mainly soccer or tennis</li>
-                  <li>You want to share a public profile for free</li>
-                  <li>You log via screenshots, X posts, or Telegram tips</li>
-                  <li>You care about CLV as a primary stat, not vanity</li>
-                  <li>
-                    You&rsquo;re open to trying a fresh tool that still has
-                    rough edges
-                  </li>
-                </ul>
-              </div>
-              <div className="compare-decision-card">
-                <div className="compare-decision-label">Pick bettin.gs if</div>
-                <ul>
-                  <li>You want an established community + leaderboards</li>
-                  <li>
-                    You bet across many sports (horse racing, cricket, golf)
-                    and need mature parsing across all of them
-                  </li>
-                  <li>You prefer a native mobile app over responsive web</li>
-                  <li>You want a 10-year-stable platform, not a v1</li>
-                  <li>
-                    You don&rsquo;t mind manual data entry (or actually prefer
-                    the discipline of it)
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <p className="compare-fine">
-              Honest take from the Am I Up team: there&rsquo;s no shame in
-              picking bettin.gs &mdash; it&rsquo;s a properly built tool we
-              respect. We built Am I Up because we wanted the specific
-              wedge of zero data entry. If that&rsquo;s not your friction
-              point, the other tool is great too.
-            </p>
-          </section>
-
-          {/* FAQ — note: questions also exist in the JSON-LD above for
-              Google rich snippets. */}
-          <section className="compare-section">
-            <h2 className="compare-h2">Frequently asked questions</h2>
-            <div className="compare-faq">
-              {FAQ_ITEMS.map((item, i) => (
-                <div key={i} className="compare-faq-item">
-                  <h3 className="compare-faq-q">{item.q}</h3>
-                  <p className="compare-faq-a">{item.a}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* CTA */}
-          <section className="compare-cta">
-            <div>
-              <div className="compare-cta-title">
-                Decided Am I Up sounds worth a look?
-              </div>
-              <div className="compare-cta-sub">
-                Free, no credit card. Your data exportable any time. You can
-                always go back to bettin.gs &mdash; nothing locked in.
-              </div>
-            </div>
-            <Link
-              href="/sign-in"
-              className="btn-primary"
-              style={{
-                padding: "12px 22px",
-                fontSize: 15,
-                textDecoration: "none",
-              }}
-            >
-              Start tracking &rarr;
-            </Link>
-          </section>
-
-          <footer className="compare-foot">
-            <Link href="/">Am I Up free bet tracker</Link>
-            <Link href="/sample">See a sample profile</Link>
-            <Link href="/compare">All comparisons</Link>
-            <Link href="/compare/bet-analytix">vs Bet Analytix</Link>
-            <Link href="/compare/pikkit">vs Pikkit</Link>
-            <Link href="/compare/betdiary">vs Bet Diary</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/privacy">Privacy</Link>
-          </footer>
-        </main>
-      </div>
-    </>
+    <div className="compare-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <header className="legal-topbar">
+        <Link href="/" className="brand" style={{ textDecoration: "none" }}><div className="brand-mark" aria-hidden="true" /><span>{BRAND.name}</span></Link>
+        <Link href="/sign-in" className="btn-primary" style={{ padding: "7px 16px", fontSize: 13, textDecoration: "none" }}>Try Am I Up free →</Link>
+      </header>
+      <main className="compare-main">
+        <nav className="learn-crumbs" aria-label="Breadcrumb"><Link href="/">Am I Up</Link><span>›</span><Link href="/compare">Compare</Link><span>›</span><span>{comparison.name}</span></nav>
+        <p className="compare-eyebrow">Am I Up vs {comparison.name}</p>
+        <h1 className="compare-title">A free {comparison.name} alternative for tracking your bets</h1>
+        <p className="compare-deck">{comparison.intro}</p>
+        <p className="compare-fine">Written by the Am I Up team. Product information checked <time dateTime="2026-09-06">6 September 2026</time>; sources below.</p>
+        <section className="compare-section">
+          <h2 className="compare-h2">Compare the workflows</h2>
+          <div className="compare-table-wrap"><table className="compare-table">
+            <thead><tr><th scope="col">Feature</th><th scope="col">Am I Up</th><th scope="col">{comparison.name}</th></tr></thead>
+            <tbody>{comparison.rows.map(([feature, ours, theirs]) => <tr key={feature}><th scope="row">{feature}</th><td>{ours}</td><td>{theirs}</td></tr>)}</tbody>
+          </table></div>
+        </section>
+        <section className="compare-section">
+          <h2 className="compare-h2">Choose Am I Up for screenshot and text imports</h2>
+          <p>Paste bookmaker text or upload a bet-slip screenshot, review the extracted bets, then save. You do not need to connect a bookmaker account. AI can make mistakes, so the review step matters.</p>
+          <p>The <Link href="/">free bet tracker</Link> includes your dashboard, separate books and CSV export. Daily limits apply to AI parsing and automatic spreadsheet mapping; manual entry remains available when you reach an AI limit. No credit card is required.</p>
+          <p><Link href="/sample">Explore a sample profile</Link> to see the charts and betting record before creating an account.</p>
+        </section>
+        <section className="compare-section"><h2 className="compare-h2">When {comparison.name} may suit you better</h2><p>{comparison.strengths}</p></section>
+        <section className="compare-section"><h2 className="compare-h2">Bringing your existing betting history</h2><p>{comparison.migration}</p><p>Trying a tracker does not require deleting your old account or original files. Start with a small export to check that the workflow fits.</p></section>
+        <section className="compare-section">
+          <h2 className="compare-h2">A few things to know</h2>
+          <div className="compare-faq">
+            <div className="compare-faq-item"><h3 className="compare-faq-q">Why is Am I Up free?</h3><p className="compare-faq-a">Founder Neil Macdonald has made a living from professional gambling, his newsletter and other ventures. Offering Am I Up free is his way of giving back to the community that has given him so much. <Link href="/author/neil-macdonald">Meet Neil</Link>.</p></div>
+            <div className="compare-faq-item"><h3 className="compare-faq-q">Does Am I Up fetch closing odds automatically?</h3><p className="compare-faq-a">No. You supply the closing odds; Am I Up uses them to calculate closing line value. <Link href="/learn/clv">Learn how CLV works</Link>.</p></div>
+            <div className="compare-faq-item"><h3 className="compare-faq-q">What does a public profile show?</h3><p className="compare-faq-a">If you enable a public profile, it shows performance statistics and settled bets. Pending bets are excluded. Review your sharing settings before publishing a profile.</p></div>
+            <div className="compare-faq-item"><h3 className="compare-faq-q">Can I export my bets?</h3><p className="compare-faq-a">Yes. Am I Up provides CSV export so you can keep a copy of your betting record.</p></div>
+          </div>
+        </section>
+        <section className="compare-section"><h2 className="compare-h2">Sources and scope</h2><p>This comparison covers the workflows described above, rather than every feature or subscription option. Check the provider for current terms.</p><ul className="compare-list">{comparison.sources.map(([label, url]) => <li key={url}><a href={url}>{label}</a></li>)}</ul></section>
+        <section className="compare-cta"><div><div className="compare-cta-title">Try your next bet slip in Am I Up</div><div className="compare-cta-sub">Free bet tracking. Review before saving. No credit card.</div></div><Link href="/sign-in" className="btn-primary" style={{ padding: "12px 22px", fontSize: 15, textDecoration: "none" }}>Start tracking free →</Link></section>
+        <footer className="compare-foot"><Link href="/">Free bet tracker</Link><Link href="/compare">All comparisons</Link><Link href="/sample">Sample profile</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></footer>
+      </main>
+    </div>
   );
 }
