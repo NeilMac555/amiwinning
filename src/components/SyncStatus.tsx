@@ -21,7 +21,7 @@ function readOnlineState(): boolean {
 }
 
 export function SyncStatus() {
-  const { user, betsVersion } = useAuth();
+  const { user, betsVersion, accountStatus } = useAuth();
   const [pending, setPending] = useState(0);
   const [online, setOnline] = useState(true);
 
@@ -64,6 +64,14 @@ export function SyncStatus() {
     dot = "#D8A93A"; // amber
     label = `${pending} pending`;
     tip = `${pending} bet${pending === 1 ? "" : "s"} not yet synced to the cloud. Retrying automatically.`;
+  } else if (accountStatus === "loading") {
+    dot = "#D8A93A";
+    label = "Refreshing";
+    tip = "Showing saved figures while your account refreshes.";
+  } else if (accountStatus === "error") {
+    dot = "#D8A93A";
+    label = "Refresh unavailable";
+    tip = "Showing saved figures. Reload to try refreshing your account again.";
   } else {
     dot = "var(--green)";
     label = "Synced";

@@ -46,9 +46,23 @@ type Source = "mock" | "imported";
 
 export default function Dashboard() {
   const { user, loading, accountStatus, activeBook } = useAuth();
+  const [cachedScope, setCachedScope] = useState<string | null>(null);
+  const scope = user && activeBook?.userId === user.id
+    ? `${user.id}:${activeBook.id}`
+    : null;
+
+  useEffect(() => {
+    // The cache is shared across sessions. Only show it early after the
+    // books query has confirmed that this book belongs to the current user.
+    const hasCachedBets = scope && loadBets().some((bet) =>
+      bet.bookId === activeBook?.id && !bet.id.startsWith("seed-"),
+    );
+    queueMicrotask(() => setCachedScope(hasCachedBets ? scope : null));
+  }, [scope, activeBook?.id]);
+
   if (loading) return <HomeStartup />;
   if (!user) return <LandingPage />;
-  if (accountStatus !== "ready") {
+  if (accountStatus !== "ready" && (!scope || cachedScope !== scope)) {
     return <DashboardLoading failed={accountStatus === "error"} />;
   }
   return <AccountDashboard key={`${user.id}:${activeBook?.id ?? "none"}`} />;
@@ -68,7 +82,7 @@ function AccountDashboard() {
   const settingsUnit = useSettings().unit;
   const [localBump, setLocalBump] = useState(0);
   const [cleanupDismissed, setCleanupDismissed] = useState(false);
-  const { user, betsVersion, activeBook, cleanup } = useAuth();
+  const { user, betsVersion, activeBook, cleanup, accountStatus } = useAuth();
 
   // Load bets on mount, and re-read whenever the auth layer signals a fresh
   // pull from Supabase (betsVersion bumps).
@@ -90,7 +104,7 @@ function AccountDashboard() {
     // Scope to the active book. Bets without a bookId (legacy cache) fall
     // through to the active book so older data still shows up.
     const scoped = activeBook
-      ? all.filter((b) => !b.bookId || b.bookId === activeBook.id)
+      ? all.filter((b) => b.bookId === activeBook.id || (accountStatus === "ready" && !b.bookId))
       : all;
     const nextNow = Date.now();
     // Defer setState to next microtask so it's not synchronous in this
@@ -107,7 +121,7 @@ function AccountDashboard() {
         setAllBets([]);
       }
     });
-  }, [betsVersion, user, activeBook, localBump]);
+  }, [betsVersion, user, activeBook, localBump, accountStatus]);
 
   // Re-aggregate whenever bets or range change. useMemo (not useEffect)
   // so React 19's no-setState-in-effect rule is satisfied — `data` is
