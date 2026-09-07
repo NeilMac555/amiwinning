@@ -359,7 +359,9 @@ export async function getPublicProfileServer(
     }
   }
 
-  const bets = allRows.map(supabaseRowToImportedBet);
+  // Match the signed-in dashboard: landing-demo seeds are not real history.
+  // Filter only the returned view; never delete or rewrite stored records.
+  const bets = allRows.filter((row) => !row.id.startsWith("seed-")).map(supabaseRowToImportedBet);
 
   return { profile, bets };
 }
@@ -459,7 +461,8 @@ export async function getPublicProfileServerByBookSlug(
     if (rows.length < PAGE_SIZE) break;
   }
 
-  const bets = allRows.map(supabaseRowToImportedBet);
+  // Match the signed-in dashboard, including every real bet unchanged.
+  const bets = allRows.filter((row) => !row.id.startsWith("seed-")).map(supabaseRowToImportedBet);
   return { profile, bets };
 }
 
