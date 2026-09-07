@@ -11,7 +11,6 @@
 // no data yet.
 
 import Link from "next/link";
-import { OddsBandTable } from "@/components/OddsBandTable";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -113,8 +112,6 @@ export default function LeaksPage() {
               </div>
               <RangeTabs value={range} onChange={setRange} options={LEAKS_RANGES} />
             </div>
-
-            <OddsBandTable bets={filterByRange(bets, range, now)} />
 
             {analysis.leaks.length === 0 && analysis.strengths.length === 0 ? (
               <div className="leaks-empty">

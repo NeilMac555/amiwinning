@@ -6620,16 +6620,3 @@ a.sb-item { cursor: pointer; }
 .landing-ecosystem-resources h3 { font-size:18px; margin:0 0 18px; }
 .landing-ecosystem-resources a { display:block; font-size:14px; margin:14px 0; line-height:1.5; }
 @media(max-width:700px) { .landing-ecosystem { grid-template-columns:1fr; padding:22px; gap:24px; } .landing-ecosystem-resources { border-left:0; border-top:1px solid var(--border-strong); padding:24px 0 0; } }
-
-.odds-band-report { padding:24px; margin-bottom:28px; }
-.odds-band-report h2 { font-size:20px; margin:0 0 12px; }
-.odds-band-report p { color:var(--text-muted); line-height:1.6; font-size:13px; }
-.odds-band-scroll { overflow-x:auto; }
-.odds-band-report table { width:100%; border-collapse:collapse; text-align:left; font-size:13px; }
-.odds-band-report th, .odds-band-report td { padding:13px 12px; border-bottom:1px solid var(--border-strong); white-space:nowrap; }
-.odds-band-report small { display:block; font-size:11px; color:var(--text-muted); margin-top:5px; }
-.odds-band-report button { color:var(--accent); background:transparent; border:1px solid var(--border-strong); border-radius:6px; padding:8px 12px; cursor:pointer; font:inherit; }
-.odds-band-report button:disabled { opacity:.5; cursor:default; }
-.odds-band-report button:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
-.odds-band-pages { display:flex; gap:18px; align-items:center; margin-top:16px; }
-.odds-band-note { max-width:1000px; }
