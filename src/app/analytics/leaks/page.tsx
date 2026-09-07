@@ -11,6 +11,7 @@
 // no data yet.
 
 import Link from "next/link";
+import { OddsBandTable } from "@/components/OddsBandTable";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -113,6 +114,8 @@ export default function LeaksPage() {
               <RangeTabs value={range} onChange={setRange} options={LEAKS_RANGES} />
             </div>
 
+            <OddsBandTable bets={filterByRange(bets, range, now)} />
+
             {analysis.leaks.length === 0 && analysis.strengths.length === 0 ? (
               <div className="leaks-empty">
                 <p>
@@ -135,8 +138,7 @@ export default function LeaksPage() {
                     <p className="leaks-lead">
                       Where you&rsquo;re losing money. Ranked by how much
                       each pattern has cost you, weighted by sample size.
-                      Sustained negative segments — not one-off cold
-                      streaks.
+                      These are historical losses, not proof of a recurring cause.
                     </p>
                     <div className="leaks-grid">
                       {analysis.leaks.map((l, i) => (
@@ -152,9 +154,7 @@ export default function LeaksPage() {
                       Biggest Edges
                     </h2>
                     <p className="leaks-lead">
-                      Where you actually make money. Same slicing, same
-                      threshold — these are the segments to double down
-                      on.
+                      Your most profitable recorded segments. Past results do not establish a future edge or justify increasing stakes.
                     </p>
                     <div className="leaks-grid">
                       {analysis.strengths.map((s, i) => (
@@ -181,9 +181,7 @@ export default function LeaksPage() {
                       excluded.
                     </li>
                     <li>
-                      Minimum <strong>30 bets per slice</strong>. Below
-                      that, ROI is too noisy to distinguish real leaks
-                      from variance.
+                      Minimum <strong>30 bets per slice</strong>. This display threshold is not a statistical significance test.
                     </li>
                     <li>
                       Ranking:{" "}
@@ -191,9 +189,7 @@ export default function LeaksPage() {
                       stake and a decent sample rise to the top.
                     </li>
                     <li>
-                      <strong>Confidence badges</strong> tell you how much
-                      to trust each number: 🟡 early (n=30–49), 🟠 moderate
-                      (n=50–99), 🟢 strong (n=100+).
+                      <strong>Sample badges</strong> describe volume only: fewer than 30, 30–99, or 100+ bets. They do not measure statistical confidence.
                     </li>
                   </ul>
                 </section>
@@ -292,10 +288,10 @@ function dimensionLabel(d: Leak["dimension"]): string {
 function confidenceLabel(c: Confidence): string {
   switch (c) {
     case "early":
-      return "🟡 Early signal";
+      return "Fewer than 30 bets";
     case "moderate":
-      return "🟠 Moderate confidence";
+      return "30–99 bets";
     case "strong":
-      return "🟢 Strong signal";
+      return "100+ bets";
   }
 }

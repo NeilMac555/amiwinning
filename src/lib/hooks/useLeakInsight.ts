@@ -14,7 +14,7 @@
 import { useEffect, useState } from "react";
 import type { Leak } from "@/lib/leaks";
 
-const CACHE_PREFIX = "aiw_leak_insight_v1_";
+const CACHE_PREFIX = "aiw_leak_insight_v2_";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 type Tone = "leak" | "strength";
