@@ -24,8 +24,8 @@ export function ThirtyDaySnapshot({ bets, now, bookName }: { bets: ImportedBet[]
           <path d={path} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
         </svg>
       ) : <p className="snapshot-empty">No settled bets in this period yet.</p>}
-      <dl className="snapshot-metrics"><div><dt>Yield</dt><dd>{data.yieldPct === null ? "—" : `${data.yieldPct > 0 ? "+" : ""}${data.yieldPct.toFixed(1)}%`}</dd></div><div><dt>Settled bets</dt><dd>{data.count.toLocaleString("en-GB")}</dd></div><div><dt>Total staked</dt><dd>{fmtUnit(data.stake, unit)}</dd></div></dl>
-      <p className="snapshot-note">Today and the previous 29 days (UTC), by event date. Pending and void bets excluded. Independent of the filter below.</p>
+      <dl className="snapshot-metrics"><div><dt>Yield</dt><dd>{data.yieldPct === null ? "—" : `${data.yieldPct > 0 ? "+" : ""}${data.yieldPct.toFixed(1)}%`}</dd></div><div><dt>Settled bets</dt><dd>{data.count.toLocaleString("en-GB")}</dd></div><div><dt>Total staked</dt><dd>{fmtUnit(data.stake, unit)}</dd></div><div><dt>Average CLV</dt><dd className={data.clvPct === null || data.clvPct === 0 ? "" : data.clvPct > 0 ? "num-pos" : "num-neg"}>{data.clvPct === null ? "—" : `${data.clvPct > 0 ? "+" : ""}${data.clvPct.toFixed(2)}%`}</dd><small className="snapshot-clv-coverage">{data.clvCount} of {data.count} with closing odds</small></div></dl>
+      <p className="snapshot-note">Today and the previous 29 days (UTC), by event date. Pending and void bets excluded. Independent of the filter below. CLV averages bets with valid closing odds; missing values are excluded.</p>
     </section>
   );
 }
