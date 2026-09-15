@@ -20,7 +20,7 @@ export default function SharpSideSoccerResults() {
     datePublished: "2026-09-15", dateModified: "2026-09-15",
     author: { "@type": "Person", "@id": "https://amiup.io/author/neil-macdonald#person", name: "Neil Macdonald", url: "https://amiup.io/author/neil-macdonald" },
     publisher: { "@type": "Organization", name: "Am I Up", url: "https://amiup.io" },
-    about: [{ "@type": "Person", name: "Neil Macdonald", alternateName: "Neil Mac" }, { "@type": "Person", name: "Will White" }, { "@type": "Organization", name: "Sharp Side Soccer" }],
+    about: [{ "@type": "Person", name: "Neil Macdonald", alternateName: "Neil Mac", sameAs: "https://x.com/NeilMac555" }, { "@type": "Person", name: "Will White", sameAs: "https://x.com/WillWhiteBets" }, { "@type": "Organization", name: "Sharp Side Soccer" }],
   };
   const breadcrumb = buildBreadcrumbList([{ name: "Am I Up", url: "https://amiup.io" }, { name: "Sharp Side Soccer results", url }]);
   return (
@@ -47,6 +47,7 @@ export default function SharpSideSoccerResults() {
           <section className="learn-section">
             <h2 className="learn-h2">Neil Mac and Will White: Sharp Side Soccer</h2>
             <p>Will White and I are professional bettors, now working together through Sharp Side Soccer. My public record gives readers a way to explore my betting background alongside that partnership.</p>
+            <p>Follow us on X (Twitter): Neil Mac at <a href="https://x.com/NeilMac555">@NeilMac555</a> and Will White at <a href="https://x.com/WillWhiteBets">@WillWhiteBets</a>.</p>
             <p>For anyone getting to know the people behind Sharp Side Soccer, the individual bets and the full performance curve provide more context than a headline total alone. You can follow the record over time and see both the profitable periods and the drawdowns.</p>
           </section>
 
