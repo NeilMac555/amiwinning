@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import NeilMacCoverage from "@/components/NeilMacCoverage";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
 const title = "Sharp Side Soccer: Neil Mac’s Betting Record & Will White";
@@ -63,6 +64,7 @@ export default function SharpSideSoccerResults() {
             <p>The profile reflects the bets recorded in Am I Up. It is not an independent audit of bookmaker accounts, and past results do not guarantee future returns.</p>
           </section>
 
+          <NeilMacCoverage />
           <section className="learn-section">
             <h2 className="learn-h2">Why I built a free bet tracker</h2>
             <p>I have been fortunate enough to make a good living from professional gambling, my newsletter and other ventures. Am I Up is my way of giving something back to the community that has given me so much.</p>

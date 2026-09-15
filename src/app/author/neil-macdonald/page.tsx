@@ -22,6 +22,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import NeilMacCoverage from "@/components/NeilMacCoverage";
 import { BRAND } from "@/lib/brand";
 import { buildBreadcrumbList } from "@/lib/breadcrumb-schema";
 
@@ -127,7 +128,7 @@ export default function AuthorPage() {
     mainEntity: { "@id": AUTHOR_ID },
     url: AUTHOR_URL,
     name: "Neil Macdonald — Sports betting analyst",
-    dateModified: "2026-09-06",
+    dateModified: "2026-09-15",
   };
 
   const breadcrumbJsonLd = buildBreadcrumbList([
@@ -247,6 +248,7 @@ export default function AuthorPage() {
             </ul>
           </section>
 
+          <NeilMacCoverage />
           <section className="learn-section">
             <h2 className="learn-h2">Articles</h2>
             <p><Link href="/sharp-side-soccer-results">Sharp Side Soccer: my betting record and partnership with Will White</Link></p>
