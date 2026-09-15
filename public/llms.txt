@@ -10,6 +10,8 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 
 ## Core
 
+- [Sharp Side Soccer: Neil Mac’s record and Will White partnership](https://amiup.io/sharp-side-soccer-results): Neil’s personal betting record, including pre-partnership history. Neil Mac and Will White joined forces on 11 August 2026; the linked personal record is not a combined partnership record.
+
 - [Landing](https://amiup.io/): What Am I Up does, live paste-and-parse demo, sample profile card.
 - [Sample public profile](https://amiup.io/sample): Fully-featured example profile so visitors can see every metric before signing up.
 

@@ -249,6 +249,7 @@ export default function AuthorPage() {
 
           <section className="learn-section">
             <h2 className="learn-h2">Articles</h2>
+            <p><Link href="/sharp-side-soccer-results">Sharp Side Soccer: my betting record and partnership with Will White</Link></p>
             <p>
               Every glossary page on {BRAND.name} is written and maintained
               here.

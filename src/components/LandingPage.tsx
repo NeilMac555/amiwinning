@@ -350,6 +350,7 @@ export function LandingPage() {
             <p>Two complementary tools from the same founder. Am I Up works independently;
               using SteamWatch does not automatically place or sync bets.</p>
             <Link href="/author/neil-macdonald">Meet the founder →</Link>
+            <Link href="/sharp-side-soccer-results">Neil Mac’s record &amp; Sharp Side Soccer →</Link>
           </div>
         </section>
       </main>
