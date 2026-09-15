@@ -6622,3 +6622,21 @@ a.sb-item { cursor: pointer; }
 @media(max-width:700px) { .landing-ecosystem { grid-template-columns:1fr; padding:22px; gap:24px; } .landing-ecosystem-resources { border-left:0; border-top:1px solid var(--border-strong); padding:24px 0 0; } }
 
 .snapshot-clv-coverage { display:block; margin-top:5px; font-size:11px; color:var(--text-muted); }
+
+/* Creator recruitment: amber accents distinguish the offer from bet metrics. */
+.creator-nav-link { color: var(--accent); font-size: 13px; font-weight: 600; text-decoration: none; margin-right: 12px; }
+.creator-invite { display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 34px; margin: 36px 0; background: linear-gradient(115deg, rgba(245,166,35,.10), var(--surface) 65%); border: 1px solid rgba(245,166,35,.45); border-left: 4px solid var(--accent); border-radius: 12px; }
+.creator-kicker { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+.creator-invite h2 { color: var(--text); font-size: clamp(25px, 3vw, 34px); line-height: 1.15; margin: 10px 0 14px; }
+.creator-invite p:not(.creator-kicker) { max-width: 610px; color: var(--text-muted); line-height: 1.6; }
+.creator-invite span { color: var(--text-muted); font-size: 12px; }
+.creator-invite > .btn-primary { flex-shrink: 0; text-decoration: none; padding: 14px 20px; }
+.creator-partners-page #apply { scroll-margin-top: 24px; }
+.creator-form { display: flex; flex-direction: column; gap: 18px; padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.creator-form label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 600; }
+.creator-form input, .creator-form textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface-2); color: var(--text); font: inherit; font-size: 16px; }
+.creator-form textarea { resize: vertical; min-height: 120px; }
+.creator-form input:focus-visible, .creator-form textarea:focus-visible, .creator-nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.creator-form .btn-primary { align-self: flex-start; white-space: normal; }
+.creator-form button:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 760px) { .creator-invite { flex-direction: column; align-items: flex-start; padding: 24px; gap: 20px; } .creator-form { padding: 18px; } .creator-nav-link { font-size: 11px; margin-right: 4px; } }

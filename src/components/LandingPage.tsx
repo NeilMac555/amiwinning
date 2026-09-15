@@ -93,6 +93,7 @@ export function LandingPage() {
           <div className="brand-mark" aria-hidden="true"></div>
           <span style={{ fontSize: 15, fontWeight: 600 }}>{BRAND.name}</span>
         </div>
+        <Link href="/partners" className="creator-nav-link">Creator partners ↗</Link>
         <Link
           href="/sign-in"
           className="btn-ghost"
@@ -284,6 +285,10 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section className="creator-invite" aria-labelledby="creator-invite-title">
+          <div><p className="creator-kicker">Paid creator partnerships</p><h2 id="creator-invite-title">Have an audience?<br />Get paid to track with Am I Up.</h2><p>Move your betting record over, make Am I Up your primary tracker and share it with your followers. We’re looking for creators with engaged communities.</p><span>Applications reviewed individually. Payment terms agreed before you start.</span></div>
+          <Link href="/partners" className="btn-primary">Become a creator partner →</Link>
+        </section>
         <section className="landing-explainer landing-free" aria-labelledby="tracker-free">
           <div>
             <h2 id="tracker-free">What’s included in the free bet tracker?</h2>
@@ -361,6 +366,7 @@ export function LandingPage() {
           <span style={{ fontWeight: 600 }}>{BRAND.name}</span>
         </div>
         <div className="landing-foot-links">
+          <Link href="/partners">Paid creator partnerships</Link>
           <a href="https://www.steamwatch.io/">SteamWatch</a>
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
