@@ -6640,3 +6640,10 @@ a.sb-item { cursor: pointer; }
 .creator-form .btn-primary { align-self: flex-start; white-space: normal; }
 .creator-form button:disabled { opacity: .6; cursor: wait; }
 @media (max-width: 760px) { .creator-invite { flex-direction: column; align-items: flex-start; padding: 24px; gap: 20px; } .creator-form { padding: 18px; } .creator-nav-link { font-size: 11px; margin-right: 4px; } }
+
+.creator-profile-invite { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 18px 0; padding: 18px 22px; border: 1px solid rgba(245,166,35,.4); border-left: 3px solid var(--accent); border-radius: 10px; background: linear-gradient(110deg, rgba(245,166,35,.08), var(--surface)); }
+.creator-profile-invite span { display: block; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; font: 10px var(--mono); margin-bottom: 6px; }
+.creator-profile-invite strong { display: block; color: var(--text); font-size: 18px; }
+.creator-profile-invite p { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin: 6px 0 0; }
+.creator-profile-invite .btn-primary { flex-shrink: 0; text-decoration: none; }
+@media (max-width: 640px) { .creator-profile-invite { flex-direction: column; align-items: flex-start; padding: 18px; gap: 14px; } }

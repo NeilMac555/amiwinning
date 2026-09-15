@@ -14,6 +14,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { CreatorPartnerInvite } from "@/components/CreatorPartnerInvite";
 import { getPublicProfileServerByBookSlug } from "@/lib/profiles";
 import { aggregateFromBets } from "@/lib/aggregate";
 import { monthlyPL } from "@/lib/analytics";
@@ -295,6 +296,7 @@ export default async function ProfilePage({ params }: PageProps) {
         )}
 
         {/* Equity curve */}
+        <CreatorPartnerInvite />
         {settledCount > 0 && (
           <section className="profile-chart card">
             <div className="profile-chart-head">

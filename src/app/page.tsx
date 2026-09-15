@@ -19,6 +19,7 @@ import { OpenPositions } from "@/components/OpenPositions";
 import { PasteHero } from "@/components/PasteHero";
 import { SampleBetsBanner } from "@/components/SampleBetsBanner";
 import { ThirtyDaySnapshot } from "@/components/ThirtyDaySnapshot";
+import { CreatorPartnerInvite } from "@/components/CreatorPartnerInvite";
 import { TrackingBadge } from "@/components/TrackingBadge";
 import { DemoBetImportBanner } from "@/components/DemoBetImportBanner";
 import { GhostPreview } from "@/components/GhostPreview";
@@ -273,6 +274,7 @@ function AccountDashboard() {
           />
           {!isFirstRun && realBetCount > 0 && <ThirtyDaySnapshot bets={allBets} now={now} bookName={activeBook?.name ?? "Current book"} />}
           </div>
+          {user && <CreatorPartnerInvite />}
 
           {/* Top-level conditional per spec:
               - totalCommittedBets === 0 → GhostPreview (presentational
