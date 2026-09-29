@@ -46,10 +46,6 @@ Built and maintained by Neil Macdonald, an independent sports betting analyst.
 - [Am I Up vs Pikkit](https://amiup.io/compare/pikkit): Same for the US bookmaker-connected tracker.
 - [Am I Up vs Bet Diary](https://amiup.io/compare/betdiary): BetDiary’s automatic closing odds compared with Am I Up’s AI text and screenshot imports.
 
-## Partners
-
-- [Paid creator partnerships](https://amiup.io/partners): Apply to make Am I Up your primary tracker and demonstrate it to your audience. Applications reviewed individually; fees and deliverables agreed before work starts.
-
 ## Legal
 
 - [Terms of service](https://amiup.io/terms)

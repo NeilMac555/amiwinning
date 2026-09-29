@@ -314,15 +314,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.6,
     },
-    {
-      // Tipster partnership landing. Lower priority (0.5) than the
-      // marketing / glossary pages because organic search intent is
-      // small, but we still want Google + LLMs to know it exists so
-      // "am i up partners" resolves cleanly.
-      url: `${BASE}/partners`,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
   ];
   return [...staticEntries, ...profileEntries, ...bookEntries];
 }
