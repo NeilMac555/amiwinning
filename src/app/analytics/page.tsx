@@ -1352,9 +1352,8 @@ function SeasonalPanel({
   rows: SeasonalMonthRow[];
   unit: DisplayUnit;
 }) {
-  // Only rows with meaningful sample influence the scale — otherwise a
-  // 3-bet outlier month would crush every legitimate bar.
-  const eligible = rows.filter((r) => r.bets >= 20);
+  // Include every populated month so displayed P/L reconciles with the total.
+  const eligible = rows.filter((r) => r.bets > 0);
   const maxAbs = Math.max(...eligible.map((r) => Math.abs(r.pl)), 1);
   const best = eligible.length
     ? [...eligible].sort((a, b) => b.pl - a.pl)[0]
@@ -1389,13 +1388,14 @@ function SeasonalPanel({
               </>
             )}
             <span style={{ color: "var(--text-faint)" }}>·</span>
-            <span>Sample suppressed below 20</span>
+            <span>All settled bets included</span>
           </div>
         </div>
       </div>
       <div className="breakdown" style={{ maxWidth: 880, padding: "6px 0" }}>
         {rows.map((r) => {
-          const hide = r.bets < 20;
+          const hide = r.bets === 0;
+          const smallSample = r.bets > 0 && r.bets < 20;
           const w = (Math.abs(r.pl) / maxAbs) * 50;
           const left = r.pl >= 0 ? 50 : 50 - w;
           const color = r.pl >= 0 ? "var(--green)" : "var(--red)";
@@ -1414,8 +1414,8 @@ function SeasonalPanel({
               }}
               title={
                 hide
-                  ? `${r.label}: ${r.bets} bets — sample too small`
-                  : `${r.label} · ${r.bets} bets across ${r.years} years · ${yieldText} · total ${fmtPL(r.pl, unit)}`
+                  ? `${r.label}: no settled bets`
+                  : `${r.label} · ${r.bets} bets across ${r.years} years · ${yieldText} · total ${fmtPL(r.pl, unit)}${smallSample ? " · Small sample (under 20 bets)" : ""}`
               }
             >
               <div className="bk-label">{r.label}</div>
@@ -1440,9 +1440,11 @@ function SeasonalPanel({
                 >
                   {hide ? "—" : fmtPL(r.pl, unit)}
                 </div>
-                <div className="bk-sample" style={{ whiteSpace: "nowrap" }}>
+                <div className="bk-sample">
                   {hide
-                    ? `n=${r.bets}`
+                    ? "No settled bets"
+                    : smallSample
+                    ? `${r.bets} bets · Small sample`
                     : `${fmtPL(r.avgPlPerYear, unit)}/yr · ${r.years}y`}
                 </div>
               </div>
