@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { buildAll, NOW, type DashboardData } from "@/lib/data";
 import { aggregateFromBets } from "@/lib/aggregate";
+import { canUsePersonalDashboardView, personalDashboardBets, type PersonalDashboardView } from "@/lib/personal-dashboard-view";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -80,6 +81,7 @@ function AccountDashboard() {
   // history out of the box. They can still scope to 7D/1M/3M/6M/YTD/12M
   // via the RangeTabs control below.
   const [range, setRange] = useState<Range>("All");
+  const [personalView, setPersonalView] = useState<PersonalDashboardView>("personal");
   const settingsUnit = useSettings().unit;
   const [localBump, setLocalBump] = useState(0);
   const [cleanupDismissed, setCleanupDismissed] = useState(false);
@@ -124,6 +126,14 @@ function AccountDashboard() {
     });
   }, [betsVersion, user, activeBook, localBump, accountStatus]);
 
+  const showPersonalView = canUsePersonalDashboardView(user?.id, activeBook?.id);
+  const isSharpSideView = showPersonalView && personalView === "sharp-side-soccer";
+  const viewBets = useMemo(
+    () => personalDashboardBets(allBets, isSharpSideView ? "sharp-side-soccer" : "personal"),
+    [allBets, isSharpSideView],
+  );
+  const viewName = isSharpSideView ? "Sharp Side Soccer" : activeBook?.name ?? "Current book";
+
   // Re-aggregate whenever bets or range change. useMemo (not useEffect)
   // so React 19's no-setState-in-effect rule is satisfied — `data` is
   // pure-derived state.
@@ -132,23 +142,23 @@ function AccountDashboard() {
     // Use the captured `now` rather than Date.now() so this memo is pure —
     // React 19 forbids impure calls during render. `now` is bumped when bets
     // are loaded, which is the only moment the window boundary changes.
-    const filtered = filterByRange(allBets, range, now);
+    const filtered = filterByRange(viewBets, range, now);
     const windowed = aggregateFromBets(filtered);
     // Return on capital is a path-dependent, "across your whole career"
-    // metric. Windowing it produces nonsense (a single bad month in a 3M
+    // metric within the selected dashboard view. Windowing it produces nonsense (a single bad month in a 3M
     // window can render -100%). Always compute it from all bets and override
     // the window-scoped values so it stays stable as the user flips ranges.
-    if (allBets.length > 0) {
-      const lifetime = aggregateFromBets(allBets);
+    if (viewBets.length > 0) {
+      const lifetime = aggregateFromBets(viewBets);
       windowed.kpis.rocPct = lifetime.kpis.rocPct;
       windowed.kpis.rocAnnualised = lifetime.kpis.rocAnnualised;
       windowed.kpis.peakDrawdown = lifetime.kpis.peakDrawdown;
       windowed.kpis.lifetimePl = lifetime.kpis.lifetimePl;
     }
     return windowed;
-  }, [allBets, range, source, now]);
+  }, [viewBets, range, source, now]);
 
-  const importedCount = allBets.length;
+  const importedCount = viewBets.length;
   const milestoneCount = allBets.filter((bet) =>
     bet.status !== "pending" && !bet._pendingDelete &&
     bet.source !== SAMPLE_SOURCE_TAG && !bet.id.startsWith("seed-") &&
@@ -242,6 +252,19 @@ function AccountDashboard() {
           <div className="page-header">
             <div>
               <h1 className="page-title">Dashboard</h1>
+              {showPersonalView && (
+                <div className="dashboard-history-view">
+                  <label htmlFor="dashboard-history-view">Dashboard view</label>
+                  <select id="dashboard-history-view" value={personalView} onChange={(event) => {
+                    setPersonalView(event.target.value as PersonalDashboardView);
+                    setRange("All");
+                  }}>
+                    <option value="personal">Personal book</option>
+                    <option value="sharp-side-soccer">Sharp Side Soccer</option>
+                  </select>
+                  <span>{isSharpSideView ? "Since 12 August 2026 · by bet date (UTC)" : "Full personal betting history"}</span>
+                </div>
+              )}
               {user && activeBook && accountStatus === "ready" && milestoneCount >= 100 && (
                 <div className="dashboard-book-milestone"><span>{activeBook.name}</span><TrackingBadge count={milestoneCount} /></div>
               )}
@@ -253,7 +276,7 @@ function AccountDashboard() {
                   <span className="dot-live"></span>
                   Updated {updatedAt} ·{" "}
                   {source === "imported"
-                    ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${rangeLabel(range, now)}`
+                    ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${isSharpSideView && range === "All" ? "since 12 August 2026" : rangeLabel(range, now)}`
                     : "Soccer (EPL, UCL) · Pinnacle & 4 others"}
                 </div>
               )}
@@ -271,7 +294,7 @@ function AccountDashboard() {
             firstRun={isFirstRun}
             compact={!isFirstRun && realBetCount > 0}
           />
-          {!isFirstRun && realBetCount > 0 && <ThirtyDaySnapshot bets={allBets} now={now} bookName={activeBook?.name ?? "Current book"} />}
+          {!isFirstRun && realBetCount > 0 && <ThirtyDaySnapshot bets={viewBets} now={now} bookName={viewName} />}
           </div>
 
           {/* Top-level conditional per spec:
@@ -346,7 +369,7 @@ function AccountDashboard() {
                   color: "var(--text-faint)",
                 }}
               >
-                Metrics · {rangeLabel(range, now)}
+                Metrics · {isSharpSideView ? "Sharp Side Soccer · " : ""}{isSharpSideView && range === "All" ? "Since 12 August 2026" : rangeLabel(range, now)}
               </div>
               <RangeTabs
                 value={range}
@@ -356,7 +379,7 @@ function AccountDashboard() {
             </div>
           )}
 
-          <KpiStripCompact kpis={data.kpis} sparks={data.sparks} />
+          <KpiStripCompact kpis={data.kpis} sparks={data.sparks} capitalScopeLabel={isSharpSideView ? "Since 12 Aug 2026" : undefined} />
           <SecondaryStats s={data.secondary} />
 
           {source === "imported" && data.kpis.lifetimePl !== undefined && (
@@ -370,7 +393,7 @@ function AccountDashboard() {
                 settledCount={data.secondary.settledCount ?? 0}
                 avgOdds={data.secondary.avgOdds}
               />
-              <DashboardEdgeCallout bets={allBets} />
+              <DashboardEdgeCallout bets={viewBets} />
             </div>
           )}
 

@@ -21,7 +21,7 @@ function colorFor(v: number): string {
   return v > 0 ? "var(--green)" : v < 0 ? "var(--red)" : "var(--text-muted)";
 }
 
-function buildKpiItems(kpis: KPIs, sparks: Sparks): KpiItem[] {
+function buildKpiItems(kpis: KPIs, sparks: Sparks, capitalScopeLabel = "Lifetime"): KpiItem[] {
   // Detect real (imported) data: aggregations always set `lifetimePl`, the
   // mock builder doesn't. Mock-era decorations only show in demo mode.
   const isReal = kpis.lifetimePl !== undefined;
@@ -33,11 +33,11 @@ function buildKpiItems(kpis: KPIs, sparks: Sparks): KpiItem[] {
   const rocSub = isReal
     ? riskCap > 0
       ? kpis.rocAnnualised
-        ? `Lifetime, annualised · on ${riskCap}u risk capital`
-        : `Lifetime · on ${riskCap}u risk capital`
-      : "Lifetime · risk capital"
+        ? `${capitalScopeLabel}, annualised · on ${riskCap}u risk capital`
+        : `${capitalScopeLabel} · on ${riskCap}u risk capital`
+      : `${capitalScopeLabel} · risk capital`
     : "on risk capital";
-  const rocDelta = isReal ? "lifetime" : "annualised";
+  const rocDelta = isReal ? (capitalScopeLabel === "Lifetime" ? "lifetime" : "") : "annualised";
   // Max drawdown as a %, but suppress the noisy -100% case (peak <= drawdown,
   // meaning the punter never had a sustained positive run inside the window).
   // Show the absolute u value as the headline instead — same info, less alarming.
@@ -122,10 +122,11 @@ function buildKpiItems(kpis: KPIs, sparks: Sparks): KpiItem[] {
 interface KpiProps {
   kpis: KPIs;
   sparks: Sparks;
+  capitalScopeLabel?: string;
 }
 
-export function KpiStripCompact({ kpis, sparks }: KpiProps) {
-  const items = buildKpiItems(kpis, sparks);
+export function KpiStripCompact({ kpis, sparks, capitalScopeLabel }: KpiProps) {
+  const items = buildKpiItems(kpis, sparks, capitalScopeLabel);
   return (
     <div className="kpi-strip">
       {items.map((k) => (

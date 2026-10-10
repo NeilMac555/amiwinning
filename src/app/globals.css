@@ -6647,3 +6647,7 @@ a.sb-item { cursor: pointer; }
 .creator-profile-invite p { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin: 6px 0 0; }
 .creator-profile-invite .btn-primary { flex-shrink: 0; text-decoration: none; }
 @media (max-width: 640px) { .creator-profile-invite { flex-direction: column; align-items: flex-start; padding: 18px; gap: 14px; } }
+
+.dashboard-history-view { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+.dashboard-history-view select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font: inherit; }
+.dashboard-history-view select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
