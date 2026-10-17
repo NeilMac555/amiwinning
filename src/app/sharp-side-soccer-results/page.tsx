@@ -41,8 +41,8 @@ export default function SharpSideSoccerResults() {
             <h2 className="learn-h2">Neil Mac’s betting record and profit/loss</h2>
             <p>My personal book is the record I want people to be able to inspect. It brings the bets together in one place, with cumulative profit and loss, yield, closing line value and the changes in performance along the way.</p>
             <p><strong>This is my personal record, including bets made before the Sharp Side Soccer partnership.</strong> It is not a combined lifetime record for me and Will.</p>
-            <p><Link href="/neilmac555" className="btn-primary">View Neil Mac’s public betting record →</Link></p>
-            <p>Open the public profile for the latest recorded profit/loss, the equity curve and individual bets. Look at the period and book shown on the profile when comparing results.</p>
+            <p><Link href="/neilmac555" className="btn-primary">Sign up free to view Neil Mac’s betting record →</Link></p>
+            <p>Create a free account or sign in to view the latest recorded profit/loss, the equity curve and individual bets. Look at the period and book shown on the profile when comparing results.</p>
           </section>
 
           <section className="learn-section">

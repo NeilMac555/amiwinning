@@ -1,3 +1,4 @@
+import { PROTECTED_PROFILE_OWNER } from "./profile-access";
 // Public tipster profiles. Every signed-up user has one (auto-created by the
 // `on_auth_user_created` Supabase trigger — see migration 0003).
 //
@@ -257,6 +258,7 @@ interface PublicProfileFetchResult {
 
 export async function getPublicProfileServer(
   handle: string,
+  accessToken?: string,
 ): Promise<PublicProfileFetchResult> {
   // Special case: /u/sample is the demo profile linked from the landing
   // page. Hardcoded data, no Supabase query — ensures the demo always
@@ -279,6 +281,7 @@ export async function getPublicProfileServer(
   // The profile.is_public WHERE clause below is the privacy gate.
   const client = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
+    ...(accessToken ? { global: { headers: { Authorization: `Bearer ${accessToken}` } } } : {}),
   });
 
   // 1. Profile — gated on is_public = true. Critical privacy check.
@@ -291,6 +294,11 @@ export async function getPublicProfileServer(
   if (!profileRow) return { profile: null, bets: [] };
 
   const profile = rowToProfile(profileRow as ProfileRow);
+  if (profile.userId === PROTECTED_PROFILE_OWNER) {
+    if (!accessToken) return { profile: null, bets: [] };
+    const { data, error } = await client.auth.getUser(accessToken);
+    if (error || !data.user || data.user.is_anonymous) return { profile: null, bets: [] };
+  }
 
   // 2. Pick which book to share publicly. Order of preference:
   //    a. Any book the user has explicitly marked is_public = true
@@ -392,6 +400,7 @@ export async function getPublicProfileServer(
 export async function getPublicProfileServerByBookSlug(
   handle: string,
   bookSlug: string,
+  accessToken?: string,
 ): Promise<PublicProfileFetchResult> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -399,6 +408,7 @@ export async function getPublicProfileServerByBookSlug(
 
   const client = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
+    ...(accessToken ? { global: { headers: { Authorization: `Bearer ${accessToken}` } } } : {}),
   });
 
   // Gate 1: profile is_public.
@@ -410,6 +420,11 @@ export async function getPublicProfileServerByBookSlug(
     .maybeSingle();
   if (!profileRow) return { profile: null, bets: [] };
   const profile = rowToProfile(profileRow as ProfileRow);
+  if (profile.userId === PROTECTED_PROFILE_OWNER) {
+    if (!accessToken) return { profile: null, bets: [] };
+    const { data, error } = await client.auth.getUser(accessToken);
+    if (error || !data.user || data.user.is_anonymous) return { profile: null, bets: [] };
+  }
 
   // Gate 2: book is_public AND public_slug matches AND belongs to owner.
   interface BookRow {
