@@ -13,14 +13,16 @@ interface Props {
   equity: EquityData;
   weekly: number[];
   isSample?: boolean;
+  showClv?: boolean;
 }
 
-export function ProfileEquity({ equity, weekly, isSample = false }: Props) {
+export function ProfileEquity({ equity, weekly, isSample = false, showClv = true }: Props) {
   return (
     // Public profiles always render in unit-mode (u) — we don't know the
     // viewer's preferred currency, and units are the bet-tracking universal.
     <UnitProvider unit="u">
       <EquityCurve
+        showClv={showClv}
         data={equity}
         weekly={weekly}
         mode="cumulative"

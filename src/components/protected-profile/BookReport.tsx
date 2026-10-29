@@ -12,6 +12,7 @@
 // duplicating the render keeps the existing route byte-identical during
 // initial rollout. A follow-up can extract a shared <ProfileBody />.
 
+import { PROTECTED_PROFILE_OWNER } from "@/lib/profile-access";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -131,6 +132,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
 
   // Reuse the same aggregation the dashboard uses — keeps the public
   // numbers identical to what the owner sees.
+  const hideClv = profile.userId === PROTECTED_PROFILE_OWNER;
   const data = aggregateFromBets(bets);
   const settledCount = bets.filter((b) => b.status !== "pending").length;
   const lifetimePl = bets.reduce((s, b) => s + b.pl, 0);
@@ -240,7 +242,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
               tone={data.kpis.rocPct >= 0 ? "pos" : "neg"}
               sub={data.kpis.rocAnnualised ? "annualised" : "period"}
             />
-            <Kpi
+            {!hideClv && (<Kpi
               label="CLV"
               value={
                 data.kpis.clvPct === 0
@@ -259,7 +261,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
                   ? "not yet captured"
                   : "vs Pinnacle close"
               }
-            />
+            />)}
             <Kpi
               label="Win rate"
               // secondary.winRate is already a percentage (e.g. 55.5), not a
@@ -307,7 +309,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
                 cumulative · {settledCount.toLocaleString()} bets
               </div>
             </div>
-            <ProfileEquity equity={data.equity} weekly={data.weekly} />
+            <ProfileEquity equity={data.equity} weekly={data.weekly} showClv={!hideClv} />
           </section>
         )}
 
@@ -317,16 +319,16 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
         {settledCount > 0 && (
           <section className="profile-breakdown-row">
             {data.sportBd && data.sportBd.length > 0 && (
-              <Breakdown title="By sport" rows={data.sportBd.slice(0, 8)} />
+              <Breakdown showClv={!hideClv} title="By sport" rows={data.sportBd.slice(0, 8)} />
             )}
             {data.marketBd.length > 0 && (
-              <Breakdown title="By market" rows={data.marketBd.slice(0, 8)} />
+              <Breakdown showClv={!hideClv} title="By market" rows={data.marketBd.slice(0, 8)} />
             )}
             {data.oddsBd.length > 0 && (
-              <Breakdown title="By odds range" rows={data.oddsBd} />
+              <Breakdown showClv={!hideClv} title="By odds range" rows={data.oddsBd} />
             )}
             {data.competitionBd && data.competitionBd.length > 0 && (
-              <Breakdown
+              <Breakdown showClv={!hideClv}
                 title="By competition (soccer)"
                 rows={data.competitionBd.slice(0, 8)}
               />
@@ -348,7 +350,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
         )}
 
         {/* CLV distribution — credibility chart */}
-        {settledCount > 0 && data.clvDist.length > 0 && (
+        {!hideClv && settledCount > 0 && data.clvDist.length > 0 && (
           <ClvDistribution dist={data.clvDist} mean={data.kpis.clvPct} />
         )}
 

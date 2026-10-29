@@ -13,6 +13,7 @@ interface EquityCurveProps {
   weekly: number[];
   lastBetAgo?: string;
   statusLabel?: string;
+  showClv?: boolean;
   /** "cumulative": Y axis is cumulative P/L starting at 0 (real imported data).
    *  "bankroll": Y axis is a running bankroll balance (mock demo data). */
   mode?: "cumulative" | "bankroll";
@@ -26,6 +27,7 @@ export function EquityCurve({
   weekly,
   lastBetAgo,
   statusLabel,
+  showClv = true,
   mode = "bankroll",
   range,
 }: EquityCurveProps) {
@@ -155,12 +157,12 @@ export function EquityCurve({
           <span className="legend-dot" style={{ color: colorPL }}>
             {isCumulative ? "P/L" : "Equity"}
           </span>
-          <span
+          {showClv && (<span
             className="legend-dot legend-clv"
             style={{ color: "var(--text-muted)" }}
           >
             CLV (cum)
-          </span>
+          </span>)}
         </div>
       </div>
 
@@ -183,14 +185,14 @@ export function EquityCurve({
               strokeDasharray={i === 0 || i === yTicks.length - 1 ? "0" : "3 3"}
             />
           ))}
-          <path
+          {showClv && (<path
             d={clvPath}
             fill="none"
             stroke="var(--text-muted)"
             strokeWidth="1"
             strokeDasharray="3 3"
             opacity="0.6"
-          />
+          />)}
           <path d={eqFill} fill={colorPL} opacity="0.05" />
           <path
             d={eqPath}
@@ -238,12 +240,12 @@ export function EquityCurve({
                 r="3"
                 className="chart-cursor-dot"
               />
-              <circle
+              {showClv && (<circle
                 cx={xOf(hover)}
                 cy={yClv(hovered.clvPct)}
                 r="2.5"
                 fill="var(--text-muted)"
-              />
+              />)}
             </g>
           )}
         </svg>
@@ -290,13 +292,13 @@ export function EquityCurve({
                     </span>
                   </div>
                 )}
-                <div className="row">
+                {showClv && (<div className="row">
                   <span className="lbl">CLV</span>
                   <span style={{ color: clvColor }}>
                     {hovered.clvPct >= 0 ? "+" : "−"}
                     {Math.abs(hovered.clvPct).toFixed(2)}%
                   </span>
-                </div>
+                </div>)}
                 <div className="row">
                   <span className="lbl">Bets</span>
                   <span>{hovered.bets}</span>

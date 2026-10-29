@@ -4,9 +4,10 @@ interface Props {
   title: string;
   rows: BreakdownRow[];
   suffix?: string;
+  showClv?: boolean;
 }
 
-export function Breakdown({ title, rows, suffix }: Props) {
+export function Breakdown({ title, rows, suffix, showClv = true }: Props) {
   const maxAbs = Math.max(...rows.map((r) => Math.abs(r.yieldPct)), 1);
   const zeroPos = 50;
   return (
@@ -22,7 +23,7 @@ export function Breakdown({ title, rows, suffix }: Props) {
           <button className="btn-ghost" data-active="true">
             Yield
           </button>
-          <button className="btn-ghost">CLV</button>
+          {showClv && <button className="btn-ghost">CLV</button>}
         </div>
       </div>
       <div className="breakdown">
