@@ -5,8 +5,10 @@
 
 import type { ImportedBet } from "./types";
 import { deleteBetRemote, pushBet, pushBets } from "../bet-sync";
+import { compressToUTF16, decompressFromUTF16 } from "lz-string";
 
 const KEY = "aiw_bets_v1";
+const COMPRESSED_PREFIX = "lz16:";
 
 // Module-level "who's currently signed in" — set by AuthProvider on user
 // change. Null = signed out → writes stay local only.
@@ -36,7 +38,13 @@ export function loadBetsRaw(): ImportedBet[] {
   try {
     const raw = w.localStorage.getItem(KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as ImportedBet[];
+    // Older caches are plain JSON. Decode both formats so upgrading never
+    // requires clearing storage (which may contain unsynced bets).
+    const json = raw.startsWith(COMPRESSED_PREFIX)
+      ? decompressFromUTF16(raw.slice(COMPRESSED_PREFIX.length))
+      : raw;
+    if (!json) throw new Error("Unable to decode bet cache");
+    const parsed = JSON.parse(json) as ImportedBet[];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -53,7 +61,15 @@ export function loadBets(): ImportedBet[] {
 export function saveBets(bets: ImportedBet[]): void {
   const w = safeWindow();
   if (!w) return;
-  w.localStorage.setItem(KEY, JSON.stringify(bets));
+  const json = JSON.stringify(bets);
+  // Large histories exceed localStorage's quota as plain JSON. Compress
+  // losslessly, including raw import data and pending-sync flags. setItem is
+  // atomic: on failure the previous cache remains intact; never remove it
+  // first or pretend that a failed write succeeded.
+  const encoded = json.length > 128_000
+    ? COMPRESSED_PREFIX + compressToUTF16(json)
+    : json;
+  w.localStorage.setItem(KEY, encoded);
 }
 
 export function appendBets(newBets: ImportedBet[]): ImportedBet[] {
