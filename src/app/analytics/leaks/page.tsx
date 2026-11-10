@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { UnitProvider, fmtPL } from "@/components/UnitContext";
+import { UnitProvider, fmtPL, useUnit } from "@/components/UnitContext";
 import { RangeTabs } from "@/components/RangeTabs";
 import { consumeSeed, loadBets } from "@/lib/import/store";
 import type { ImportedBet } from "@/lib/import/types";
@@ -139,7 +139,7 @@ export default function LeaksPage() {
                     </p>
                     <div className="leaks-grid">
                       {analysis.leaks.map((l, i) => (
-                        <LeakCard key={`${l.dimension}:${l.label}`} leak={l} rank={i + 1} tone="leak" />
+                        <LeakCard key={`${l.dimension}:${l.label}`} leak={l} rank={i + 1} tone="leak" insights={!!user} />
                       ))}
                     </div>
                   </section>
@@ -155,7 +155,7 @@ export default function LeaksPage() {
                     </p>
                     <div className="leaks-grid">
                       {analysis.strengths.map((s, i) => (
-                        <LeakCard key={`${s.dimension}:${s.label}`} leak={s} rank={i + 1} tone="strength" />
+                        <LeakCard key={`${s.dimension}:${s.label}`} leak={s} rank={i + 1} tone="strength" insights={!!user} />
                       ))}
                     </div>
                   </section>
@@ -166,8 +166,8 @@ export default function LeaksPage() {
                   <ul>
                     <li>
                       Bets are sliced four ways: <strong>sport</strong>,{" "}
-                      <strong>competition</strong> (soccer only, e.g. Premier
-                      League, La Liga, Champions League),{" "}
+                      <strong>competition</strong> (e.g. Premier League,
+                      Champions League, NBA, ATP Tour),{" "}
                       <strong>market type</strong> (correct score,
                       goalscorer, BTTS, over/under, etc.), and{" "}
                       <strong>odds bucket</strong> (short / mid / longshot
@@ -197,76 +197,83 @@ export default function LeaksPage() {
       </div>
     </UnitProvider>
   );
+}
 
-  function LeakCard({
-    leak,
-    rank,
-    tone,
-  }: {
-    leak: Leak;
-    rank: number;
-    tone: "leak" | "strength";
-  }) {
-    const { insight, loading, error } = useLeakInsight(leak, tone);
-    return (
-      <div className={`leaks-card leaks-card--${tone}`}>
-        <div className="leaks-card-head">
-          <div>
-            <div className="leaks-card-dim">{dimensionLabel(leak.dimension)}</div>
-            <div className="leaks-card-label">{leak.label}</div>
-          </div>
-          <div className="leaks-card-rank">#{rank}</div>
+// Module scope on purpose. Declared inside LeaksPage this was a brand new
+// component type on every render, so React threw away and rebuilt every
+// card (and restarted its insight request) each time the page re-rendered.
+function LeakCard({
+  leak,
+  rank,
+  tone,
+  insights,
+}: {
+  leak: Leak;
+  rank: number;
+  tone: "leak" | "strength";
+  /** False when signed out: the insight API needs an account. */
+  insights: boolean;
+}) {
+  const unit = useUnit();
+  const { insight, loading, error } = useLeakInsight(leak, tone, insights);
+  return (
+    <div className={`leaks-card leaks-card--${tone}`}>
+      <div className="leaks-card-head">
+        <div>
+          <div className="leaks-card-dim">{dimensionLabel(leak.dimension)}</div>
+          <div className="leaks-card-label">{leak.label}</div>
         </div>
+        <div className="leaks-card-rank">#{rank}</div>
+      </div>
 
-        <div className="leaks-card-metrics">
-          <div className="leaks-card-metric">
-            <div className="leaks-card-metric-label">P/L</div>
-            <div className={`leaks-card-metric-value leaks-card-metric-value--${leak.pl >= 0 ? "pos" : "neg"}`}>
-              {fmtPL(leak.pl, "u")}
-            </div>
-          </div>
-          <div className="leaks-card-metric">
-            <div className="leaks-card-metric-label">Yield (ROI)</div>
-            <div className={`leaks-card-metric-value leaks-card-metric-value--${leak.yieldPct >= 0 ? "pos" : "neg"}`}>
-              {leak.yieldPct >= 0 ? "+" : ""}
-              {leak.yieldPct.toFixed(1)}%
-            </div>
-          </div>
-          <div className="leaks-card-metric">
-            <div className="leaks-card-metric-label">Bets</div>
-            <div className="leaks-card-metric-value">{leak.n.toLocaleString()}</div>
-          </div>
-          <div className="leaks-card-metric">
-            <div className="leaks-card-metric-label">Win rate</div>
-            <div className="leaks-card-metric-value">{leak.winRate.toFixed(1)}%</div>
+      <div className="leaks-card-metrics">
+        <div className="leaks-card-metric">
+          <div className="leaks-card-metric-label">P/L</div>
+          <div className={`leaks-card-metric-value leaks-card-metric-value--${leak.pl >= 0 ? "pos" : "neg"}`}>
+            {fmtPL(leak.pl, unit)}
           </div>
         </div>
-
-        {/* AI insight row — one sentence generated per card by Claude
-            Haiku (see /api/leaks/insight). Cached client-side so a
-            re-render doesn't re-fetch. Silently absent on error. */}
-        {(loading || insight) && !error && (
-          <div className="leaks-card-insight">
-            <span className="leaks-card-insight-mark" aria-hidden="true">✦</span>
-            {loading ? (
-              <span className="leaks-card-insight-loading">
-                Reading the numbers…
-              </span>
-            ) : (
-              <span>{insight}</span>
-            )}
+        <div className="leaks-card-metric">
+          <div className="leaks-card-metric-label">Yield (ROI)</div>
+          <div className={`leaks-card-metric-value leaks-card-metric-value--${leak.yieldPct >= 0 ? "pos" : "neg"}`}>
+            {leak.yieldPct >= 0 ? "+" : ""}
+            {leak.yieldPct.toFixed(1)}%
           </div>
-        )}
-
-        <div className="leaks-card-foot">
-          <span className={`leaks-badge leaks-badge--${leak.confidence}`}>
-            {confidenceLabel(leak.confidence)}
-          </span>
-          <span className="leaks-card-avg-odds">avg odds {leak.avgOdds.toFixed(2)}</span>
+        </div>
+        <div className="leaks-card-metric">
+          <div className="leaks-card-metric-label">Bets</div>
+          <div className="leaks-card-metric-value">{leak.n.toLocaleString()}</div>
+        </div>
+        <div className="leaks-card-metric">
+          <div className="leaks-card-metric-label">Win rate</div>
+          <div className="leaks-card-metric-value">{leak.winRate.toFixed(1)}%</div>
         </div>
       </div>
-    );
-  }
+
+      {/* AI insight row — one sentence generated per card by Claude
+          Haiku (see /api/leaks/insight). Cached client-side so a
+          re-render doesn't re-fetch. Silently absent on error. */}
+      {(loading || insight) && !error && (
+        <div className="leaks-card-insight">
+          <span className="leaks-card-insight-mark" aria-hidden="true">✦</span>
+          {loading ? (
+            <span className="leaks-card-insight-loading">
+              Reading the numbers…
+            </span>
+          ) : (
+            <span>{insight}</span>
+          )}
+        </div>
+      )}
+
+      <div className="leaks-card-foot">
+        <span className={`leaks-badge leaks-badge--${leak.confidence}`}>
+          {confidenceLabel(leak.confidence)}
+        </span>
+        <span className="leaks-card-avg-odds">avg odds {leak.avgOdds.toFixed(2)}</span>
+      </div>
+    </div>
+  );
 }
 
 function dimensionLabel(d: Leak["dimension"]): string {

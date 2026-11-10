@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, fmtPL, fmtStake } from "@/components/UnitContext";
@@ -39,7 +39,6 @@ export default function BetsPage() {
     nextPl: number;
     kept: boolean;
   } | null>(null);
-  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<Status | typeof ALL>(ALL);
   const [marketFilter, setMarketFilter] = useState<string>(ALL);
@@ -95,7 +94,6 @@ export default function BetsPage() {
         ? updated.filter((x) => !x.bookId || x.bookId === activeBook.id)
         : updated,
     );
-    if (undoTimer.current) clearTimeout(undoTimer.current);
     setUndo({
       id: b.id,
       prevStatus: b.status,
@@ -104,7 +102,6 @@ export default function BetsPage() {
       nextPl,
       kept: !derive,
     });
-    undoTimer.current = setTimeout(() => setUndo(null), 30_000);
   };
 
   const undoStatusChange = () => {
@@ -115,16 +112,17 @@ export default function BetsPage() {
         ? updated.filter((x) => !x.bookId || x.bookId === activeBook.id)
         : updated,
     );
-    if (undoTimer.current) clearTimeout(undoTimer.current);
     setUndo(null);
   };
 
-  // Don't leave a timer running after the page unmounts.
+  // Auto-dismiss the undo toast after 30s. Every status change stores a
+  // new `undo` object, which restarts the countdown; undoing (or leaving
+  // the page) cancels it.
   useEffect(() => {
-    return () => {
-      if (undoTimer.current) clearTimeout(undoTimer.current);
-    };
-  }, []);
+    if (!undo) return;
+    const t = setTimeout(() => setUndo(null), 30_000);
+    return () => clearTimeout(t);
+  }, [undo]);
 
   const marketOptions = useMemo(() => {
     const set = new Set<string>();

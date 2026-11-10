@@ -10,7 +10,7 @@
 // The cron route feeds it rows from Supabase via the service-role key.
 
 import type { ImportedBet, MarketGuess, Status } from "@/lib/import/types";
-import { aggregateFromBets } from "@/lib/aggregate";
+import { computeKpis } from "@/lib/aggregate";
 import { analyzeLeaks, type Confidence, type LeakDimension } from "@/lib/leaks";
 import { byCompetition, byMarket } from "@/lib/analytics";
 import { classifySport } from "@/lib/sport-classify";
@@ -269,8 +269,7 @@ export function buildWeeklyReportInput(args: {
   const weekEndMs = week.end.getTime();
 
   const settledAll = bets.filter(isSettled);
-  const agg = aggregateFromBets(bets);
-  const k = agg.kpis;
+  const k = computeKpis(bets);
 
   const clvSample = settledAll.filter((b) => b.closingOdds != null && b.closingOdds > 0).length;
 

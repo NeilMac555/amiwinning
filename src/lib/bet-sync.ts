@@ -123,6 +123,9 @@ export async function pullFromSupabase(): Promise<number> {
       .select("*")
       .eq("user_id", userId)
       .order("kickoff", { ascending: false })
+      // Tiebreaker: thousands of bets share a kickoff date, and paging
+      // on a non-unique sort can skip or repeat rows between pages.
+      .order("id", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) {
 

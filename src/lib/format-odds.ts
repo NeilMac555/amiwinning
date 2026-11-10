@@ -43,15 +43,3 @@ export function formatOdds(decimal: number, format: OddsFormat): string {
       return decimal.toFixed(2);
   }
 }
-
-/** Short label, useful as a placeholder hint in odds inputs. */
-export function oddsExample(format: OddsFormat): string {
-  switch (format) {
-    case "american":
-      return "−110";
-    case "fractional":
-      return "5/6";
-    default:
-      return "1.85";
-  }
-}

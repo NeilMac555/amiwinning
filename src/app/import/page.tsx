@@ -970,7 +970,7 @@ function CommittedView({ count, onReset }: { count: number; onReset: () => void 
         Imported {count.toLocaleString()} bets
       </div>
       <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>
-        Saved to your browser. They&rsquo;ll sync to your account once auth is wired up.
+        Saved and syncing to your account.
       </div>
       <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
         <Link href="/" className="btn-ghost" data-active="true" style={{ padding: "8px 16px", fontSize: 13 }}>

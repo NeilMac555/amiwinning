@@ -154,11 +154,17 @@ export async function generateWeeklyReport(args: {
 }): Promise<GeneratedReport> {
   const client = new Anthropic(args.apiKey ? { apiKey: args.apiKey } : {});
 
+  // The model gets the numbers only. The handle stays on our side: the
+  // privacy policy says the model never receives an account identifier,
+  // and the report doesn't need one (the email greeting is added later
+  // by the template, not written by the model).
+  const { handle: _handle, ...numbersOnly } = args.input;
+  void _handle;
   const userMessage = [
-    `Write @${args.input.handle}'s Sharp Report for the week ${args.input.week.start} to ${args.input.week.end}.`,
+    `Write this bettor's Sharp Report for the week ${args.input.week.start} to ${args.input.week.end}.`,
     ``,
     `Payload:`,
-    JSON.stringify(args.input),
+    JSON.stringify(numbersOnly),
   ].join("\n");
 
   const baseParams = {

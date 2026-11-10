@@ -1,9 +1,11 @@
 // Sitemap for search engines. Includes:
-//   - Static marketing surfaces (homepage, legal, /compare, /learn,
-//     /partners).
+//   - Static marketing surfaces (homepage, legal, /compare, /learn).
 //   - Public tipster profiles that the user has actually configured
 //     (display_name set — filters out the ghost signups). Both the
-//     bare /u/<handle> and any per-book /u/<handle>/<book_slug> URLs.
+//     bare /<handle> and any per-book /<handle>/<book_slug> URLs.
+//   - NOT profiles that require an account to view. Those pages are
+//     noindex and show a sign-in gate, so listing them here only
+//     advertises URLs (and book names) the owner chose to keep gated.
 //
 // The profile queries hit Supabase at request time via the anon client
 // (RLS policies profiles_select_public + books_select_public_profile
@@ -12,6 +14,7 @@
 
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { requiresProfileAccount } from "@/lib/profile-access";
 
 const BASE = "https://amiup.io";
 
@@ -52,15 +55,17 @@ async function fetchPublicProfileEntries(): Promise<MetadataRoute.Sitemap> {
 
   if (error || !data) return [];
 
-  return (data as ProfileRow[]).map((p) => ({
-    url: `${BASE}/${p.handle}`,
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }));
+  return (data as ProfileRow[])
+    .filter((p) => !requiresProfileAccount(p.handle))
+    .map((p) => ({
+      url: `${BASE}/${p.handle}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
 }
 
 // Fetch public books that have a slug set — these are the per-book
-// profile URLs (/u/<handle>/<slug>). No FK exists between books and
+// profile URLs (/<handle>/<slug>). No FK exists between books and
 // profiles in PostgREST's schema (both just reference auth.users), so
 // we can't use an inline `!inner` join. Fetch books, then fetch the
 // handles for their user_ids and stitch client-side.
@@ -99,6 +104,7 @@ async function fetchPublicBookEntries(): Promise<MetadataRoute.Sitemap> {
   for (const b of books) {
     const handle = handleByUser.get(b.user_id);
     if (!handle) continue; // profile not public → don't leak URL
+    if (requiresProfileAccount(handle)) continue; // account-gated → don't list
     out.push({
       url: `${BASE}/${handle}/${b.public_slug}`,
       changeFrequency: "weekly",

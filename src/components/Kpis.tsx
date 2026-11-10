@@ -153,30 +153,3 @@ export function KpiStripCompact({ kpis, sparks, capitalScopeLabel }: KpiProps) {
     </div>
   );
 }
-
-export function KpiFeatured({ kpis, sparks }: KpiProps) {
-  const items = buildKpiItems(kpis, sparks);
-  return (
-    <div className="kpi-featured">
-      {items.map((k, i) => (
-        <div className={`kpi${i === 0 ? " hero" : ""}`} key={k.id}>
-          <div className="kpi-label">{k.label}</div>
-          <div className={`kpi-value mono ${k.sign}`}>{k.value}</div>
-          <div className="kpi-meta">
-            <span className={`kpi-delta mono ${k.deltaSign}`}>{k.delta}</span>
-            <span style={{ color: "var(--text-muted)" }}>{k.deltaLabel}</span>
-          </div>
-          <div className="kpi-spark" style={{ color: k.sparkColor }}>
-            <Sparkline
-              data={k.sparkData}
-              color="currentColor"
-              width={i === 0 ? 140 : 86}
-              height={i === 0 ? 36 : 28}
-              fill={k.id === "clv" || k.id === "yield" || k.id === "roi"}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}

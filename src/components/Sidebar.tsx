@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
-import { BRAND } from "@/lib/brand";
+import { APP_VERSION, BRAND } from "@/lib/brand";
 import { isAdminEmail } from "@/lib/admin";
 import { useMobileNav } from "@/lib/mobile-nav";
 import { BookSwitcher } from "./BookSwitcher";
@@ -199,8 +199,7 @@ export function Sidebar() {
       </div>
       <SyncStatus />
       <div className="sb-foot">
-        <span>v0.4.5</span>
-        <span>UTC+01</span>
+        <span>v{APP_VERSION}</span>
       </div>
       <div
         style={{

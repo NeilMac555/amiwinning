@@ -106,7 +106,7 @@ export async function POST(req: Request) {
   for (const key of DRIP_KEYS) {
     if (totalSent >= MAX_SENDS_PER_RUN) {
       // Hard cap — cron will pick up the rest tomorrow.
-      summaries.push(emptySummary(key, dryRun, "cap reached"));
+      summaries.push(emptySummary(key, dryRun));
       continue;
     }
     const summary = await processKey({
@@ -178,15 +178,12 @@ async function processKey(args: {
 
   const userIds = profiles.map((p) => p.user_id as string);
 
-  // 2. Filter out users who already have any bet on record. `bets` has
-  //    an RLS-restricted read for owners; service-role bypasses.
-  const { data: betRows } = await admin
-    .from("bets")
-    .select("user_id")
-    .in("user_id", userIds);
-  const usersWithBets = new Set(
-    (betRows ?? []).map((r) => (r as { user_id: string }).user_id),
-  );
+  // 2. "Has this user logged a bet?" is checked per user inside the loop
+  //    below (userHasBets). It used to be one query for every candidate's
+  //    bets, but Supabase returns at most 1,000 rows per query: one new
+  //    user importing a big spreadsheet filled the whole page, everyone
+  //    else looked like they had no bets, and they were sent a "you
+  //    haven't logged a bet yet" email.
 
   // 3. Filter out users who already received this drip key.
   const { data: sendRows } = await admin
@@ -206,12 +203,16 @@ async function processKey(args: {
   for (const p of profiles) {
     const userId = p.user_id as string;
     const handle = (p.handle as string) ?? "";
-    if (usersWithBets.has(userId)) {
-      summary.filtered.hasBets++;
-      continue;
-    }
     if (alreadySent.has(userId)) {
       summary.filtered.alreadySent++;
+      continue;
+    }
+    // null = the lookup failed. Treat that as "has bets" and skip: telling
+    // an active user they've never logged a bet is worse than a late nudge
+    // (tomorrow's run won't retry this key, the signup window moves on).
+    const hasBets = await userHasBets(admin, userId);
+    if (hasBets !== false) {
+      summary.filtered.hasBets++;
       continue;
     }
     const { data: u, error: uErr } = await admin.auth.admin.getUserById(userId);
@@ -289,7 +290,24 @@ async function processKey(args: {
   return summary;
 }
 
-function emptySummary(key: DripKey, dryRun: boolean, _reason: string): KeySummary {
+// One-row existence check. Service role, so RLS doesn't apply.
+async function userHasBets(
+  admin: SupabaseClient,
+  userId: string,
+): Promise<boolean | null> {
+  const { data, error } = await admin
+    .from("bets")
+    .select("id")
+    .eq("user_id", userId)
+    .limit(1);
+  if (error) {
+    console.error(`[cron/drip] bets lookup failed for ${userId}:`, error.message);
+    return null;
+  }
+  return (data?.length ?? 0) > 0;
+}
+
+function emptySummary(key: DripKey, dryRun: boolean): KeySummary {
   return {
     key,
     candidates: 0,

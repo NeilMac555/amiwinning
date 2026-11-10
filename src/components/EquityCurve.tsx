@@ -17,9 +17,9 @@ interface EquityCurveProps {
   /** "cumulative": Y axis is cumulative P/L starting at 0 (real imported data).
    *  "bankroll": Y axis is a running bankroll balance (mock demo data). */
   mode?: "cumulative" | "bankroll";
-  /** Selected range, controlled by the parent dashboard. */
+  /** Selected range, shown as a label. The picker itself lives on the
+   *  dashboard, above the KPI strip. */
   range?: Range;
-  onRangeChange?: (r: Range) => void;
 }
 
 export function EquityCurve({
@@ -27,12 +27,17 @@ export function EquityCurve({
   weekly,
   lastBetAgo,
   statusLabel,
-  showClv = true,
+  showClv: showClvProp = true,
   mode = "bankroll",
   range,
 }: EquityCurveProps) {
   const unit = useUnit();
   const { points } = data;
+  // The per-day CLV series isn't computed yet (every point carries 0), so
+  // drawing it gave every user a flat dashed line, a "CLV (cum)" legend
+  // and a "+0.00%" tooltip row. Only show the overlay when there is a
+  // real series behind it.
+  const showClv = showClvProp && points.some((p) => p.clvPct !== 0);
   const W = 920;
   const H = 280;
   const padL = 36,
@@ -51,7 +56,10 @@ export function EquityCurve({
   const clvMax = Math.max(...clvs, 0.1);
   const clvRange = clvMax - clvMin || 1;
 
-  const xOf = (i: number) => padL + (i / (points.length - 1)) * innerW;
+  // A one-day history has a single point: centre it instead of dividing
+  // by zero (which put NaN into every coordinate and drew nothing).
+  const xOf = (i: number) =>
+    padL + (points.length > 1 ? i / (points.length - 1) : 0.5) * innerW;
   const yEq = (v: number) => padT + (1 - (v - eqMin) / eqRange) * innerH;
   const yClv = (v: number) => padT + (1 - (v - clvMin) / clvRange) * innerH;
 
@@ -115,7 +123,14 @@ export function EquityCurve({
           </div>
           <div className="card-meta" style={{ marginTop: 4 }}>
             <span>
-              {statusLabel ?? <><span className="dot-live"></span>Live · last bet{" "}{lastBetAgo ?? "12m ago"}</>}
+              {statusLabel ??
+                (lastBetAgo ? (
+                  <>
+                    <span className="dot-live"></span>Live · last bet {lastBetAgo}
+                  </>
+                ) : (
+                  "Settled bets, by kickoff date"
+                ))}
             </span>
           </div>
         </div>

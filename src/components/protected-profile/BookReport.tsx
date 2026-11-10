@@ -1,8 +1,8 @@
 // Shared server renderer. Protected profiles are invoked only after token verification.
 // Per-book public tipster profile — server-rendered. Path is
-// /u/<handle>/<book-slug>, e.g. /u/filthyjabba/ylose-soccer.
+// /<handle>/<book-slug>, e.g. /somehandle/premier-league.
 //
-// Same rendering as /u/<handle> but the underlying data is scoped to a
+// Same rendering as /<handle> but the underlying data is scoped to a
 // SINGLE book identified by its public_slug on the books table. Three
 // gates before any data returns: profile.is_public,
 // book.is_public + slug match, and bets filtered by (user_id, book_id).
@@ -29,6 +29,7 @@ import { ProfileEquity } from "@/app/[handle]/ProfileEquity";
 import { ProfileGate } from "@/app/[handle]/ProfileGate";
 import { UtmCapture } from "@/components/UtmCapture";
 import type { ImportedBet } from "@/lib/import/types";
+import { statusTone } from "@/lib/bet-math";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
 // so newly-published profiles are reachable without a redeploy.
@@ -64,7 +65,7 @@ export async function generateMetadata({
   const name = profile.displayName ?? profile.handle;
   // Include the book slug in the metadata so a shared link's card
   // makes it obvious which book the numbers came from. e.g.
-  // "filthyjabba • ylose-soccer".
+  // "somehandle · premier-league".
   const scoped = `${name} · ${bookSlug}`;
   return {
     title: `${scoped} (${profile.handle})`,
@@ -193,8 +194,8 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
               <div className="profile-name-row"><h1 className="profile-name">{name}</h1><TrackingBadge count={settledCount} sample={handle === "sample"} /></div>
               <div className="profile-handle">@{profile.handle}</div>
               {/* Book label — makes it obvious to a viewer that this
-                  URL is scoped to one specific book (Ylose Soccer /
-                  Ylose Tennis / etc), not the profile's full history. */}
+                  URL is scoped to one specific book, not the
+                  profile's full history. */}
               <div
                 className="profile-book-tag"
                 style={{
@@ -309,7 +310,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
                 cumulative · {settledCount.toLocaleString()} bets
               </div>
             </div>
-            <ProfileEquity equity={data.equity} weekly={data.weekly} showClv={!hideClv} />
+            <ProfileEquity equity={data.equity} weekly={data.weekly} showClv={!hideClv} lastBetAgo={data.kpis.lastBetAgo} />
           </section>
         )}
 
@@ -318,7 +319,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
             these; only signed-out visitors hit the wall. */}
         {settledCount > 0 && (
           <section className="profile-breakdown-row">
-            {data.sportBd && data.sportBd.length > 0 && (
+            {data.sportBd.length > 0 && (
               <Breakdown showClv={!hideClv} title="By sport" rows={data.sportBd.slice(0, 8)} />
             )}
             {data.marketBd.length > 0 && (
@@ -327,9 +328,9 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
             {data.oddsBd.length > 0 && (
               <Breakdown showClv={!hideClv} title="By odds range" rows={data.oddsBd} />
             )}
-            {data.competitionBd && data.competitionBd.length > 0 && (
+            {data.competitionBd.length > 0 && (
               <Breakdown showClv={!hideClv}
-                title="By competition (soccer)"
+                title="By competition"
                 rows={data.competitionBd.slice(0, 8)}
               />
             )}
@@ -354,7 +355,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
           <ClvDistribution dist={data.clvDist} mean={data.kpis.clvPct} />
         )}
 
-        {/* Recent 30 settled */}
+        {/* Full settled bet history */}
         {settledCount > 0 && (
           <RecentSettledTable bets={bets} nowMs={nowMs} />
         )}
@@ -550,13 +551,7 @@ function RecentSettledTable({
                   <td className="num mono">{b.stake.toFixed(1)}u</td>
                   <td className={`num mono num-${tone}`}>{plStr}</td>
                   <td>
-                    <span className={`badge ${
-                      b.status === "won"
-                        ? "win"
-                        : b.status === "lost"
-                          ? "lose"
-                          : "void"
-                    }`}>
+                    <span className={`badge ${statusTone(b.status)}`}>
                       {b.status === "half_won"
                         ? "half W"
                         : b.status === "half_lost"

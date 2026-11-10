@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { PROTECTED_PROFILE_OWNER } from "./profile-access";
 // Public tipster profiles. Every signed-up user has one (auto-created by the
 // `on_auth_user_created` Supabase trigger — see migration 0003).
@@ -245,9 +246,20 @@ export async function removeMyAvatar(): Promise<{ error?: string }> {
 
 // ─ Server-side fetchers ────────────────────────────────────────────────────
 //
-// Used by the /u/[handle] route handler and its OG image generator. These
-// run on the server with the public anon key — RLS lets them through only
-// when is_public = true, which is exactly what we want.
+// Used by the /[handle] route and its OG image generator. These run on
+// the server with the public anon key — RLS lets them through only when
+// is_public = true, which is exactly what we want.
+//
+// Both fetchers are wrapped in React's cache(): generateMetadata and the
+// page itself each ask for the same profile, and without it every profile
+// view downloaded the owner's whole bet history twice.
+
+// The only bet columns a public profile needs. Listed explicitly so the
+// owner's private fields (notes, tipster, tags, bookmaker, and the raw
+// import row) are never pulled out of the database for a public view,
+// and so a 5,000-bet profile doesn't ship 5,000 JSON blobs it won't use.
+const PUBLIC_BET_COLUMNS =
+  "id, book_id, kickoff, sport, league, home, away, event, market, selection, odds, stake, closing_odds, status, pl, source, imported_at";
 
 interface PublicProfileFetchResult {
   profile: Profile | null;
@@ -256,11 +268,20 @@ interface PublicProfileFetchResult {
   bets: import("./import/types").ImportedBet[];
 }
 
-export async function getPublicProfileServer(
+export function getPublicProfileServer(
   handle: string,
   accessToken?: string,
 ): Promise<PublicProfileFetchResult> {
-  // Special case: /u/sample is the demo profile linked from the landing
+  // Always pass both arguments: cache() keys on the argument list, so
+  // f(handle) and f(handle, undefined) would otherwise be two entries.
+  return fetchPublicProfile(handle, accessToken);
+}
+
+const fetchPublicProfile = cache(async function fetchPublicProfile(
+  handle: string,
+  accessToken: string | undefined,
+): Promise<PublicProfileFetchResult> {
+  // Special case: /sample is the demo profile linked from the landing
   // page. Hardcoded data, no Supabase query — ensures the demo always
   // renders identically and doesn't rely on any real user existing.
   if (handle === "sample") {
@@ -303,7 +324,7 @@ export async function getPublicProfileServer(
   // 2. Pick which book to share publicly. Order of preference:
   //    a. Any book the user has explicitly marked is_public = true
   //    b. The oldest book — auto-created "Personal" on first sign-in
-  // The user's other books (e.g. "Ylose Tennis") stay private unless they
+  // The user's other books (e.g. "Tennis") stay private unless they
   // flip is_public on them. This stops the profile from accidentally
   // mixing strategies together.
   interface BookRow {
@@ -335,13 +356,16 @@ export async function getPublicProfileServer(
     const to = from + PAGE_SIZE - 1;
     const { data: pageRows, error } = await client
       .from("bets")
-      .select("*")
+      .select(PUBLIC_BET_COLUMNS)
       .eq("user_id", profile.userId)
       .eq("book_id", selectedBook.id)
       .order("kickoff", { ascending: true })
+      // Tiebreaker: thousands of bets share a kickoff date, and paging
+      // on a non-unique sort can skip or repeat rows between pages.
+      .order("id", { ascending: true })
       .range(from, to);
     if (error) break;
-    const rows = (pageRows ?? []) as RawBetRow[];
+    const rows = (pageRows ?? []) as unknown as RawBetRow[];
     allRows.push(...rows);
     if (rows.length < PAGE_SIZE) break;
   }
@@ -355,13 +379,16 @@ export async function getPublicProfileServer(
       const to = from + PAGE_SIZE - 1;
       const { data: pageRows, error } = await client
         .from("bets")
-        .select("*")
+        .select(PUBLIC_BET_COLUMNS)
         .eq("user_id", profile.userId)
         .is("book_id", null)
         .order("kickoff", { ascending: true })
+        // Tiebreaker: thousands of bets share a kickoff date, and paging
+        // on a non-unique sort can skip or repeat rows between pages.
+        .order("id", { ascending: true })
         .range(from, to);
       if (error) break;
-      const rows = (pageRows ?? []) as RawBetRow[];
+      const rows = (pageRows ?? []) as unknown as RawBetRow[];
       allRows.push(...rows);
       if (rows.length < PAGE_SIZE) break;
     }
@@ -372,7 +399,7 @@ export async function getPublicProfileServer(
   const bets = allRows.filter((row) => !row.id.startsWith("seed-")).map(supabaseRowToImportedBet);
 
   return { profile, bets };
-}
+});
 
 // ─────────────────────────────────────────────────────────────────────────
 // Per-book public profile fetcher.
@@ -393,14 +420,22 @@ export async function getPublicProfileServer(
 //
 // Legacy no-book-id bets are intentionally NOT included here (unlike the
 // bare-handle fetcher which folds them into the oldest book by convention).
-// Ylose Soccer / Ylose Tennis should never inherit pre-books-system orphan
-// bets — those belong to Personal.
+// A named book should never inherit pre-books-system orphan bets.
+// Those belong to Personal.
 // ─────────────────────────────────────────────────────────────────────────
 
-export async function getPublicProfileServerByBookSlug(
+export function getPublicProfileServerByBookSlug(
   handle: string,
   bookSlug: string,
   accessToken?: string,
+): Promise<PublicProfileFetchResult> {
+  return fetchPublicProfileByBookSlug(handle, bookSlug, accessToken);
+}
+
+const fetchPublicProfileByBookSlug = cache(async function fetchPublicProfileByBookSlug(
+  handle: string,
+  bookSlug: string,
+  accessToken: string | undefined,
 ): Promise<PublicProfileFetchResult> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -465,13 +500,16 @@ export async function getPublicProfileServerByBookSlug(
     const to = from + PAGE_SIZE - 1;
     const { data: pageRows, error } = await client
       .from("bets")
-      .select("*")
+      .select(PUBLIC_BET_COLUMNS)
       .eq("user_id", profile.userId)
       .eq("book_id", book.id)
       .order("kickoff", { ascending: true })
+      // Tiebreaker: thousands of bets share a kickoff date, and paging
+      // on a non-unique sort can skip or repeat rows between pages.
+      .order("id", { ascending: true })
       .range(from, to);
     if (error) break;
-    const rows = (pageRows ?? []) as RawBetRow[];
+    const rows = (pageRows ?? []) as unknown as RawBetRow[];
     allRows.push(...rows);
     if (rows.length < PAGE_SIZE) break;
   }
@@ -479,11 +517,11 @@ export async function getPublicProfileServerByBookSlug(
   // Match the signed-in dashboard, including every real bet unchanged.
   const bets = allRows.filter((row) => !row.id.startsWith("seed-")).map(supabaseRowToImportedBet);
   return { profile, bets };
-}
+});
 
+// Shape of a row selected with PUBLIC_BET_COLUMNS.
 interface RawBetRow {
   id: string;
-  user_id: string;
   book_id: string | null;
   kickoff: string;
   sport: string;
@@ -496,9 +534,6 @@ interface RawBetRow {
   odds: number;
   stake: number;
   closing_odds: number | null;
-  tipster: string | null;
-  tags: string[] | null;
-  notes: string | null;
   status: string;
   pl: number;
   source: string;
@@ -523,9 +558,8 @@ function supabaseRowToImportedBet(
     odds: Number(r.odds),
     stake: Number(r.stake),
     closingOdds: r.closing_odds != null ? Number(r.closing_odds) : undefined,
-    tipster: r.tipster ?? undefined,
-    tags: r.tags ?? undefined,
-    notes: r.notes ?? undefined,
+    // tipster / tags / notes / bookmaker are private to the owner and are
+    // deliberately not selected for public views.
     status: r.status as import("./import/types").Status,
     pl: Number(r.pl),
     source: r.source,

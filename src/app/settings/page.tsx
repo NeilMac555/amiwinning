@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
@@ -79,13 +79,16 @@ export default function SettingsPage() {
     setTimeout(() => setExportMsg(null), 4000);
   };
 
-  // Derive the bet count on every render — keyed by the auth context's
-  // betsVersion so it re-runs after a Supabase pull, plus a local tick
-  // bumped after "Clear all bets" so the count updates immediately.
-  const importedCount = useMemo(() => {
-    if (typeof window === "undefined") return 0;
-    return loadBets().length;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Bets in this browser's cache. Read after mount, not during render:
+  // the server has no localStorage, so reading it while rendering made
+  // the first client render disagree with the server HTML ("No bets
+  // cached" vs "7 bets") and React threw a hydration error on every hard
+  // load of this page. Re-read after a Supabase pull (betsVersion) and
+  // after "Clear all bets" (clearTick).
+  const [importedCount, setImportedCount] = useState(0);
+  useEffect(() => {
+    const n = loadBets().length;
+    queueMicrotask(() => setImportedCount(n));
   }, [betsVersion, clearTick]);
 
   const onCreateBook = async () => {
@@ -144,7 +147,8 @@ export default function SettingsPage() {
               <div>
                 <h1 className="page-title">Settings</h1>
                 <div className="page-subtitle">
-                  Preferences and books. Synced to your account across devices.
+                  Preferences and books. Books sync to your account. Display
+                  preferences are saved in this browser.
                 </div>
               </div>
               {savedNotice && (
@@ -164,7 +168,7 @@ export default function SettingsPage() {
 
             <Section
               title="Public profile"
-              subtitle="Share your lifetime stats with a single link. Stats only — individual bets are never shown publicly."
+              subtitle="Share your record with a single link. It shows your stats and your settled bets. Pending bets are never shown."
             >
               <ProfilePanel />
             </Section>
@@ -522,7 +526,6 @@ export default function SettingsPage() {
                 <li>· Bookmaker accounts and balances</li>
                 <li>· CLV preferences (devig method, source priority)</li>
                 <li>· Connected accounts (X / Twitter OAuth)</li>
-                <li>· Pending-sync retry queue (durability)</li>
                 <li>· Account deletion</li>
               </ul>
             </Section>

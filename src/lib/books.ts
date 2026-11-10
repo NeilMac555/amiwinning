@@ -1,4 +1,4 @@
-// Books — a single user can have multiple "books" (Personal, Ylose Tennis,
+// Books — a single user can have multiple "books" (Personal, Tennis,
 // etc.) and bets live inside exactly one book. Active book is a UI/local
 // concept stored in localStorage; book records themselves live in Supabase
 // RLS-locked to the owning user.

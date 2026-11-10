@@ -35,7 +35,11 @@ export function Heatmap({ data }: Props) {
   // Scale factors per mode — capped by maxes across the data set so the chart
   // adapts to whatever the user has.
   const scale = useMemo(() => {
-    const plMax = Math.max(60, ...data.map((d) => Math.abs(d.pl || 0)));
+    // Floor is only there to avoid dividing by zero. It used to be 60 (a
+    // leftover from the dollar-denominated demo data), which meant a unit
+    // staker's best day of +3u was drawn at 5% strength: every cell the
+    // same faint shade.
+    const plMax = Math.max(0.01, ...data.map((d) => Math.abs(d.pl || 0)));
     const volMax = Math.max(1, ...data.map((d) => d.bets || 0));
     const clvMax = Math.max(
       1,

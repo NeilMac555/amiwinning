@@ -16,7 +16,7 @@
 // Returns a summary so the UI can show "fixed N bets" feedback.
 
 import { supabase } from "./supabase";
-import { loadBets, saveBets } from "./import/store";
+import { loadBetsRaw, saveBets } from "./import/store";
 import { pushBets } from "./bet-sync";
 import { classifySport } from "./sport-classify";
 import type { ImportedBet } from "./import/types";
@@ -79,7 +79,11 @@ export async function runDataCleanup(opts: {
     return { status: "skipped", sportReclassified: 0, datesFixed: 0, total: 0 };
   }
 
-  const bets = loadBets();
+  // Raw read: this pass rewrites the whole cache, so it has to carry
+  // pending-delete tombstones through untouched. Reading the filtered
+  // list and saving it back would drop them and resurrect deleted bets.
+  const raw = loadBetsRaw();
+  const bets = raw.filter((b) => !b._pendingDelete);
   if (bets.length === 0) {
     win.localStorage.setItem(flag, new Date().toISOString());
     return { status: "done", sportReclassified: 0, datesFixed: 0, total: 0 };
@@ -90,7 +94,8 @@ export async function runDataCleanup(opts: {
   let datesFixed = 0;
   const changed: ImportedBet[] = [];
 
-  const next = bets.map((b) => {
+  const next = raw.map((b) => {
+    if (b._pendingDelete) return b;
     let patched: ImportedBet | null = null;
 
     const newSport = classifySport(b);
@@ -143,12 +148,4 @@ export async function runDataCleanup(opts: {
     datesFixed,
     total: bets.length,
   };
-}
-
-/** Force-reset the cleanup flag so the next page load re-runs the migration.
- *  Handy for dev / debugging or if the user wants to manually trigger a redo. */
-export function resetCleanupFlag(userId?: string): void {
-  const win = safeWindow();
-  if (!win) return;
-  win.localStorage.removeItem(flagSetFor(userId));
 }

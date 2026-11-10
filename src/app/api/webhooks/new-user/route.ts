@@ -25,7 +25,7 @@
 //   - SIGNUP_WEBHOOK_SECRET     — any long random string; share with
 //                                 the Supabase dashboard config (above)
 //   - SIGNUP_NOTIFY_FROM        — verified sender, e.g. signups@amiup.io
-//   - SIGNUP_NOTIFY_TO          — destination inbox, e.g. filthyjabba@gmail.com
+//   - SIGNUP_NOTIFY_TO          — destination inbox, e.g. you@example.com
 //
 // Optional env vars for the 24h nudge email to the new user:
 //   - NEXT_PUBLIC_SUPABASE_URL       — same URL used by the frontend
@@ -86,23 +86,12 @@ export async function POST(req: Request) {
   // otherwise the right secret.
   const providedSecret = req.headers.get("x-signup-webhook-secret")?.trim();
   if (providedSecret !== expectedSecret) {
-    // Diagnostic — fingerprint both sides so we can compare in Railway logs
-    // without ever revealing the actual secret. Remove this block once the
-    // webhook is confirmed working end-to-end.
-    const fp = (s: string | undefined | null) =>
-      !s
-        ? "null"
-        : `len=${s.length} first=${s.slice(0, 4)} last=${s.slice(-4)}`;
-    const headerKeys: string[] = [];
-    req.headers.forEach((_v, k) => headerKeys.push(k));
+    // Log that it happened, never any part of either secret. (A setup-time
+    // diagnostic used to print the first and last 4 characters of the real
+    // secret here on every bad request. The webhook has worked since.)
     console.error(
       "[new-user] 401 secret mismatch.",
-      "provided:",
-      fp(providedSecret),
-      "expected:",
-      fp(expectedSecret),
-      "headers:",
-      headerKeys.join(","),
+      providedSecret ? "header present" : "header missing",
     );
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

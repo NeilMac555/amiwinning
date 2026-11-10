@@ -1,10 +1,9 @@
-// Aggregations: turn a flat ImportedBet[] into the DashboardData shape that the
-// dashboard components already consume. Keeps mock-data and real-data paths
-// interchangeable.
+// Aggregations: turn a flat ImportedBet[] into the DashboardData shape that
+// the dashboard and profile components consume.
 //
-// Imported bets have no CLV (Pinnacle closing odds aren't in bettin.gs exports)
-// so anything CLV-related falls back to 0 / empty. CLV will populate as users
-// log bets through the app pre-kickoff.
+// CLV figures only count bets that have closing odds recorded. Bets without
+// them (most spreadsheet imports) are left out of the CLV numbers rather
+// than counted as zero.
 
 import type {
   BreakdownRow,
@@ -15,11 +14,8 @@ import type {
   HeatmapCell,
   KPIs,
   OpenPosition,
-  ProfileKey,
   SecondaryStats,
-  SettledBet,
   Sparks,
-  TickerItem,
 } from "./data";
 import type { ImportedBet } from "./import/types";
 import { guessMarket } from "./import/normalise";
@@ -48,13 +44,9 @@ function isWin(b: ImportedBet): boolean {
   return b.status === "won" || b.status === "half_won";
 }
 
-function isLoss(b: ImportedBet): boolean {
-  return b.status === "lost" || b.status === "half_lost";
-}
-
 // KPIs ---------------------------------------------------------------------
 
-function computeKpis(bets: ImportedBet[]): KPIs {
+export function computeKpis(bets: ImportedBet[]): KPIs {
   const settled = bets.filter(isSettled).sort((a, b) => kickoffMs(a) - kickoffMs(b));
   const totalStake = settled.reduce((s, b) => s + b.stake, 0);
   const totalPl = settled.reduce((s, b) => s + b.pl, 0);
@@ -118,7 +110,7 @@ function computeKpis(bets: ImportedBet[]): KPIs {
 }
 
 // Sparks: 32-point series. We bucket settled bets into 32 chronological windows
-// and compute cumulative metrics. CLV stays flat since imported bets have none.
+// and compute cumulative metrics. The CLV series is flat (not yet computed).
 
 function computeSparks(bets: ImportedBet[]): Sparks {
   const settled = bets.filter(isSettled).sort((a, b) => kickoffMs(a) - kickoffMs(b));
@@ -161,7 +153,7 @@ function computeSparks(bets: ImportedBet[]): Sparks {
  *
  * Uses the full bet history. The component's range tabs filter the display.
  */
-function computeEquity(bets: ImportedBet[]): EquityData {
+export function computeEquity(bets: ImportedBet[]): EquityData {
   const settled = bets.filter(isSettled).sort((a, b) => kickoffMs(a) - kickoffMs(b));
   if (settled.length === 0) {
     const today = new Date();
@@ -214,38 +206,6 @@ function computeEquity(bets: ImportedBet[]): EquityData {
   // (carried in KPIs.peakDrawdown).
   const maxDrawdown = peak > 0 ? -(maxDdAbs / peak) * 100 : 0;
   return { points, maxDrawdown: round(maxDrawdown, 2) };
-}
-
-// Recent settled ------------------------------------------------------------
-
-function computeRecentSettled(bets: ImportedBet[], n = 14): SettledBet[] {
-  // Settled bets can't have happened in the future — clamp the sort key so a
-  // bet with an erroneous future kickoff (e.g. the parser couldn't resolve a
-  // date and guessed "next Sunday") doesn't jump above genuinely recent bets.
-  const nowMs = Date.now();
-  const effective = (b: ImportedBet) => Math.min(kickoffMs(b), nowMs);
-  const settled = bets
-    .filter((b) => isWin(b) || isLoss(b))
-    .sort((a, b) => effective(b) - effective(a))
-    .slice(0, n);
-  return settled.map((b, idx) => ({
-    id: b.id || `s${idx}`,
-    // Use the classifier so even un-migrated bets display the correct sport.
-    league: b.league || classifySport(b),
-    home: b.home ?? splitFallback(b.event).home ?? "",
-    away: b.away ?? splitFallback(b.event).away ?? "",
-    market: b.market ?? "other",
-    selection: b.selection,
-    odds: b.odds,
-    stake: b.stake,
-    result: isWin(b) ? "win" : "loss",
-    pl: Math.round(b.pl * 100) / 100,
-    clvBp: 0,
-    // Same clamp on display: if the stored kickoff is in the future, treat
-    // "settled at" as now so the relative-time label reads sensibly instead
-    // of showing "1m ago" for a bet placed weeks ago.
-    settledAt: new Date(Math.min(kickoffMs(b), nowMs)),
-  }));
 }
 
 // Open positions ------------------------------------------------------------
@@ -306,28 +266,13 @@ function computeHeatmap(bets: ImportedBet[]): HeatmapCell[] {
     cells.push({
       date: d,
       bets: slot.bets,
-      pl: Math.round(slot.pl),
+      // 2dp, not whole numbers: most users stake 1-2 units, so rounding
+      // to an integer turned a +0.4u day into "0" (a grey cell).
+      pl: round(slot.pl, 2),
       avgClv: slot.clvN > 0 ? round(slot.clvSum / slot.clvN, 2) : null,
     });
   }
   return cells;
-}
-
-// Ticker: imported bets have no closing-line moves; show recent imports as a
-// placeholder so the strip isn't empty.
-
-function computeTicker(bets: ImportedBet[]): TickerItem[] {
-  const recent = [...bets].sort((a, b) => kickoffMs(b) - kickoffMs(a)).slice(0, 14);
-  return recent.map((b, i) => ({
-    id: `tk${i}`,
-    league: b.league || classifySport(b),
-    match: b.event,
-    sel: b.selection,
-    from: b.odds.toFixed(2),
-    to: b.odds.toFixed(2),
-    moved: 0,
-    tag: "IMPORTED",
-  }));
 }
 
 // Secondary stats -----------------------------------------------------------
@@ -368,7 +313,6 @@ function computeSecondary(bets: ImportedBet[]): SecondaryStats {
     medianOdds: round(medianOdds, 2),
     avgStake: Math.round(avgStake),
     turnover: Math.round(turnover),
-    stakeRoll: avgStake > 0 ? round((avgStake / Math.max(turnover, 1)) * 100, 2) : 0,
     avgClv: round(meanClvPct(bets), 2),
     lastBet,
     wins,
@@ -389,7 +333,8 @@ function humanAgo(ms: number): string {
   return `${Math.floor(mo / 12)}y ago`;
 }
 
-// CLV distribution: no data → centred placeholder so the chart renders.
+// CLV distribution: bets with closing odds, bucketed into 36 bins over
+// [-8%, +8%]. All-zero counts when no bet has closing odds.
 
 function computeClvDist(bets: ImportedBet[]): ClvDistBin[] {
   const bins = 36;
@@ -510,7 +455,9 @@ function computeWeekly(bets: ImportedBet[], weeks = 52): number[] {
     const idx = Math.floor((t - start) / (7 * DAY_MS));
     if (idx >= 0 && idx < weeks) out[idx] += b.pl;
   }
-  return out.map((v) => Math.round(v));
+  // 2dp for the same reason as the heatmap: unit stakers have weekly
+  // totals well under 1, which whole-number rounding flattened to zero.
+  return out.map((v) => round(v, 2));
 }
 
 // Helpers -------------------------------------------------------------------
@@ -537,14 +484,11 @@ function splitFallback(event: string): { home?: string; away?: string } {
 
 export function aggregateFromBets(bets: ImportedBet[]): DashboardData {
   return {
-    profile: "mixed" as ProfileKey, // not meaningful for real data, but shape requires it
     kpis: computeKpis(bets),
     sparks: computeSparks(bets),
     equity: computeEquity(bets),
     open: computeOpenPositions(bets),
-    settled: computeRecentSettled(bets),
     heatmap: computeHeatmap(bets),
-    ticker: computeTicker(bets),
     secondary: computeSecondary(bets),
     clvDist: computeClvDist(bets),
     marketBd: computeBreakdown(
@@ -556,57 +500,18 @@ export function aggregateFromBets(bets: ImportedBet[]): DashboardData {
     ),
     oddsBd: computeOddsRangeBreakdown(bets),
     // Sport breakdown — reuse the classifier so untagged "Other" rows are
-    // bucketed correctly. Used on the public /u/<handle> page; the
-    // dashboard already shows market and odds-range, this fills the gap.
+    // bucketed correctly. Used on the public profile page.
     sportBd: computeBreakdown(
       bets,
       (b) => classifySport(b) || "Other",
     ),
-    // Competition breakdown — soccer-only for v1. Pure-derived from
-    // league/event/selection text; bet schema is unchanged. Rows with
-    // fewer than 20 settled bets are suppressed by computeBreakdown.
+    // Competition breakdown. Pure-derived from league/event/selection
+    // text; bet schema is unchanged. Rows with fewer than 20 settled
+    // bets are suppressed by computeBreakdown.
     competitionBd: computeBreakdown(
       bets,
       (b) => classifyCompetition(b) ?? undefined,
     ),
-    // Bookmaker breakdown. Optional field on every bet (users who
-    // don't record it are grouped under "Unspecified" so the row
-    // doesn't disappear). Case-insensitive grouping so "Pinnacle"
-    // and "pinnacle" merge; display uses the first-seen casing.
-    bookmakerBd: computeBookmakerBreakdown(bets),
     weekly: computeWeekly(bets),
   };
-}
-
-// Bookmaker breakdown. Separate helper (not computeBreakdown) so we
-// can (a) group case-insensitively and (b) preserve the first-seen
-// display casing rather than lowercasing the row labels.
-function computeBookmakerBreakdown(bets: ImportedBet[]): BreakdownRow[] {
-  const groups = new Map<
-    string,
-    { display: string; pl: number; stake: number; n: number }
-  >();
-  for (const b of bets) {
-    if (!isSettled(b)) continue;
-    const raw = (b.bookmaker ?? "").trim();
-    const key = raw ? raw.toLowerCase() : "__unspecified__";
-    const display = raw || "Unspecified";
-    const cur =
-      groups.get(key) ?? { display, pl: 0, stake: 0, n: 0 };
-    cur.pl += b.pl;
-    cur.stake += b.stake;
-    cur.n++;
-    groups.set(key, cur);
-  }
-  const rows: BreakdownRow[] = [];
-  for (const g of groups.values()) {
-    if (g.n < 20) continue; // same 20-bet floor as other breakdowns
-    rows.push({
-      label: g.display,
-      yieldPct: g.stake > 0 ? round((g.pl / g.stake) * 100, 2) : 0,
-      sample: g.n,
-    });
-  }
-  rows.sort((a, b) => b.yieldPct - a.yieldPct);
-  return rows;
 }

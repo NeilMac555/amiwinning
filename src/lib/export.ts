@@ -42,6 +42,9 @@ const COLUMNS: Array<{ key: keyof ExportRow; header: string }> = [
   { key: "pl", header: "pl" },
   { key: "source", header: "source" },
   { key: "imported_at", header: "imported_at" },
+  // Appended last (not next to closing_odds) so the positions of the
+  // existing columns stay stable for anyone diffing older exports.
+  { key: "bookmaker", header: "bookmaker" },
 ];
 
 interface ExportRow {
@@ -65,6 +68,7 @@ interface ExportRow {
   pl: number;
   source: string;
   imported_at: string;
+  bookmaker: string;
 }
 
 interface BetWithBook extends ImportedBet {
@@ -93,6 +97,7 @@ function betToRow(b: BetWithBook): ExportRow {
     pl: b.pl,
     source: b.source,
     imported_at: b.importedAt,
+    bookmaker: b.bookmaker ?? "",
   };
 }
 
@@ -118,6 +123,7 @@ interface RawBetRow {
   odds: number | string;
   stake: number | string;
   closing_odds: number | string | null;
+  bookmaker: string | null;
   tipster: string | null;
   tags: string[] | null;
   notes: string | null;
@@ -167,6 +173,9 @@ async function fetchAllUserBets(): Promise<BetWithBook[]> {
       .select("*")
       .eq("user_id", userId)
       .order("kickoff", { ascending: true })
+      // Tiebreaker: thousands of bets share a kickoff date, and paging
+      // on a non-unique sort can skip or repeat rows between pages.
+      .order("id", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) break;
     const rows = (data ?? []) as unknown as RawBetRow[];
@@ -188,6 +197,7 @@ async function fetchAllUserBets(): Promise<BetWithBook[]> {
     odds: Number(r.odds),
     stake: Number(r.stake),
     closingOdds: r.closing_odds != null ? Number(r.closing_odds) : undefined,
+    bookmaker: r.bookmaker ?? undefined,
     tipster: r.tipster ?? undefined,
     tags: r.tags ?? undefined,
     notes: r.notes ?? undefined,

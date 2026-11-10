@@ -10,9 +10,13 @@
 // States: loading | insight ready | error. Cards decide how to
 // render each — typically loading = subtle placeholder, error =
 // hide the insight row entirely.
+//
+// The API route needs a signed-in user, so pass enabled=false when
+// there isn't one: the hook then does nothing and reports "no insight".
 
 import { useEffect, useState } from "react";
 import type { Leak } from "@/lib/leaks";
+import { authedFetch } from "@/lib/authed-fetch";
 
 const CACHE_PREFIX = "aiw_leak_insight_v2_";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -68,57 +72,75 @@ export interface UseLeakInsightResult {
   error: boolean;
 }
 
-export function useLeakInsight(leak: Leak, tone: Tone): UseLeakInsightResult {
+// The answer for one fingerprint. Storing the key alongside the result
+// means a card whose leak changes never shows the previous leak's text:
+// a result only counts while its key matches the current one.
+interface Settled {
+  key: string;
+  insight: string | null;
+  error: boolean;
+}
+
+export function useLeakInsight(
+  leak: Leak,
+  tone: Tone,
+  enabled = true,
+): UseLeakInsightResult {
   const key = fingerprint(leak, tone);
-  const cached = readCache(key);
-  const [insight, setInsight] = useState<string | null>(cached);
-  const [loading, setLoading] = useState<boolean>(!cached);
-  const [error, setError] = useState<boolean>(false);
+  const body = JSON.stringify({
+    dimension: leak.dimension,
+    label: leak.label,
+    n: leak.n,
+    pl: leak.pl,
+    yieldPct: leak.yieldPct,
+    avgOdds: leak.avgOdds,
+    winRate: leak.winRate,
+    tone,
+  });
+  const [settled, setSettled] = useState<Settled | null>(null);
 
   useEffect(() => {
-    if (cached) return; // Already resolved from cache, no fetch needed.
+    if (!enabled) return;
     let cancelled = false;
-    setLoading(true);
-    setError(false);
-    fetch("/api/leaks/insight", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        dimension: leak.dimension,
-        label: leak.label,
-        n: leak.n,
-        pl: leak.pl,
-        yieldPct: leak.yieldPct,
-        avgOdds: leak.avgOdds,
-        winRate: leak.winRate,
-        tone,
-      }),
-    })
-      .then(async (r) => {
+    const settle = (insight: string | null, error: boolean) => {
+      if (!cancelled) setSettled({ key, insight, error });
+    };
+    void (async () => {
+      // Cache is read here, not during render, so the server-rendered
+      // HTML and the first client render always agree.
+      await Promise.resolve();
+      const cached = readCache(key);
+      if (cached) {
+        settle(cached, false);
+        return;
+      }
+      try {
+        const r = await authedFetch("/api/leaks/insight", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: { insight?: string }) => {
-        if (cancelled) return;
+        const data = (await r.json()) as { insight?: string };
         if (!data.insight) {
-          setError(true);
-          setLoading(false);
+          settle(null, true);
           return;
         }
-        setInsight(data.insight);
-        setLoading(false);
         writeCache(key, data.insight);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setError(true);
-        setLoading(false);
-      });
+        settle(data.insight, false);
+      } catch {
+        settle(null, true);
+      }
+    })();
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, body, enabled]);
 
-  return { insight, loading, error };
+  const current = settled && settled.key === key ? settled : null;
+  return {
+    insight: current?.insight ?? null,
+    loading: enabled && !current,
+    error: current?.error ?? false,
+  };
 }

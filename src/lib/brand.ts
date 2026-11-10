@@ -9,3 +9,7 @@ export const BRAND = {
   taglineShort: "The terminal for serious punters",
   fullTitle: "Am I Up — The terminal for serious punters.",
 } as const;
+
+// The version shown in the sidebar and the dashboard footer. One constant
+// so the two can't drift apart again (they used to read 0.4.5 and 0.4.2).
+export const APP_VERSION = "0.4.5";

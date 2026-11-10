@@ -347,7 +347,7 @@ export function ProfilePanel() {
             }}
           >
             {isPublic
-              ? "Anyone with the link can see your lifetime stats and equity curve. Individual bets are never shared."
+              ? "Anyone with the link can see your lifetime P/L. Signed-in Am I Up users also see your full stats and every settled bet. Pending bets stay private."
               : "Only you can see your stats. The shareable link returns 404."}
           </div>
         </div>

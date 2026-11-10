@@ -60,25 +60,36 @@ export function ClvDistribution({ dist, mean }: Props) {
     );
   }
 
+  // Share of bets at or above the closing line. Zero sits exactly on a
+  // bin edge (the bins split [-8, 8] evenly), so "bin centre above zero"
+  // is the same set as "CLV >= 0".
+  const atOrAbove = dist.reduce((a, d) => a + (d.binCenter > 0 ? d.count : 0), 0);
+  const beatPct = (atOrAbove / total) * 100;
+  const meanTone = mean > 0 ? "num-pos" : mean < 0 ? "num-neg" : "num-flat";
+  const meanColor = mean > 0 ? "var(--green)" : mean < 0 ? "var(--red)" : "var(--text-muted)";
+  // The axis runs -8% to +8%; pin the marker inside it for extreme means.
+  const meanLeft = Math.max(0, Math.min(100, 50 + (mean / 8) * 50));
+
   return (
     <div className="card dist-card">
       <div className="card-header">
         <div>
           <div className="card-title">CLV distribution</div>
           <div className="card-meta" style={{ marginTop: 4 }}>
-            <span>{total.toLocaleString()} bets · last 90d</span>
+            <span>
+              {total.toLocaleString()} bet{total === 1 ? "" : "s"} with a closing line
+            </span>
           </div>
-        </div>
-        <div className="card-actions">
-          <button className="btn-ghost" data-active="true">
-            90d
-          </button>
-          <button className="btn-ghost">All</button>
         </div>
       </div>
       <div className="dist-headline">
-        <span className="num num-pos">μ +{mean.toFixed(2)}%</span>
-        <span className="sub">σ 2.6% · p25 −1.5% · p75 +3.4%</span>
+        <span className={`num ${meanTone}`}>
+          μ {mean > 0 ? "+" : mean < 0 ? "−" : ""}
+          {Math.abs(mean).toFixed(2)}%
+        </span>
+        <span className="sub">
+          {beatPct.toFixed(0)}% matched or beat the close
+        </span>
       </div>
       <div className="dist-chart">
         {dist.map((d, i) => {
@@ -97,12 +108,12 @@ export function ClvDistribution({ dist, mean }: Props) {
         <div
           className="dist-marker"
           style={{
-            left: `${50 + (mean / 8) * 50}%`,
-            background: "var(--green)",
+            left: `${meanLeft}%`,
+            background: meanColor,
             opacity: 0.8,
           }}
         >
-          <span className="label" style={{ color: "var(--green)" }}>
+          <span className="label" style={{ color: meanColor }}>
             μ
           </span>
         </div>

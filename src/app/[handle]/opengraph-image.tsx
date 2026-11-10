@@ -9,7 +9,7 @@
 
 import { ImageResponse } from "next/og";
 import { getPublicProfileServer } from "@/lib/profiles";
-import { aggregateFromBets } from "@/lib/aggregate";
+import { computeEquity } from "@/lib/aggregate";
 
 export const alt = "Am I Up profile";
 export const size = { width: 1200, height: 630 };
@@ -117,7 +117,7 @@ export default async function Image({ params }: OgProps) {
   // Pre-compute the equity sparkline. computeEquity already gives us the
   // cumulative series — pluck the equity value off each point.
   const equity =
-    settledCount > 0 ? aggregateFromBets(bets).equity.points.map((p) => p.equity) : [];
+    settledCount > 0 ? computeEquity(bets).points.map((p) => p.equity) : [];
   const sparkD = sparkPath(equity, 700, 120);
 
   return new ImageResponse(

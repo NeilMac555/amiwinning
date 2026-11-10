@@ -72,8 +72,16 @@ export function saveBets(bets: ImportedBet[]): void {
   w.localStorage.setItem(KEY, encoded);
 }
 
+// Every write path below reads with loadBetsRaw(), never loadBets().
+// loadBets() hides tombstones (_pendingDelete), so reading with it and
+// then saving silently threw away any delete that had not reached
+// Supabase yet, and the "deleted" bet came back on the next pull.
+function visible(bets: ImportedBet[]): ImportedBet[] {
+  return bets.filter((b) => !b._pendingDelete);
+}
+
 export function appendBets(newBets: ImportedBet[]): ImportedBet[] {
-  const existing = loadBets();
+  const existing = loadBetsRaw();
   const byId = new Map(existing.map((b) => [b.id, b]));
   // Mark every incoming bet as _pending until Supabase confirms the push.
   // The flag is local-only — bet-sync clears it after a successful upsert,
@@ -91,13 +99,13 @@ export function appendBets(newBets: ImportedBet[]): ImportedBet[] {
       if (succeeded.size > 0) clearPendingFlag(succeeded);
     })();
   }
-  return merged;
+  return visible(merged);
 }
 
 /** Strip _pending off bets whose IDs are in the given set. Re-reads the
  *  store so concurrent writes aren't clobbered. */
 function clearPendingFlag(ids: Set<string>): void {
-  const current = loadBets();
+  const current = loadBetsRaw();
   let touched = false;
   const next = current.map((b) => {
     if (ids.has(b.id) && b._pending) {
@@ -129,12 +137,12 @@ export function updateBet(
 ): ImportedBet[] {
   // Mark _pending — same logic as appendBets. If the push succeeds, the
   // background task clears it. If it fails, flushPendingSyncs will retry.
-  const next = loadBets().map((b) =>
-    b.id === id ? { ...b, ...patch, _pending: true } : b,
+  const next = loadBetsRaw().map((b) =>
+    b.id === id && !b._pendingDelete ? { ...b, ...patch, _pending: true } : b,
   );
   saveBets(next);
   if (_currentUserId) {
-    const updated = next.find((b) => b.id === id);
+    const updated = next.find((b) => b.id === id && !b._pendingDelete);
     if (updated) {
       const userId = _currentUserId;
       void (async () => {
@@ -143,7 +151,7 @@ export function updateBet(
       })();
     }
   }
-  return next;
+  return visible(next);
 }
 
 /** Hard-delete a bet. */
@@ -153,12 +161,12 @@ export function deleteBet(id: string): ImportedBet[] {
   // row. We hide the bet from the UI by treating _pendingDelete as
   // deleted at read time, but keep it in the cache until Supabase
   // confirms. flushPendingSyncs retries.
-  const current = loadBets();
+  const current = loadBetsRaw();
   if (!_currentUserId) {
     // Signed out: no Supabase to sync with; just evict.
     const next = current.filter((b) => b.id !== id);
     saveBets(next);
-    return next;
+    return visible(next);
   }
   const next = current.map((b) =>
     b.id === id ? { ...b, _pendingDelete: true } : b,
@@ -168,12 +176,12 @@ export function deleteBet(id: string): ImportedBet[] {
     const ok = await deleteBetRemote(id);
     if (ok) {
       // Strip the tombstone — remove the row entirely from the cache.
-      const after = loadBets().filter((b) => b.id !== id);
+      const after = loadBetsRaw().filter((b) => b.id !== id);
       saveBets(after);
     }
   })();
   // Return the externally-visible list (no tombstones).
-  return next.filter((b) => !b._pendingDelete);
+  return visible(next);
 }
 
 // ---------------------------------------------------------------------------
@@ -304,7 +312,7 @@ const SEED_BETS: ImportedBet[] = [
 export function consumeSeed(): number {
   const w = safeWindow();
   if (!w) return 0;
-  const existing = loadBets();
+  const existing = loadBetsRaw();
   const existingIds = new Set(existing.map((b) => b.id));
   const toAdd = SEED_BETS.filter((b) => !existingIds.has(b.id));
   if (toAdd.length === 0) return 0;

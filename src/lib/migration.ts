@@ -23,6 +23,10 @@ function toRow(b: ImportedBet, userId: string) {
   return {
     id: b.id,
     user_id: userId,
+    // bets.book_id is NOT NULL. This row builder used to omit it, so any
+    // upload that actually had rows to send was rejected by the database
+    // and retried on every page load. Callers only pass bets with a bookId.
+    book_id: b.bookId,
     kickoff: b.kickoff,
     sport: b.sport,
     league: b.league ?? null,
@@ -34,6 +38,7 @@ function toRow(b: ImportedBet, userId: string) {
     odds: b.odds,
     stake: b.stake,
     closing_odds: b.closingOdds ?? null,
+    bookmaker: b.bookmaker ?? null,
     tipster: b.tipster ?? null,
     tags: b.tags && b.tags.length ? b.tags : null,
     notes: b.notes ?? null,

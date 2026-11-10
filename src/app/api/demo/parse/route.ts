@@ -62,14 +62,17 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  let body: { text?: string; today?: string };
+  let body: { text?: unknown; today?: unknown };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
 
-  const text = (body.text ?? "").trim();
+  const text = (typeof body.text === "string" ? body.text : "").trim();
   if (!text) {
     return NextResponse.json(
       { error: "Paste some bet text to try the demo." },
@@ -107,8 +110,18 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
   usage.set(ip, { count: currentCount + 1, dayKey });
+  // Yesterday's records are dead weight. Sweep them once the map gets big
+  // so a long-running process doesn't keep one entry per visitor forever.
+  if (usage.size > 5_000) {
+    for (const [k, v] of usage) if (v.dayKey !== dayKey) usage.delete(k);
+  }
 
-  const today = body.today ?? todayUtcDayKey();
+  // The visitor's local date, used to resolve "tonight" / "Saturday". It
+  // goes into the prompt, so only a plain YYYY-MM-DD is accepted.
+  const today =
+    typeof body.today === "string" && /^d{4}-d{2}-d{2}$/.test(body.today)
+      ? body.today
+      : todayUtcDayKey();
   const client = new Anthropic({ apiKey });
 
   try {
@@ -151,7 +164,25 @@ export async function POST(req: Request): Promise<Response> {
       limit: DAILY_CAP,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: msg }, { status: 502 });
+    // Our failure, not the visitor's: give the attempt back, keep the raw
+    // provider error in the server log, and show something readable. (The
+    // raw text used to go straight to the landing page, e.g. a JSON blob
+    // starting "529 {"type":"error"...".)
+    usage.set(ip, { count: currentCount, dayKey });
+    const status = err instanceof Anthropic.APIError ? err.status : undefined;
+    console.error(
+      "[demo/parse] model call failed:",
+      status ?? "",
+      err instanceof Error ? err.message : String(err),
+    );
+    const busy = status === 529 || status === 503 || status === 429;
+    return NextResponse.json(
+      {
+        error: busy
+          ? "The AI is busy right now. Give it a minute and try again. This one didn't count towards your demo limit."
+          : "Something went wrong reading that paste. Try again. This one didn't count towards your demo limit.",
+      },
+      { status: 502 },
+    );
   }
 }

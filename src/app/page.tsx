@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { buildAll, NOW, type DashboardData } from "@/lib/data";
-import { aggregateFromBets } from "@/lib/aggregate";
+import type { DashboardData } from "@/lib/data";
+import { aggregateFromBets, computeKpis } from "@/lib/aggregate";
 import { canUsePersonalDashboardView, personalDashboardBets, type PersonalDashboardView } from "@/lib/personal-dashboard-view";
-import { consumeSeed, loadBets } from "@/lib/import/store";
+import { loadBets } from "@/lib/import/store";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { KpiStripCompact } from "@/components/Kpis";
@@ -28,8 +28,14 @@ import { DashboardEdgeCallout } from "@/components/DashboardEdgeCallout";
 import { RangeTabs } from "@/components/RangeTabs";
 import { WinRateGauge } from "@/components/WinRateGauge";
 import { UnitProvider, type DisplayUnit } from "@/components/UnitContext";
-import { BRAND } from "@/lib/brand";
+import { APP_VERSION, BRAND } from "@/lib/brand";
 import { filterByRange, rangeLabel, type Range } from "@/lib/range";
+import type { ImportedBet } from "@/lib/import/types";
+import { applyThemeForSignedIn, useSettings } from "@/lib/settings";
+import { useAuth } from "@/lib/auth";
+import { LandingPage } from "@/components/LandingPage";
+import { DashboardLoading } from "@/components/DashboardLoading";
+import { HomeStartup } from "@/components/HomeStartup";
 
 // The dashboard exposes a slimmed-down subset of the full RANGES list:
 // four buckets the user asked for, ordered from most-recent to widest. All
@@ -37,14 +43,15 @@ import { filterByRange, rangeLabel, type Range } from "@/lib/range";
 // `range` state, so this control filters the whole page — it just sits
 // directly above the KPI strip where the user can actually see it.
 const DASHBOARD_RANGES: Range[] = ["1M", "3M", "12M", "All"];
-import type { ImportedBet } from "@/lib/import/types";
-import { applyTheme, applyThemeForSignedIn, useSettings } from "@/lib/settings";
-import { useAuth } from "@/lib/auth";
-import { LandingPage } from "@/components/LandingPage";
-import { DashboardLoading } from "@/components/DashboardLoading";
-import { HomeStartup } from "@/components/HomeStartup";
 
-type Source = "mock" | "imported";
+// "UTC+01:00" style label for the viewer's own clock at time `ms`.
+function utcOffsetLabel(ms: number): string {
+  const mins = -new Date(ms).getTimezoneOffset();
+  const abs = Math.abs(mins);
+  const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mm = String(abs % 60).padStart(2, "0");
+  return `UTC${mins >= 0 ? "+" : "−"}${hh}:${mm}`;
+}
 
 export default function Dashboard() {
   const { user, loading, accountStatus, activeBook } = useAuth();
@@ -70,13 +77,17 @@ export default function Dashboard() {
   return <AccountDashboard key={`${user.id}:${activeBook?.id ?? "none"}`} />;
 }
 
+// Only ever rendered for a signed-in user (see Dashboard above), and only
+// in the browser: the server render stops at <HomeStartup /> because auth
+// is still loading there. An account with no bets gets the first-run
+// PasteHero + GhostPreview; everything else on the page is real data.
+// (There used to be a generated "demo data" dashboard for signed-out
+// visitors. They get the landing page now, so that path was unreachable
+// and has been removed.)
 function AccountDashboard() {
-  // First render: mock data so SSR/client hydration match. After mount, we
-  // check localStorage and swap to imported aggregates when present.
-  const [source, setSource] = useState<Source>("mock");
   const [cacheLoaded, setCacheLoaded] = useState(false);
   const [allBets, setAllBets] = useState<ImportedBet[]>([]);
-  const [now, setNow] = useState<number>(NOW);
+  const [now, setNow] = useState<number>(() => Date.now());
   // Default to All time so the dashboard stats reflect a user's full
   // history out of the box. They can still scope to 7D/1M/3M/6M/YTD/12M
   // via the RangeTabs control below.
@@ -90,12 +101,7 @@ function AccountDashboard() {
   // Load bets on mount, and re-read whenever the auth layer signals a fresh
   // pull from Supabase (betsVersion bumps).
   useEffect(() => {
-    // Dashboard route is one of two things: the signed-in dashboard
-    // (terminal-dark default) or the LandingPage marketing surface
-    // (:root cream). Pick the theme applicator to match.
-    if (user) applyThemeForSignedIn();
-    else applyTheme();
-    if (!user) consumeSeed();
+    applyThemeForSignedIn();
     const allRaw = loadBets();
     // Signed-in accounts must not inherit the landing-page seed bets that
     // consumeSeed() drops into localStorage for the signed-out preview.
@@ -103,7 +109,7 @@ function AccountDashboard() {
     // fresh signup sees a truly empty ledger and hits the first-run
     // PasteHero. Signed-out preview still sees them because we don't
     // apply this filter there.
-    const all = user ? allRaw.filter((b) => !b.id.startsWith("seed-")) : allRaw;
+    const all = allRaw.filter((b) => !b.id.startsWith("seed-"));
     // Scope to the active book. Bets without a bookId (legacy cache) fall
     // through to the active book so older data still shows up.
     const scoped = activeBook
@@ -115,14 +121,8 @@ function AccountDashboard() {
     // paint, so no visible flash of stale state.
     queueMicrotask(() => {
       setCacheLoaded(true);
-      if (scoped.length > 0) {
-        setSource("imported");
-        setAllBets(scoped);
-        setNow(nextNow);
-      } else {
-        setSource("mock");
-        setAllBets([]);
-      }
+      setAllBets(scoped);
+      setNow(nextNow);
     });
   }, [betsVersion, user, activeBook, localBump, accountStatus]);
 
@@ -138,7 +138,6 @@ function AccountDashboard() {
   // so React 19's no-setState-in-effect rule is satisfied — `data` is
   // pure-derived state.
   const data = useMemo<DashboardData>(() => {
-    if (source !== "imported") return buildAll("mixed");
     // Use the captured `now` rather than Date.now() so this memo is pure —
     // React 19 forbids impure calls during render. `now` is bumped when bets
     // are loaded, which is the only moment the window boundary changes.
@@ -148,15 +147,18 @@ function AccountDashboard() {
     // metric within the selected dashboard view. Windowing it produces nonsense (a single bad month in a 3M
     // window can render -100%). Always compute it from all bets and override
     // the window-scoped values so it stays stable as the user flips ranges.
+    // Only the KPI block is needed for that, so compute just the KPIs
+    // rather than running the whole aggregation (heatmap, breakdowns,
+    // sport and competition classifiers) a second time over every bet.
     if (viewBets.length > 0) {
-      const lifetime = aggregateFromBets(viewBets);
-      windowed.kpis.rocPct = lifetime.kpis.rocPct;
-      windowed.kpis.rocAnnualised = lifetime.kpis.rocAnnualised;
-      windowed.kpis.peakDrawdown = lifetime.kpis.peakDrawdown;
-      windowed.kpis.lifetimePl = lifetime.kpis.lifetimePl;
+      const lifetime = computeKpis(viewBets);
+      windowed.kpis.rocPct = lifetime.rocPct;
+      windowed.kpis.rocAnnualised = lifetime.rocAnnualised;
+      windowed.kpis.peakDrawdown = lifetime.peakDrawdown;
+      windowed.kpis.lifetimePl = lifetime.lifetimePl;
     }
     return windowed;
-  }, [viewBets, range, source, now]);
+  }, [viewBets, range, now]);
 
   const importedCount = viewBets.length;
   const milestoneCount = allBets.filter((bet) =>
@@ -199,46 +201,24 @@ function AccountDashboard() {
     process.env.NODE_ENV === "development" &&
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("firstrun") === "1";
-  const isFirstRun = forceFirstRun || (!!user && realBetCount === 0);
+  const isFirstRun = forceFirstRun || realBetCount === 0;
   const showGhost = forceFirstRun || totalCommittedBets === 0;
-  const inRangeCount = useMemo(
-    () => (source === "imported" ? data.kpis.sampleSize : 0),
-    [source, data.kpis.sampleSize],
-  );
+  const inRangeCount = data.kpis.sampleSize;
 
-  // Span of the user's entire career — earliest to latest bet, in years.
-  // Drives the "per year" line on the stake-scaler card.
-  const lifetimeYears = useMemo(() => {
-    if (allBets.length === 0) return undefined;
-    let minMs = Infinity;
-    let maxMs = -Infinity;
-    for (const b of allBets) {
-      const t = new Date(b.kickoff).getTime();
-      if (t < minMs) minMs = t;
-      if (t > maxMs) maxMs = t;
-    }
-    if (!isFinite(minMs) || !isFinite(maxMs)) return undefined;
-    const yrs = (maxMs - minMs) / (365.25 * 86400000);
-    return yrs > 0 ? yrs : undefined;
-  }, [allBets]);
-
+  // Shown in the viewer's own time zone, with the matching UTC offset in
+  // the footer. (Both used to be pinned to UK summer time, which was an
+  // hour out for UK users every winter and wrong for everyone else.)
   const updatedAt = useMemo(() => {
     return new Date(now).toLocaleString("en-GB", {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
-      timeZone: "Europe/London",
     });
   }, [now]);
 
-  // For imported data: respect the user's setting. For the demo: keep $ since
-  // the mock bankroll is dollar-denominated.
-  const unit: DisplayUnit = source === "imported" ? settingsUnit : "$";
+  const unit: DisplayUnit = settingsUnit;
 
-  // Signed-out visitors see the marketing landing page instead of the
-  // sample dashboard. They came here from an X share, an OG card link,
-  // or word of mouth — not to look at someone else's seed bets.
   if (!cacheLoaded) return <DashboardLoading />;
 
   return (
@@ -268,22 +248,16 @@ function AccountDashboard() {
               {user && activeBook && accountStatus === "ready" && milestoneCount >= 100 && (
                 <div className="dashboard-book-milestone"><span>{activeBook.name}</span><TrackingBadge count={milestoneCount} /></div>
               )}
-              {/* No subtitle / no range tabs when the user is empty:
-                  shows the mock subtitle "Soccer (EPL, UCL) · Pinnacle"
-                  otherwise, which is misleading on a fresh signup. */}
+              {/* No subtitle when the book is empty. */}
               {allBets.length > 0 && (
                 <div className="page-subtitle">
                   <span className="dot-live"></span>
                   Updated {updatedAt} ·{" "}
-                  {source === "imported"
-                    ? `${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${isSharpSideView && range === "All" ? "since 12 August 2026" : rangeLabel(range, now)}`
-                    : "Soccer (EPL, UCL) · Pinnacle & 4 others"}
+                  {`${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${isSharpSideView && range === "All" ? "since 12 August 2026" : rangeLabel(range, now)}`}
                 </div>
               )}
             </div>
           </div>
-
-          {!user && allBets.length > 0 && <SampleDataBanner />}
 
           {/* PasteHero always renders — it's the primary action for both
               zero-bet and populated dashboards. `firstRun` controls the
@@ -346,43 +320,40 @@ function AccountDashboard() {
               />
             )}
 
-          {source === "mock" && <MockBanner />}
-          {source === "imported" && <ImportedBanner count={importedCount} />}
+          <ImportedBanner count={importedCount} />
 
-          {source === "imported" && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              marginTop: 14,
+              marginBottom: 6,
+              flexWrap: "wrap",
+            }}
+          >
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 12,
-                marginTop: 14,
-                marginBottom: 6,
-                flexWrap: "wrap",
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--text-faint)",
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--text-faint)",
-                }}
-              >
-                Metrics · {isSharpSideView ? "Sharp Side Soccer · " : ""}{isSharpSideView && range === "All" ? "Since 12 August 2026" : rangeLabel(range, now)}
-              </div>
-              <RangeTabs
-                value={range}
-                onChange={setRange}
-                options={DASHBOARD_RANGES}
-              />
+              Metrics · {isSharpSideView ? "Sharp Side Soccer · " : ""}{isSharpSideView && range === "All" ? "Since 12 August 2026" : rangeLabel(range, now)}
             </div>
-          )}
+            <RangeTabs
+              value={range}
+              onChange={setRange}
+              options={DASHBOARD_RANGES}
+            />
+          </div>
 
           <KpiStripCompact kpis={data.kpis} sparks={data.sparks} capitalScopeLabel={isSharpSideView ? "Since 12 Aug 2026" : undefined} />
           <SecondaryStats s={data.secondary} />
 
-          {source === "imported" && data.kpis.lifetimePl !== undefined && (
+          {data.kpis.lifetimePl !== undefined && (
             <div
               className="grid"
               style={{ gridTemplateColumns: "1fr 1fr", marginTop: 14 }}
@@ -402,9 +373,8 @@ function AccountDashboard() {
               data={data.equity}
               weekly={data.weekly}
               lastBetAgo={data.kpis.lastBetAgo}
-              mode={source === "imported" ? "cumulative" : "bankroll"}
+              mode="cumulative"
               range={range}
-              onRangeChange={source === "imported" ? setRange : undefined}
             />
           </div>
 
@@ -425,13 +395,11 @@ function AccountDashboard() {
           </div>
 
           <div className="footer-line">
-            <span>{BRAND.name} · v0.4.2</span>
+            <span>{BRAND.name} · v{APP_VERSION}</span>
             <span>
-              {source === "imported"
-                ? "Imported data · stakes shown as units · CLV not yet captured for historical bets"
-                : "Data delayed ≤ 30s · Closing-line sourced from Pinnacle"}
+              P/L and yield count settled bets · CLV counts bets with closing odds
             </span>
-            <span>UTC+01:00</span>
+            <span>{utcOffsetLabel(now)}</span>
           </div>
             </>
           )}
@@ -439,102 +407,6 @@ function AccountDashboard() {
       </div>
     </div>
     </UnitProvider>
-  );
-}
-
-function MockBanner() {
-  return (
-    <div
-      style={{
-        marginTop: 14,
-        padding: "10px 16px",
-        background: "var(--surface-2)",
-        border: "var(--border-w) solid var(--border)",
-        borderRadius: 8,
-        fontSize: 12,
-        color: "var(--text-muted)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-      }}
-    >
-      <span>
-        <span style={{ fontWeight: 600, color: "var(--text)" }}>Demo data.</span>{" "}
-        Import your own to see real numbers.
-      </span>
-      <Link
-        href="/import"
-        className="btn-ghost"
-        data-active="true"
-        style={{ padding: "4px 10px", fontSize: 12 }}
-      >
-        Import data →
-      </Link>
-    </div>
-  );
-}
-
-function SampleDataBanner() {
-  return (
-    <div
-      style={{
-        marginTop: 14,
-        padding: "12px 18px",
-        background:
-          "linear-gradient(90deg, rgba(15, 110, 86, 0.10) 0%, rgba(15, 110, 86, 0.03) 100%)",
-        border: "var(--border-w) solid var(--green-tint)",
-        borderRadius: 10,
-        fontSize: 13,
-        color: "var(--text)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        position: "relative",
-      }}
-    >
-      <span
-        style={{
-          position: "absolute",
-          top: -1,
-          left: 18,
-          background: "var(--bg)",
-          color: "var(--green)",
-          fontFamily: "var(--mono)",
-          fontSize: 9.5,
-          fontWeight: 700,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          padding: "0 6px",
-          borderRadius: 3,
-        }}
-      >
-        Sample
-      </span>
-      <span style={{ paddingLeft: 4 }}>
-        <span style={{ fontWeight: 600, color: "var(--green)" }}>
-          You&rsquo;re viewing sample data.
-        </span>{" "}
-        <span style={{ color: "var(--text-muted)" }}>
-          Every chart, KPI and bet on this page is illustrative.
-          Sign in to start tracking your own.
-        </span>
-      </span>
-      <Link
-        href="/sign-in"
-        className="btn-ghost"
-        data-active="true"
-        style={{
-          padding: "6px 14px",
-          fontSize: 12,
-          fontWeight: 600,
-          whiteSpace: "nowrap",
-        }}
-      >
-        Sign in →
-      </Link>
-    </div>
   );
 }
 

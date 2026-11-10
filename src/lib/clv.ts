@@ -41,10 +41,3 @@ export function meanClvPct(bets: ImportedBet[]): number {
   }
   return n > 0 ? sum / n : 0;
 }
-
-/** Number of bets with closing line captured. */
-export function clvCoverage(bets: ImportedBet[]): { withClv: number; total: number } {
-  let withClv = 0;
-  for (const b of bets) if (betClv(b) != null) withClv++;
-  return { withClv, total: bets.length };
-}

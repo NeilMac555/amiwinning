@@ -55,10 +55,6 @@ function notify(): void {
   for (const cb of listeners) cb();
 }
 
-export function loadSettings(): UserSettings {
-  return ensureSnapshot();
-}
-
 export function saveSettings(s: UserSettings): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(KEY, JSON.stringify(s));

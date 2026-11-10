@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { OpenPosition } from "@/lib/data";
 import { fmtCountdown } from "@/lib/format";
@@ -210,7 +211,9 @@ export function OpenPositions({ positions, density, now }: Props) {
                     <span className="badge live">In play</span>
                   )}
                   {status === "soon" && <span className="badge soon">{cd}</span>}
-                  {status === "pre" && <span className="badge">{cd}</span>}
+                  {status === "pre" && (
+                    <span className="badge">{cd ?? "Awaiting result"}</span>
+                  )}
                 </td>
                 <td className="actions">
                   <span className="row-actions">
@@ -226,7 +229,12 @@ export function OpenPositions({ positions, density, now }: Props) {
                         <path d="M3 7h8M8 4l3 3-3 3" />
                       </svg>
                     </button>
-                    <button className="row-icon-btn" title="Edit">
+                    <Link
+                      className="row-icon-btn"
+                      href={`/bets/${p.id}/edit`}
+                      title="Edit or settle this bet"
+                      aria-label={`Edit ${p.selection}`}
+                    >
                       <svg
                         width="13"
                         height="13"
@@ -234,10 +242,11 @@ export function OpenPositions({ positions, density, now }: Props) {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="1.4"
+                        aria-hidden="true"
                       >
                         <path d="M2 12l2 -.5L11 4l-1.5 -1.5L2.5 9.5z" />
                       </svg>
-                    </button>
+                    </Link>
                   </span>
                 </td>
               </tr>

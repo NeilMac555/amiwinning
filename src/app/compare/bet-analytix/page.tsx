@@ -60,7 +60,7 @@ const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is my data private?",
-    a: "Yes. Individual bets are never shown publicly. Your public profile (if you turn it on) shows aggregate stats only: lifetime P/L, equity curve, KPI grid, sample size. Strangers cannot see what you are about to bet on next. Pending bets stay private by design. Full CSV export from Settings any time, no cost. Your data is yours.",
+    a: "Your pending bets are never shown to anyone, so nobody can see what you are about to bet on next. Every account comes with a profile page that shows your lifetime P/L, and signed-in Am I Up users can also see your stats and settled bets. You can switch the profile to private in Settings at any time. Full CSV export from Settings any time, no cost. Your data is yours.",
   },
 ];
 

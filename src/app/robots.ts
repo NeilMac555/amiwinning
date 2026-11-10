@@ -13,6 +13,9 @@ export default function robots(): MetadataRoute.Robots {
         // files. These are static plain-text files served from /public so
         // no Next.js route pattern is needed, but we allow-list them here
         // so no future robots.txt tightening accidentally excludes them.
+        // "/u/" stays allowed on purpose: old /u/<handle> links 301 to
+        // /<handle>, and crawlers have to be able to follow the redirect
+        // for the old links to pass their signal on.
         allow: [
           "/",
           "/terms",
@@ -20,16 +23,16 @@ export default function robots(): MetadataRoute.Robots {
           "/u/",
           "/compare/",
           "/learn/",
-          "/partners",
           "/llms.txt",
           "/llms-full.txt",
         ],
         disallow: [
           "/api/",       // server routes, never crawl
           "/admin",      // operator console
+          "/dev/",       // internal email previews
           "/settings",   // signed-in only, no value to crawl
-          "/bets",       // signed-in only
-          "/bets/new",
+          "/bets",       // signed-in only (prefix also covers /bets/new)
+          "/pending",    // signed-in only
           "/analytics",
           "/import",
           "/auth/",      // magic-link callback URLs

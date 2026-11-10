@@ -1,7 +1,7 @@
 // UTM attribution capture.
 //
 // The problem this solves: Neil ships the same "amiup.io" link across
-// SteamWatch, X bio, Substack, Ylose Telegram. Without instrumentation
+// SteamWatch, X bio, Substack, Telegram. Without instrumentation
 // he cannot tell which channel is driving signups. Adding utm_source
 // query params to each variant of the link, capturing them into
 // sessionStorage on landing, and forwarding into Supabase auth

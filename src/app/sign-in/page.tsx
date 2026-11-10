@@ -7,6 +7,17 @@ import { useAuth } from "@/lib/auth";
 import { applyTheme } from "@/lib/settings";
 import { BRAND } from "@/lib/brand";
 import { UtmCapture } from "@/components/UtmCapture";
+import { rememberReturnTo, sanitizeReturnTo } from "@/lib/return-to";
+
+// The ?returnTo= on this page's own URL, if it is a safe profile path.
+// Read from window.location rather than useSearchParams so the page
+// doesn't need a Suspense boundary to prerender.
+function returnToFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  return sanitizeReturnTo(
+    new URLSearchParams(window.location.search).get("returnTo"),
+  );
+}
 
 export default function SignInPage() {
   const router = useRouter();
@@ -18,16 +29,19 @@ export default function SignInPage() {
 
   useEffect(() => {
     applyTheme();
+    // Park the profile the visitor came from so the magic-link callback
+    // can send them back to it. No returnTo clears any older one.
+    rememberReturnTo(returnToFromUrl());
   }, []);
 
-  // Also re-run UTM capture here in case the user landed directly on
-  // /sign-in from a marketing link (e.g. a paid ad pointing straight
-  // at the auth page rather than the landing). Idempotent — if the
-  // landing page already captured, this call preserves it.
+  // UTM capture also runs here (the <UtmCapture /> below) in case the
+  // user landed directly on /sign-in from a marketing link rather than
+  // the landing page. Idempotent: an earlier capture is preserved.
 
-  // If already signed in, bounce to dashboard.
+  // If already signed in, bounce back to where they came from, or to
+  // the dashboard when they didn't come from a profile.
   useEffect(() => {
-    if (!loading && user) router.replace("/");
+    if (!loading && user) router.replace(returnToFromUrl() ?? "/");
   }, [loading, user, router]);
 
   const submit = async (e: React.FormEvent) => {

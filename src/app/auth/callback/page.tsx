@@ -3,17 +3,23 @@
 // Magic-link landing page. Supabase's client SDK (with `detectSessionInUrl`)
 // automatically picks up the ?code= param and exchanges it for a session as
 // soon as the page boots. We just wait for the auth state to flip, then
-// redirect home.
+// redirect: back to the profile the visitor signed up from if there was
+// one (see lib/return-to.ts), otherwise home.
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { BRAND } from "@/lib/brand";
+import { consumeReturnTo } from "@/lib/return-to";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { user, loading, configured } = useAuth();
   const [waited, setWaited] = useState(false);
+  // Redirect exactly once. The effect below re-runs when `waited` flips,
+  // and a second pass would find the parked destination already used up
+  // and send the visitor home instead.
+  const redirected = useRef(false);
 
   useEffect(() => {
     // Give the SDK a moment to consume the URL and emit the auth event.
@@ -22,11 +28,13 @@ export default function AuthCallbackPage() {
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || redirected.current) return;
     if (user) {
-      router.replace("/");
+      redirected.current = true;
+      router.replace(consumeReturnTo() ?? "/");
     } else if (waited && configured) {
       // SDK didn't pick anything up — link probably expired or already used.
+      redirected.current = true;
       router.replace("/sign-in");
     }
   }, [loading, user, router, waited, configured]);

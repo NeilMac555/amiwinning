@@ -9,13 +9,17 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-export type QuotaAction = "parse" | "auto_map";
+export type QuotaAction = "parse" | "auto_map" | "insight";
 
 // Per-user, per-day caps. Burning through 50 paste-parses or 30 spreadsheet
 // auto-maps in a single day would be highly unusual real usage.
+// Insights: the leaks page shows up to 10 cards per range across 5 ranges,
+// and each card is cached in the browser for 7 days, so 100 a day covers
+// flicking through every range on two books with room to spare.
 const DAILY_CAPS: Record<QuotaAction, number> = {
   parse: 50,
   auto_map: 30,
+  insight: 100,
 };
 
 export interface QuotaResult {

@@ -29,6 +29,7 @@ export const RESERVED_HANDLES = new Set<string>([
   "analytics",
   "api",
   "auth",
+  "author",
   "bets",
   "compare",
   "dev",

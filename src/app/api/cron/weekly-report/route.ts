@@ -164,41 +164,47 @@ export async function POST(req: Request) {
     candidateIds = [onlyUser];
   } else {
     const since = new Date(now.getTime() - ACTIVE_WINDOW_DAYS * 86_400_000).toISOString();
-    const { data, error } = await admin
-      .from("bets")
-      .select("user_id")
-      .gte("kickoff", since);
-    if (error) {
+    try {
+      candidateIds = await fetchActiveUserIds(admin, since);
+    } catch (e) {
       summary.ok = false;
-      summary.errors.push(`candidates query: ${error.message}`);
+      summary.errors.push(`candidates query: ${e instanceof Error ? e.message : String(e)}`);
       return NextResponse.json(summary, { status: 500 });
     }
-    candidateIds = Array.from(
-      new Set((data ?? []).map((r) => (r as { user_id: string }).user_id)),
-    );
   }
   summary.candidates = candidateIds.length;
   if (candidateIds.length === 0) return NextResponse.json(summary);
 
-  // Already-sent set for this week (one query, not one per user).
+  // Already-sent set for this week, and handles for all candidates.
+  // Looked up in chunks of ID_CHUNK ids: a single .in() with hundreds of
+  // UUIDs overflows the request URL, and each response is capped at
+  // 1,000 rows.
   const alreadySent = new Set<string>();
-  if (!force) {
-    const { data: sentRows } = await admin
-      .from("weekly_report_sends")
-      .select("user_id")
-      .eq("week_start", weekStart)
-      .in("user_id", candidateIds);
-    for (const r of sentRows ?? []) alreadySent.add((r as { user_id: string }).user_id);
-  }
-
-  // Handles for all candidates in one query.
-  const { data: profileRows } = await admin
-    .from("profiles")
-    .select("user_id, handle")
-    .in("user_id", candidateIds);
   const handleByUser = new Map<string, string>();
-  for (const p of (profileRows ?? []) as { user_id: string; handle: string | null }[]) {
-    if (p.handle) handleByUser.set(p.user_id, p.handle);
+  for (let i = 0; i < candidateIds.length; i += ID_CHUNK) {
+    const chunk = candidateIds.slice(i, i + ID_CHUNK);
+    if (!force) {
+      const { data: sentRows, error: sentErr } = await admin
+        .from("weekly_report_sends")
+        .select("user_id")
+        .eq("week_start", weekStart)
+        .in("user_id", chunk);
+      if (sentErr) {
+        // Not knowing who already got this week's report risks a double
+        // send to everyone. Stop rather than guess.
+        summary.ok = false;
+        summary.errors.push(`already-sent query: ${sentErr.message}`);
+        return NextResponse.json(summary, { status: 500 });
+      }
+      for (const r of sentRows ?? []) alreadySent.add((r as { user_id: string }).user_id);
+    }
+    const { data: profileRows } = await admin
+      .from("profiles")
+      .select("user_id, handle")
+      .in("user_id", chunk);
+    for (const p of (profileRows ?? []) as { user_id: string; handle: string | null }[]) {
+      if (p.handle) handleByUser.set(p.user_id, p.handle);
+    }
   }
 
   // ── 5. Per-user loop ───────────────────────────────────────────────────
@@ -294,6 +300,35 @@ export async function POST(req: Request) {
 
 // ─ Helpers ───────────────────────────────────────────────────────────────
 
+const ID_CHUNK = 100;
+
+// Every user with a bet kicking off since `sinceIso`. Paged: Supabase
+// returns at most 1,000 rows per query, and a fortnight of bets across
+// all users is well past that, so a single query silently dropped most
+// of the active users.
+async function fetchActiveUserIds(
+  admin: SupabaseClient,
+  sinceIso: string,
+): Promise<string[]> {
+  const PAGE = 1000;
+  const MAX_PAGES = 500; // 500k recent bets; a runaway-loop guard, not a limit we expect to hit
+  const ids = new Set<string>();
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE;
+    const { data, error } = await admin
+      .from("bets")
+      .select("user_id")
+      .gte("kickoff", sinceIso)
+      .order("id", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as { user_id: string }[];
+    for (const r of rows) ids.add(r.user_id);
+    if (rows.length < PAGE) break;
+  }
+  return Array.from(ids);
+}
+
 async function fetchAllBets(admin: SupabaseClient, userId: string): Promise<ImportedBet[]> {
   const PAGE = 1000;
   let from = 0;
@@ -304,6 +339,9 @@ async function fetchAllBets(admin: SupabaseClient, userId: string): Promise<Impo
       .select("*")
       .eq("user_id", userId)
       .order("kickoff", { ascending: false })
+      // Tiebreaker: thousands of bets share a kickoff date, and paging
+      // on a non-unique sort can skip or repeat rows between pages.
+      .order("id", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) throw new Error(error.message);
     const page = (data ?? []) as BetRow[];

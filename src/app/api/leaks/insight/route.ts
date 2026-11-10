@@ -8,24 +8,29 @@
 //   framed as a specific observation the user can act on. Not a
 //   generic pep talk.
 //
-// Cheap: Haiku costs ~$0.0005 per call. Even 10 calls per page load
-// per user is negligible. Client caches by leak fingerprint so a
-// re-render doesn't re-call.
+// Cheap: Haiku costs ~$0.0005 per call. The client caches by leak
+// fingerprint for 7 days so a re-render doesn't re-call.
 //
-// Auth: this endpoint is not authenticated — the /analytics/leaks
-// page is already gated behind sign-in in the UI, so callers land
-// here only through an authenticated session. The insight itself
-// contains no user-identifying data (just the leak stats sent in
-// the request). If we ever surface this via the public profile we
-// need to gate it.
+// Auth: signed-in users only, with a per-user daily cap. This route
+// used to be open to anyone on the internet, which meant a script could
+// spend the Anthropic budget (and feed arbitrary text to the model via
+// `label`) without an account. Same gate as /api/bets/parse now.
 
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { requireUser } from "@/lib/api-auth";
+import { claimAiQuota } from "@/lib/ai-quota";
 
 export const runtime = "nodejs";
 
+const DIMENSIONS = ["sport", "competition", "market", "odds"] as const;
+type Dimension = (typeof DIMENSIONS)[number];
+
+// Longest real label today is ~40 chars ("UEFA Europa Conference League").
+const MAX_LABEL_CHARS = 80;
+
 interface InsightRequest {
-  dimension: "sport" | "competition" | "market" | "odds";
+  dimension: Dimension;
   label: string;
   n: number;
   pl: number;
@@ -35,17 +40,24 @@ interface InsightRequest {
   tone: "leak" | "strength";
 }
 
+function isFiniteNumber(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v);
+}
+
 function isValid(body: unknown): body is InsightRequest {
   if (!body || typeof body !== "object") return false;
   const b = body as Record<string, unknown>;
   return (
     typeof b.dimension === "string" &&
+    (DIMENSIONS as readonly string[]).includes(b.dimension) &&
     typeof b.label === "string" &&
-    typeof b.n === "number" &&
-    typeof b.pl === "number" &&
-    typeof b.yieldPct === "number" &&
-    typeof b.avgOdds === "number" &&
-    typeof b.winRate === "number" &&
+    b.label.trim().length > 0 &&
+    b.label.length <= MAX_LABEL_CHARS &&
+    isFiniteNumber(b.n) &&
+    isFiniteNumber(b.pl) &&
+    isFiniteNumber(b.yieldPct) &&
+    isFiniteNumber(b.avgOdds) &&
+    isFiniteNumber(b.winRate) &&
     (b.tone === "leak" || b.tone === "strength")
   );
 }
@@ -67,6 +79,10 @@ export async function POST(req: Request) {
     );
   }
 
+  // 1. Auth gate. Anonymous callers can't burn budget.
+  const auth = await requireUser(req);
+  if ("error" in auth) return auth.error;
+
   let body: unknown;
   try {
     body = await req.json();
@@ -77,11 +93,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request shape" }, { status: 400 });
   }
 
+  // 2. Per-user daily cap. Claimed after validation so a malformed
+  //    request doesn't use up an allowance.
+  const quota = await claimAiQuota(auth.user.id, "insight");
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "Daily insight limit reached. Try again tomorrow." },
+      { status: 429 },
+    );
+  }
+
   const client = new Anthropic({ apiKey });
 
+  // Collapse whitespace so a label can't smuggle extra lines into the
+  // message layout below.
+  const label = body.label.replace(/\s+/g, " ").trim();
   const plSign = body.pl >= 0 ? "+" : "";
   const yldSign = body.yieldPct >= 0 ? "+" : "";
-  const userMessage = `Segment: ${body.label} (dimension: ${body.dimension})
+  const userMessage = `Segment: ${label} (dimension: ${body.dimension})
 Tone: ${body.tone}
 P/L: ${plSign}${body.pl.toFixed(1)} units
 Yield: ${yldSign}${body.yieldPct.toFixed(1)}%
@@ -116,10 +145,12 @@ Write ONE sentence per the system prompt rules.`;
     }
     return NextResponse.json({ insight });
   } catch (e) {
+    // Log the provider detail server-side only. The card hides itself on
+    // any error, so the client has no use for the raw message.
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[leaks/insight] error:", msg);
     return NextResponse.json(
-      { error: "Insight generation failed", detail: msg },
+      { error: "Insight generation failed" },
       { status: 502 },
     );
   }

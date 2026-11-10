@@ -15,6 +15,7 @@ import { computeClvPct } from "@/lib/clv";
 import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authed-fetch";
 import { classifySport } from "@/lib/sport-classify";
+import { autoPl } from "@/lib/bet-math";
 
 interface FormState {
   kickoffDate: string; // YYYY-MM-DD
@@ -36,6 +37,10 @@ interface ParsedBet {
   odds: number;
   stake: number;
   status: import("@/lib/import/types").Status;
+  /** The parser's sport label. Passed to classifySport as a hint, same as
+   *  the dashboard paste box: without it, a bet the text rules can't place
+   *  ("Sinner -3.5") fell back to the default instead of what the AI read. */
+  sport?: string;
   bookmaker?: string;
 }
 
@@ -140,9 +145,13 @@ export default function NewBetPage() {
           today: new Date().toISOString().slice(0, 10),
         }),
       });
-      const body = await res.json();
-      if (!res.ok) {
-        setPasteError(body.error ?? `HTTP ${res.status}`);
+      // A gateway error page (502/504) isn't JSON. Don't let that surface
+      // as "Unexpected token '<'": fall through to a plain message.
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body) {
+        setPasteError(
+          body?.error ?? `Couldn't read those bets (HTTP ${res.status}). Try again in a moment.`,
+        );
         return;
       }
       setParsedBets(body.bets ?? []);
@@ -168,12 +177,6 @@ export default function NewBetPage() {
           break;
         }
       }
-      // P/L: derive from status × odds × stake if settled, else 0.
-      let pl = 0;
-      if (p.status === "won") pl = p.stake * (p.odds - 1);
-      else if (p.status === "lost") pl = -p.stake;
-      else if (p.status === "half_won") pl = (p.stake * (p.odds - 1)) / 2;
-      else if (p.status === "half_lost") pl = -p.stake / 2;
       return {
         id: uid(),
         bookId: activeBook?.id,
@@ -182,6 +185,7 @@ export default function NewBetPage() {
           selection: p.selection,
           event: p.event,
           market: p.market,
+          sport: p.sport,
           home,
           away,
         }),
@@ -193,7 +197,8 @@ export default function NewBetPage() {
         odds: p.odds,
         stake: p.stake,
         status: p.status,
-        pl: Math.round(pl * 100) / 100,
+        // P/L from status × odds × stake (0 for pending / push / void).
+        pl: autoPl(p.status, p.odds, p.stake),
         source: "manual:paste",
         importedAt,
         raw: {},

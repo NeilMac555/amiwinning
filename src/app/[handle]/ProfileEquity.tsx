@@ -14,9 +14,11 @@ interface Props {
   weekly: number[];
   isSample?: boolean;
   showClv?: boolean;
+  /** "4d ago" for the most recent settled bet. */
+  lastBetAgo?: string;
 }
 
-export function ProfileEquity({ equity, weekly, isSample = false, showClv = true }: Props) {
+export function ProfileEquity({ equity, weekly, isSample = false, showClv = true, lastBetAgo }: Props) {
   return (
     // Public profiles always render in unit-mode (u) — we don't know the
     // viewer's preferred currency, and units are the bet-tracking universal.
@@ -26,6 +28,7 @@ export function ProfileEquity({ equity, weekly, isSample = false, showClv = true
         data={equity}
         weekly={weekly}
         mode="cumulative"
+        lastBetAgo={lastBetAgo}
         statusLabel={isSample ? "Illustrative sample data" : undefined}
       />
     </UnitProvider>

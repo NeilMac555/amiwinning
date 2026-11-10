@@ -11,7 +11,7 @@
 //      so we can see every user's row counts. Never exposed to the client.
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { isAdminEmail } from "@/lib/admin";
 
 interface UserRow {
@@ -77,10 +77,13 @@ export async function GET(req: Request): Promise<Response> {
   });
 
   // 1. List all auth users. The admin API paginates; loop until we have
-  //    everyone (cap at 1000 for safety — overkill for our scale).
+  //    everyone. (This used to stop at 5 pages = 1,000 users, so once the
+  //    site passed 1,000 sign-ups the rest simply went missing from
+  //    /admin.) MAX_USER_PAGES is only a runaway-loop guard.
   const allUsers: { id: string; email: string; created_at: string; last_sign_in_at: string | null }[] = [];
   let page = 1;
   const perPage = 200;
+  const MAX_USER_PAGES = 500; // 100,000 users
   for (;;) {
     const { data, error } = await admin.auth.admin.listUsers({
       page,
@@ -101,46 +104,24 @@ export async function GET(req: Request): Promise<Response> {
         last_sign_in_at: u.last_sign_in_at ?? null,
       });
     }
-    if (data.users.length < perPage || page >= 5) break;
+    if (data.users.length < perPage || page >= MAX_USER_PAGES) break;
     page++;
   }
 
   // 2. Aggregate bet counts and book counts per user. Two simple queries
   //    against the public schema, server-side.
-  const userIds = allUsers.map((u) => u.id);
-  const betsByUser = new Map<string, number>();
-  const booksByUser = new Map<string, number>();
-
-  if (userIds.length > 0) {
-    const { data: betRows, error: betErr } = await admin
-      .from("bets")
-      .select("user_id")
-      .in("user_id", userIds);
-    if (betErr) {
-      return NextResponse.json(
-        { error: `bets aggregation failed: ${betErr.message}` },
-        { status: 500 },
-      );
-    }
-    for (const r of betRows ?? []) {
-      const k = (r as { user_id: string }).user_id;
-      betsByUser.set(k, (betsByUser.get(k) ?? 0) + 1);
-    }
-
-    const { data: bookRows, error: bookErr } = await admin
-      .from("books")
-      .select("user_id")
-      .in("user_id", userIds);
-    if (bookErr) {
-      return NextResponse.json(
-        { error: `books aggregation failed: ${bookErr.message}` },
-        { status: 500 },
-      );
-    }
-    for (const r of bookRows ?? []) {
-      const k = (r as { user_id: string }).user_id;
-      booksByUser.set(k, (booksByUser.get(k) ?? 0) + 1);
-    }
+  let betsByUser: Map<string, number>;
+  let booksByUser: Map<string, number>;
+  try {
+    [betsByUser, booksByUser] = await Promise.all([
+      countRowsByUser(admin, "bets"),
+      countRowsByUser(admin, "books"),
+    ]);
+  } catch (e) {
+    return NextResponse.json(
+      { error: `aggregation failed: ${e instanceof Error ? e.message : String(e)}` },
+      { status: 500 },
+    );
   }
 
   // 3. Build the response. Sort newest-signup first so the admin sees
@@ -177,4 +158,46 @@ export async function GET(req: Request): Promise<Response> {
   };
 
   return NextResponse.json({ rows, totals });
+}
+
+// Rows per user for a whole table, read in 1,000-row pages.
+//
+// The old version asked for every row "where user_id in (<all user ids>)"
+// in one request. Two things broke as the site grew: the id list no longer
+// fitted in a request URL, and Supabase returns at most 1,000 rows per
+// query, so bet counts stopped adding up past the first 1,000 bets.
+// Every row in these tables belongs to a user, so no filter is needed.
+async function countRowsByUser(
+  admin: SupabaseClient,
+  table: "bets" | "books",
+): Promise<Map<string, number>> {
+  const PAGE = 1000;
+  const CONCURRENCY = 8;
+
+  const { count, error: countErr } = await admin
+    .from(table)
+    .select("user_id", { count: "exact", head: true });
+  if (countErr) throw new Error(`${table} count: ${countErr.message}`);
+
+  const pages = Math.ceil((count ?? 0) / PAGE);
+  const out = new Map<string, number>();
+  for (let start = 0; start < pages; start += CONCURRENCY) {
+    const batch = await Promise.all(
+      Array.from({ length: Math.min(CONCURRENCY, pages - start) }, (_, i) => {
+        const from = (start + i) * PAGE;
+        return admin
+          .from(table)
+          .select("user_id")
+          .order("id", { ascending: true })
+          .range(from, from + PAGE - 1);
+      }),
+    );
+    for (const { data, error } of batch) {
+      if (error) throw new Error(`${table} page: ${error.message}`);
+      for (const r of (data ?? []) as { user_id: string }[]) {
+        out.set(r.user_id, (out.get(r.user_id) ?? 0) + 1);
+      }
+    }
+  }
+  return out;
 }

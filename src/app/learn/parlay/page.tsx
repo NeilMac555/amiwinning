@@ -198,7 +198,7 @@ export default function ParlayPage() {
               <li>
                 <strong>Same game parlay (SGP)</strong> = multiple picks
                 from ONE game. The book prices the legs as if independent,
-                but they're correlated — bigger house edge.
+                but they&rsquo;re correlated — bigger house edge.
               </li>
               <li>
                 <strong>House edge compounds per leg.</strong> A 4-leg

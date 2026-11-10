@@ -1,7 +1,8 @@
 // Shared server renderer. Protected profiles are invoked only after token verification.
-// Public tipster profile — server-rendered. Shows lifetime stats and the
-// equity curve. Individual bets are intentionally NOT rendered: this page
-// has to feel like a credibility card, not a strategy reveal.
+// Public tipster profile — server-rendered. Shows lifetime stats, the
+// equity curve, breakdowns, and every settled bet (pending bets are never
+// included). Everything below the headline P/L sits behind the sign-up
+// wall in ProfileGate.
 //
 // Public profiles use anon RLS; protected profiles use a verified viewer token.
 
@@ -23,6 +24,7 @@ import { ProfileEquity } from "@/app/[handle]/ProfileEquity";
 import { ProfileGate } from "@/app/[handle]/ProfileGate";
 import { UtmCapture } from "@/components/UtmCapture";
 import type { ImportedBet } from "@/lib/import/types";
+import { statusTone } from "@/lib/bet-math";
 import { SafeEvent, SafeField } from "@/components/SafeBetField";
 
 // Disable static prerender. Profile pages MUST hit the DB on every request
@@ -294,7 +296,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
                 cumulative · {settledCount.toLocaleString()} bets
               </div>
             </div>
-            <ProfileEquity equity={data.equity} weekly={data.weekly} showClv={!hideClv} />
+            <ProfileEquity equity={data.equity} weekly={data.weekly} showClv={!hideClv} lastBetAgo={data.kpis.lastBetAgo} />
           </section>
         )}
 
@@ -303,7 +305,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
             these; only signed-out visitors hit the wall. */}
         {settledCount > 0 && (
           <section className="profile-breakdown-row">
-            {data.sportBd && data.sportBd.length > 0 && (
+            {data.sportBd.length > 0 && (
               <Breakdown showClv={!hideClv} title="By sport" rows={data.sportBd.slice(0, 8)} />
             )}
             {data.marketBd.length > 0 && (
@@ -312,9 +314,9 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
             {data.oddsBd.length > 0 && (
               <Breakdown showClv={!hideClv} title="By odds range" rows={data.oddsBd} />
             )}
-            {data.competitionBd && data.competitionBd.length > 0 && (
+            {data.competitionBd.length > 0 && (
               <Breakdown showClv={!hideClv}
-                title="By competition (soccer)"
+                title="By competition"
                 rows={data.competitionBd.slice(0, 8)}
               />
             )}
@@ -339,7 +341,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
           <ClvDistribution dist={data.clvDist} mean={data.kpis.clvPct} />
         )}
 
-        {/* Recent 30 settled */}
+        {/* Full settled bet history */}
         {settledCount > 0 && (
           <RecentSettledTable bets={bets} nowMs={nowMs} isSample={isSample} />
         )}
@@ -547,13 +549,7 @@ function RecentSettledTable({
                   <td className="num mono">{b.stake.toFixed(1)}u</td>
                   <td className={`num mono num-${tone}`}>{plStr}</td>
                   <td>
-                    <span className={`badge ${
-                      b.status === "won"
-                        ? "win"
-                        : b.status === "lost"
-                          ? "lose"
-                          : "void"
-                    }`}>
+                    <span className={`badge ${statusTone(b.status)}`}>
                       {b.status === "half_won"
                         ? "half W"
                         : b.status === "half_lost"
