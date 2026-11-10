@@ -1,19 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, JetBrains_Mono, IBM_Plex_Sans } from "next/font/google";
+import { JetBrains_Mono, IBM_Plex_Sans } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { MobileNavProvider } from "@/lib/mobile-nav";
 import { BRAND } from "@/lib/brand";
 import "./globals.css";
-
-// Space Grotesk: industrial-geometric, distinct from the Inter/Geist default
-// that every AI product ships with. Keeps the data-density we need while
-// adding a small amount of editorial character.
-const sans = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-sans-grotesk",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -189,7 +179,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${jetbrainsMono.variable} ${ibmPlex.variable}`}
+      className={`${jetbrainsMono.variable} ${ibmPlex.variable}`}
     >
       <body>
         {/* SoftwareApplication structured data — renders on every route
