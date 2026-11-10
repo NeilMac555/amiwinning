@@ -1,10 +1,10 @@
 -- ---------------------------------------------------------------------------
 -- Am I Up — per-book public share slugs.
 --
--- Feature: a user with multiple books (Personal, Ylose Soccer, Ylose Tennis)
+-- Feature: a user with multiple books (Personal, Soccer, Tennis)
 -- can share DIFFERENT public URLs for each book, one at a time. E.g.
---   amiup.io/u/filthyjabba/ylose-soccer
---   amiup.io/u/filthyjabba/ylose-tennis
+--   amiup.io/u/somehandle/soccer
+--   amiup.io/u/somehandle/tennis
 --
 -- Adds a new nullable column `public_slug` on public.books. When set, it is
 -- the URL fragment used on the multi-book profile route. When null, the book

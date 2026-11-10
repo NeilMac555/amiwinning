@@ -8,7 +8,8 @@
 -- Schema design:
 --   - One row per (user, action, day). Old rows are harmless but the helper
 --     never reads them; you can prune nightly with a cron if you like.
---   - "action" is a free text but should be one of: 'parse', 'auto_map'.
+--   - "action" is a free text but should be one of: 'parse', 'auto_map',
+--     'insight' (see DAILY_CAPS in src/lib/ai-quota.ts).
 --   - "used" counts successful CLAIMS (not successful API calls — claims
 --     happen before the work runs, so a failed API call still consumed
 --     quota. That's intentional; otherwise infinite-retry would dodge it).

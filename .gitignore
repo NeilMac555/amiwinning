@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the example, which only lists variable names.
+!.env.local.example
 
 # vercel
 .vercel
@@ -42,3 +44,7 @@ next-env.d.ts
 
 # weekly-report smoke test output
 scripts/out/
+
+# local-only data (personal bet exports used for manual import testing).
+# Never commit: this folder used to live in /public and was served live.
+/local-data/

@@ -560,7 +560,7 @@ What visitors see on a public profile:
 - Sport / market / odds-range / competition breakdowns.
 - Monthly P/L bars for the last 18 months.
 - CLV distribution histogram.
-- The last 30 settled bets in a table (event, selection, odds, stake, P/L, status).
+- The settled bet history in a table (event, selection, odds, stake, P/L, status).
 
 Pending bets are intentionally private. Strangers see what a user has proven, not what they are about to bet on next.
 

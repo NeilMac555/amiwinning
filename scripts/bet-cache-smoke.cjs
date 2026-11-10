@@ -47,9 +47,30 @@ const added = Array.from({ length: 6 }, (_, i) => ({ ...history[2], id: `new-${i
 store.saveBets([...history, ...added]);
 assert.equal(store.loadBetsRaw().length, 10006);
 assert.equal(store.loadBets().filter(b => b.id.startsWith('new-')).length, 6);
+// Pending deletes (tombstones) must survive every write path. Each of these
+// used to read the filtered list and save it back, which dropped the
+// tombstone, so the next pull from the server brought the "deleted" bet back.
+const tombstoned = () =>
+  store.loadBetsRaw().some((b) => b.id === 'synthetic-1' && b._pendingDelete);
+assert.ok(tombstoned());
+const afterUpdate = store.updateBet('synthetic-5', { stake: 3 });
+assert.ok(tombstoned(), 'updateBet dropped a pending delete');
+assert.ok(!afterUpdate.some((b) => b.id === 'synthetic-1'), 'updateBet returned a tombstone');
+assert.equal(store.loadBets().find((b) => b.id === 'synthetic-5').stake, 3);
+store.updateBet('synthetic-1', { stake: 99 }); // editing a deleted bet does nothing
+assert.equal(store.loadBetsRaw().find((b) => b.id === 'synthetic-1').stake, 2);
+const afterAppend = store.appendBets([{ ...history[2], id: 'appended-0' }]);
+assert.ok(tombstoned(), 'appendBets dropped a pending delete');
+assert.ok(!afterAppend.some((b) => b.id === 'synthetic-1'), 'appendBets returned a tombstone');
+store.consumeSeed();
+assert.ok(tombstoned(), 'consumeSeed dropped a pending delete');
+const afterDelete = store.deleteBet('synthetic-7'); // signed out: removed outright
+assert.ok(tombstoned(), 'deleteBet dropped an unrelated pending delete');
+assert.ok(!afterDelete.some((b) => b.id === 'synthetic-7'));
+assert.ok(!store.loadBetsRaw().some((b) => b.id === 'synthetic-7'));
 // A genuinely full store must throw and retain the previous durable cache.
 const beforeFailure = stored;
 quota = 1;
 assert.throws(() => store.saveBets([...history, ...added]), /QuotaExceededError/);
 assert.equal(stored, beforeFailure);
-console.log(`PASS: lossless 10,006-row reload, legacy upgrade, pending flags, six new rows, atomic quota failure. Cache ${(stored.length * 2 / 1024 / 1024).toFixed(2)} MiB.`);
+console.log(`PASS: lossless 10,006-row reload, legacy upgrade, pending flags, six new rows, pending deletes kept on every write, atomic quota failure. Cache ${(stored.length * 2 / 1024 / 1024).toFixed(2)} MiB.`);
