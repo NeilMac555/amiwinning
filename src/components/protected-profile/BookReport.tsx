@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPublicProfileServerByBookSlug } from "@/lib/profiles";
+import { bookPerformanceBets, hasYloseTrackingPeriod } from "@/lib/book-performance-period";
 import { aggregateFromBets } from "@/lib/aggregate";
 import { monthlyPL } from "@/lib/analytics";
 import { classifySport } from "@/lib/sport-classify";
@@ -48,7 +49,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { handle, book: bookSlug } = await params;
-  const { profile, bets } = await getPublicProfileServerByBookSlug(
+  const { profile, bets: storedBets } = await getPublicProfileServerByBookSlug(
     handle,
     bookSlug,
   );
@@ -58,6 +59,7 @@ export async function generateMetadata({
       robots: { index: false },
     };
   }
+  const bets = bookPerformanceBets(storedBets, profile.userId);
   const settledCount = bets.filter((b) => b.status !== "pending").length;
   const lifetimePl = bets.reduce((s, b) => s + b.pl, 0);
   const plLabel =
@@ -118,7 +120,7 @@ function fmtDateRange(bets: { kickoff: string }[]): string {
 
 export default async function ProfilePage({ params, accessToken }: PageProps) {
   const { handle, book: bookSlug } = await params;
-  const { profile, bets } = await getPublicProfileServerByBookSlug(
+  const { profile, bets: storedBets } = await getPublicProfileServerByBookSlug(
     handle,
     bookSlug,
     accessToken,
@@ -133,6 +135,8 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
 
   // Reuse the same aggregation the dashboard uses — keeps the public
   // numbers identical to what the owner sees.
+  const isYlosePeriod = storedBets.some(bet => hasYloseTrackingPeriod(profile.userId, bet.bookId));
+  const bets = bookPerformanceBets(storedBets, profile.userId);
   const hideClv = profile.userId === PROTECTED_PROFILE_OWNER;
   const data = aggregateFromBets(bets);
   const settledCount = bets.filter((b) => b.status !== "pending").length;
@@ -217,7 +221,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
 
         {/* Lifetime number */}
         <section className="profile-pl">
-          <div className="profile-pl-label">Lifetime P/L</div>
+          <div className="profile-pl-label">{isYlosePeriod ? "P/L since February 2026" : "Lifetime P/L"}</div>
           <div className={`profile-pl-value num-${lifetime.tone}`}>
             {lifetime.value}
           </div>
@@ -305,7 +309,7 @@ export default async function ProfilePage({ params, accessToken }: PageProps) {
         {settledCount > 0 && (
           <section className="profile-chart card">
             <div className="profile-chart-head">
-              <h2 className="profile-chart-title">All-time P/L</h2>
+              <h2 className="profile-chart-title">{isYlosePeriod ? "P/L since February 2026" : "All-time P/L"}</h2>
               <div className="profile-chart-sub">
                 cumulative · {settledCount.toLocaleString()} bets
               </div>

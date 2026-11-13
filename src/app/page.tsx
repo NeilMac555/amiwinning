@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { DashboardData } from "@/lib/data";
 import { aggregateFromBets, computeKpis } from "@/lib/aggregate";
 import { canUsePersonalDashboardView, personalDashboardBets, type PersonalDashboardView } from "@/lib/personal-dashboard-view";
+import { bookPerformanceBets, hasYloseTrackingPeriod } from "@/lib/book-performance-period";
 import { loadBets } from "@/lib/import/store";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -128,9 +129,10 @@ function AccountDashboard() {
 
   const showPersonalView = canUsePersonalDashboardView(user?.id, activeBook?.id);
   const isSharpSideView = showPersonalView && personalView === "sharp-side-soccer";
+  const isYlosePeriod = hasYloseTrackingPeriod(user?.id, activeBook?.id);
   const viewBets = useMemo(
-    () => personalDashboardBets(allBets, isSharpSideView ? "sharp-side-soccer" : "personal"),
-    [allBets, isSharpSideView],
+    () => personalDashboardBets(isYlosePeriod ? bookPerformanceBets(allBets, user?.id) : allBets, isSharpSideView ? "sharp-side-soccer" : "personal"),
+    [allBets, isSharpSideView, isYlosePeriod, user?.id],
   );
   const viewName = isSharpSideView ? "Sharp Side Soccer" : activeBook?.name ?? "Current book";
 
@@ -253,7 +255,7 @@ function AccountDashboard() {
                 <div className="page-subtitle">
                   <span className="dot-live"></span>
                   Updated {updatedAt} ·{" "}
-                  {`${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${isSharpSideView && range === "All" ? "since 12 August 2026" : rangeLabel(range, now)}`}
+                  {`${inRangeCount.toLocaleString()} of ${importedCount.toLocaleString()} bets · ${isSharpSideView && range === "All" ? "since 12 August 2026" : isYlosePeriod && range === "All" ? "Since February 2026" : rangeLabel(range, now)}`}
                 </div>
               )}
             </div>
@@ -341,7 +343,7 @@ function AccountDashboard() {
                 color: "var(--text-faint)",
               }}
             >
-              Metrics · {isSharpSideView ? "Sharp Side Soccer · " : ""}{isSharpSideView && range === "All" ? "Since 12 August 2026" : rangeLabel(range, now)}
+              Metrics · {isSharpSideView ? "Sharp Side Soccer · " : ""}{isSharpSideView && range === "All" ? "Since 12 August 2026" : isYlosePeriod && range === "All" ? "Since February 2026" : rangeLabel(range, now)}
             </div>
             <RangeTabs
               value={range}
@@ -350,7 +352,7 @@ function AccountDashboard() {
             />
           </div>
 
-          <KpiStripCompact kpis={data.kpis} sparks={data.sparks} capitalScopeLabel={isSharpSideView ? "Since 12 Aug 2026" : undefined} />
+          <KpiStripCompact kpis={data.kpis} sparks={data.sparks} capitalScopeLabel={isSharpSideView ? "Since 12 Aug 2026" : isYlosePeriod ? "Since Feb 2026" : undefined} />
           <SecondaryStats s={data.secondary} />
 
           {data.kpis.lifetimePl !== undefined && (
